@@ -75,7 +75,7 @@ The original proposal places in plaintext at the beginning of each block: (a) a 
 
 **Recommended representation (not yet approved):** canonical-encoded header containing ledger_guid, unique block_guid, utc_timestamp_ms, signer_public_key, protocol_version, payload_hash, encrypted_payload_hash (which you can decrypt using the signer_public_key), the payload (which contains typed database operations, GRANT_MASTER, or REVOKE_MASTER (additional details below)  – usually just one operation per payload).
 
-Signature algorithm: AES-256-CBC
+Signature algorithm: Ed25519 (confirmed 2026-10-21; supersedes AES-256-CBC)
 
 hash algorithm: SHA-512
 
@@ -379,7 +379,7 @@ Potential implementations should be evaluated through independent correctness an
 
 ### 16.6 Remaining open decisions and legacy text
 
-Earlier sections retain unresolved choices on cryptographic signing (AES-256-CBC is not an asymmetric signature scheme), canonical byte serialization and hash boundaries, authorization ordering, clock trust, schema changes, selective replay dependencies, and trigger/function/procedure support. Earlier predecessor-reference statements are obsolete per 16.1. Review and reconcile these before treating the specification as an executable protocol.
+Earlier sections retain obsolete cryptographic wording (superseded by Section 18.22), plus unresolved choices on canonical byte serialization and hash boundaries, authorization ordering, clock trust, schema changes, selective replay dependencies, and trigger/function/procedure support. Earlier predecessor-reference statements are obsolete per 16.1. Review and reconcile these before treating the specification as an executable protocol.
 
 
 ## 17. Schema conflict decisions — 2026-10-20
@@ -522,7 +522,7 @@ For version one, do not attempt to distinguish malicious from benign writes sole
 
 ### 18.19 Consolidation reminder — OPEN legacy contradictions
 
-When the specification is fully edited, reconcile earlier sections that still mention predecessor block links, DAG branches, atomic multi-statement SQL transaction assumptions, or unilateral revocation scenarios. Section 16.1 confirms blocks have NO predecessor reference. The newer decisions in Sections 18.15–18.18 supersede those legacy statements. Other outstanding questions (digital-signature algorithm versus AES, canonical encoding, crash-safe append, repaired-value blocks, precisely supported SQL feature set, and timing policy) remain OPEN unless explicitly resolved elsewhere.
+When the specification is fully edited, reconcile earlier sections that still mention predecessor block links, DAG branches, atomic multi-statement SQL transaction assumptions, or unilateral revocation scenarios. Section 16.1 confirms blocks have NO predecessor reference. The newer decisions in Sections 18.15–18.18 supersede those legacy statements. Other outstanding questions (canonical encoding, exact signed-byte boundaries, crash-safe append, repaired-value blocks, precisely supported SQL feature set, and timing policy) remain OPEN unless explicitly resolved elsewhere.
 
 
 ### 18.20 One row per independent ledger block — confirmed 2026-10-20
@@ -550,7 +550,142 @@ A signed UPDATE event referring to a row GUID not yet materialized is retained i
 An ordinary SQL UPDATE/DELETE evaluated by a master against its currently materialized database and affecting zero rows produces zero ledger row-change blocks. The SQL text is not normally stored or replayed on other nodes. Applications needing an effect once missing remote history arrives must explicitly retry their SQL or implement a higher-assurance synchronization strategy. The base database does not re-run such a statement after later replication.
 
 
-#### 18.21.4 Block proof mechanism — intended property confirmed; algorithm remains OPEN
+#### 18.21.4 Block proof mechanism — Ed25519 approved in Section 18.22
 
-The required cryptographic property is public verification of each master-authored block: only the holder of an authorized master private key can construct a valid authenticator, while anyone with the corresponding public key can verify that authenticator against the exact authenticated block bytes/hash. The originator described this as decrypting an encrypted key/hash field and comparing the hash. IMPORTANT TECHNICAL DISTINCTION: AES-256-CBC is a symmetric encryption mode and cannot implement private-key authorship with public-key verification. A standardized asymmetric signature such as Ed25519 (RFC 8032) or RSA-PSS would satisfy the intended property, though verification is not necessarily literal public-key decryption. The originator has NOT approved an algorithm substitution yet. Keep signer-key encoding, SHA-512 hash placement, exact signed/canonical bytes, and algorithm versioning OPEN; do not implement an insecure invented private-key encryption or hash-only comparison.
+The required cryptographic property is public verification of each master-authored block: only the holder of an authorized master private key can construct a valid authenticator, while anyone with the corresponding public key can verify that authenticator against the exact authenticated block bytes/hash. The originator described this as decrypting an encrypted key/hash field and comparing the hash. IMPORTANT TECHNICAL DISTINCTION: AES-256-CBC is a symmetric encryption mode and cannot implement private-key authorship with public-key verification. The approved implementation uses Ed25519 (RFC 8032) for signature creation and verification, without treating signature verification as literal public-key decryption. Retain SHA-512 as the independent block hash. Signer-key encoding, SHA-512 hash placement, exact signed/canonical bytes, and algorithm versioning remain OPEN; do not implement an insecure invented private-key encryption or hash-only comparison.
 
+
+
+### 18.22 Cryptographic standard — CONFIRMED 2026-10-21
+
+Version 1 MUST use Ed25519 (RFC 8032) for asymmetric digital signatures on master-authored blocks. Authorized masters retain private signing keys; public verification keys allow unrestricted independent authentication. Use SHA-512 as the separately specified block hashing algorithm. The legacy AES-256-CBC "signature algorithm" wording is superseded and MUST NOT be implemented as block authentication; AES-256-CBC is symmetric encryption and has no public verification key. Ed25519 is a signature mechanism, not payload encryption, and this ledger's contents are public. Still OPEN: canonical wire encoding, precise signed bytes, whether the separately calculated SHA-512 digest is signed or embedded, hash-field cycle avoidance, version negotiation/algorithm upgrades, public-key encoding, and signature representation. This decision does not automatically resolve those separate protocol issues.
+
+
+### 18.23 Authorization grant effective time — CONFIRMED 2026-10-21
+
+Master authority is determined at the block’s position in the canonical timestamp-and-key order, not at block receipt time. A block signed by a newly granted master is unauthorized and must be rejected if its canonical position precedes the effective GRANT_MASTER authorization, even if the key is authorized by the time the block is received. Example: If Master A grants Master B authority at 10:00, a B-signed block at 09:59 is unauthorized. A previously materialized block found to be unauthorized after later receipt of relevant authority history must be removed from the derived database projection and its dependencies selectively reconciled; retained raw bytes may be kept for audit/quarantine rather than accepted as an authorized change. OPEN: exact tie-order semantics for grant and grantee blocks with identical timestamps, and safeguards against timestamp manipulation. This rule does not modify the existing two-party revocation requirement.
+
+### 18.24 SQL transactions and partial commit publication — CONFIRMED 2026-10-21
+
+`BEGIN` opens an isolated, provisional SQL transaction. Statements may evaluate and stage changes,
+but MUST NOT mutate the official materialized database or publish ledger blocks before `COMMIT`.
+`ROLLBACK` discards provisional changes and emits **no** blocks.
+
+At `COMMIT`, staged resulting row changes are emitted as separate authenticated ledger blocks,
+**one affected row per independent block**. Blocks are durably published individually, without
+all-or-nothing group guarantees. If a crash interrupts publication after 60 of 100 blocks, the 60
+published blocks remain permanent authoritative ledger history and the other 40 may never appear.
+`ROLLBACK` cannot remove or undo a block once durably recorded. Independently receiving and
+applying these blocks may happen later.
+
+Applications that require all-or-nothing outcomes must implement their own coordination and/or
+verify and issue missing work; compensation requires new ledger blocks and does not erase history.
+Atomic publication of independent blocks is a possible **future** capability, not a Version 1 rule.
+
+**OPEN:** Exact `COMMIT` client response upon partial failure, idempotent retries, recovery policy for
+unpublished staged operations, isolation/staging implementation, and timeout/error behavior.
+Do not infer atomic commit of a multi-block group.
+
+
+### 18.25 Ledger versus database responsibility for incomplete SQL commits — CONFIRMED 2026-10-21
+
+Architectural separation: The ledger is the foundational, authoritative, immutable record of individually issued blocks. A database engine and all applications are above it. The ledger neither interprets a multi-row SQL transaction as an all-or-nothing unit nor guarantees completion of a particular database-level SQL COMMIT. A durable block remains authoritative regardless of why other intended blocks were not created.
+
+If a database crashes after issuing 60 of 100 intended row-change blocks, the ledger authoritatively contains those 60 blocks. The database layer should report or log that the intended COMMIT was not fully completed, where such failure can be detected. The crashed process cannot throw a live error after abrupt termination; a durable commit-progress record could enable the recovered database to log/report the partial failure and identify outstanding work.
+
+Optional database-layer resilience: Upon restart, the database MAY use its durable staged-transaction or commit-progress metadata to resume an interrupted COMMIT and issue the remaining 40 independent blocks. Such continuation must avoid duplicate creation and handle retries, but it is an implementation choice for the database layer, NOT a requirement or guarantee of the underlying ledger. Likewise, the application may detect and repair incomplete work.
+
+OPEN for the database implementation: Precise persistence of staged changes and publish-progress bookkeeping, deduplication/operation identity, whether and when to auto-resume, how and when SQL clients see failures, and semantics of an interrupted request. These are not ledger requirements. No previously created block may be erased or reversed by an ordinary SQL ROLLBACK.
+
+
+### 18.26 Cascading authorization and historical re-evaluation — CONFIRMED 2026-10-21
+
+Authorization is transitive and evaluated using the canonical ledger order. If subsequently received earlier history establishes that a master lacked valid authority at the time it granted authority to another master, the downstream grant is invalid, as are all blocks relying solely on that downstream authorization. This applies recursively through the grant chain. Previously materialized consequences must be selectively reconciled against the newly determined authorized set; signed historical bytes remain in the append-only ledger record.
+
+Version 1 does not add a special governance or recovery mechanism for compromised authorized masters. Detailed adversarial governance scenarios are outside the public design scope.
+
+
+### 18.27 Signed blocks with inaccurate clocks — CONFIRMED 2026-10-21
+
+A block is not rejected or quarantined solely because its signed timestamp appears far in the past or future compared with the receiver's clock. Its declared UTC millisecond timestamp participates in canonical sorting; eligibility continues to depend on cryptographic authenticity, authorized signer at that canonical position, and syntactic validity. The operational expectation remains that masters synchronize their clocks regularly.
+
+OPEN: Distinguish the treatment of temporarily missing authorization history from permanently invalid/unauthorized blocks. No automatic rejection solely on timestamp deviation is allowed.
+
+
+### 18.28 Block-reception priority and materialization barrier — CONFIRMED 2026-10-21
+
+When new blocks arrive, the local database pauses ordinary database activities until the received blocks have been authenticated as applicable and their effects, including any necessary reconciliation, have been reflected in the local materialized state. This is a local correctness barrier: it does not require confirmation from remote masters, completion of network-wide synchronization, or knowledge of blocks that have not yet been received. Correctness is more important than throughput or latency.
+
+OPEN: The exact queueing policy for arrivals during processing, fairness/forward-progress protection under a nonstop incoming stream, reader concurrency, and receipt acknowledgments are implementation details. This rule does not supersede offline master availability for writes when there are no newly received blocks to process.
+
+
+### 18.29 Block envelope and compression-byte proposal — PROPOSED, awaiting approval 2026-10-21
+
+Proposed outer wire format: a JSON object with version, ledger_guid, block_guid, timestamp_utc_ms, signer_public_key, payload_sha512, payload (Base64 text), and signature (Base64 text). These field names and encodings are proposals only; the protocol is not frozen.
+
+CONFIRMED: After Base64 decoding, the first octet of the binary payload identifies its compression method. The remaining bytes are the encoded operation payload. 0x00 means no compression; 0x01 means 7-Zip-based compression using the project/library the originator identified; values 0x02–0xFF are reserved. When uncompressed, the operation is represented as UTF-8 JSON. The precise 0x01 compression stream/7z archive subformat has not yet been chosen.
+
+PROPOSED: Canonicalize the logical operation as UTF-8 JSON using RFC 8785 (JCS), then optionally compress it. Let payload_binary = compression_octet || encoded_operation. Calculate payload_sha512 over these exact binary bytes, before Base64 encoding. Generate Ed25519 signature over the RFC 8785 canonical UTF-8 bytes of the entire outer object excluding only the signature field. Public verification reconstructs those same bytes and checks the signature; hash verification compares SHA-512 of payload_binary with payload_sha512. This avoids circular signatures and hashes. Precise digest encoding (hex vs Base64) and timestamp decimal-string representation are OPEN.
+
+OPEN: Decide whether compression ID 0x01 means a genuine single-file .7z archive or the LZMA/LZMA2 compressed stream supplied by the 7-Zip SDK. Those are different formats, and the wire protocol must select precisely one for interoperability. Define deterministic decoding, compression options, limits on decompressed size and work, canonical data-type encoding, and whether optional compressed bytes should be preserved exactly from the received original block.
+
+
+### 18.30 Missing-block discovery and transport-independent synchronization — COMBINED APPROACH APPROVED 2026-10-21
+
+CONFIRMED DESIGN CHOICE: Use a combination of complementary block discovery and anti-entropy techniques rather than depending on one transport, one peer, predecessor links, or timestamp-range checks alone. All nodes, including permissionless read-only replicas, may discover, request, verify, store, and relay blocks. An ordinary master write never waits for peer discovery or remote synchronization.
+
+PROPOSED REAL-TIME PATH: On durable receipt of a new block, announce its ledger identifier, block GUID, and content hash to connected peers. Peers request blocks they do not possess and may fetch different missing blocks concurrently from multiple peers. Use peer exchange, bootstrap nodes, decentralized discovery, local-network discovery, relays, HTTPS, and manual file import/export as available. Relays never acquire write authority merely by transporting a block.
+
+PROPOSED ANTI-ENTROPY PATH: Periodically and on reconnection, compare per-ledger cryptographic set summaries. Build a deterministic Merkle tree (or equivalent hierarchical digest structure) over immutable block identities and content hashes, partitioned by stable hash-prefix buckets rather than only by timestamps. Peers whose summaries differ recursively compare subranges, exchange inventories of differing block IDs/hashes, and transfer only missing blocks. Periodically check the full ledger, not just the newest time window, because late-arriving blocks can have arbitrarily old or future timestamps. Timestamp windows may supplement discovery as an optimization but cannot be the sole correctness mechanism.
+
+PROPOSED VALIDATION: Check exact block bytes, ledger identity, block GUID, SHA-512 digest, Ed25519 signature, and the applicable authorization history independently of transport. Deduplicate retransmissions. Retain blocks whose signatures verify but whose authority/dependency status cannot yet be determined, for reevaluation as missing history arrives; do not let an untrusted peer decide validity. Any discrepancy between identical block GUIDs with different content hashes requires a defined conflict/error rule.
+
+PROPOSED BULK PATH: Support import/export of a single block, time range, arbitrary ID set, full ledger, and incremental missing-block sets. Full archives must contain all underlying blocks needed for independent verification and database reconstruction, without requiring predecessor references or any particular master to be online.
+
+LIMITATION: No synchronization protocol can prove or obtain a block that all reachable sources withhold or have lost. Eventual convergence assumes that previously issued blocks remain available from some eventually reachable source and that anti-entropy continues fairly.
+
+OPEN IMPLEMENTATION CHOICES: Exact Merkle/set-summary encoding, hash-bucket fanout, gossip cadence, anti-entropy scheduling, connection limits, rate control, bootstrap defaults, resume offsets for partial downloads, conflicting block-ID handling, and version negotiation. The proposed mechanisms are implementation guidance, not newly approved protocol constants.
+
+
+### 18.31 Custom binary block format — confirmed direction; sizes proposed 2026-10-21
+
+**CONFIRMED:** Use a compact custom binary envelope instead of JSON/Base64: a fixed-width header,
+raw binary payload, and an Ed25519 signature after the payload. For compression, use a raw
+LZMA/LZMA2 stream, **not** a full `.7z` archive. The hybrid four-mechanism distribution and
+anti-entropy approach is retained. The exact widths, offsets, and stream subformat below are
+**proposed, pending approval**.
+
+| Field | Proposed encoding | Bytes | Zero-based offsets |
+|---|---|---:|---|
+| `version` | unsigned 16-bit integer | 2 | 0–1 |
+| `ledger_guid` | RFC 9562 UUID bytes | 16 | 2–17 |
+| `block_guid` | RFC 9562 UUID bytes | 16 | 18–33 |
+| `timestamp_utc_ms` | signed 64-bit milliseconds since Unix epoch, UTC | 8 | 34–41 |
+| `signer_public_key` | raw Ed25519 public key | 32 | 42–73 |
+| `payload_sha512` | raw SHA-512 digest | 64 | 74–137 |
+| `payload_size` | unsigned 64-bit length in bytes | 8 | 138–145 |
+| `payload_compression_type` | byte: 0x00 none; 0x01 LZMA2 | 1 | 146 |
+| `payload` | raw binary payload | N | 147 through 146+N |
+| `signature` | raw Ed25519 signature | 64 | 147+N through 210+N |
+
+No alignment/padding bytes. Multibyte integer fields use big-endian network byte order;
+GUIDs use RFC 9562 byte order. Fixed prefix 147 bytes; fixed suffix 64 bytes; total
+**211 + N bytes per block**. `uint32` version would make this 213 + N bytes.
+
+**PROPOSED authentication:** `payload_sha512 = SHA-512(raw payload bytes)`;
+Ed25519 signature covers the exact byte sequence starting at `version` and ending
+at the last payload byte, excluding only the final 64-byte signature. This signs
+all headers, payload size, selector, digest, and payload without self-reference.
+Block-content hash for transport/inventories remains a separate specified choice.
+
+**PROPOSED 0x01 format:** Raw LZMA2 stream rather than `.7z` container. The decoder
+needs an agreed dictionary-size property. Candidate design: first byte *within*
+`payload` stores the raw LZMA2 dictionary property; the remaining bytes are the
+LZMA2 stream (all included in `payload_size`). Alternative: fix the dictionary
+size for protocol version 1. Exact LZMA2 framing, decoder property, memory and
+expansion limits are OPEN. `0x00` carries raw, uncompressed bytes.
+
+**OPEN:** Canonical binary encoding of the actual row/DDL/authority events, typed values,
+byte/record limits, compression dictionary properties, and signed-message framing.
+This section supersedes the older JSON/Base64 envelope proposals and the earlier idea
+of locating the compression selector as the first byte of a decoded Base64 payload.
