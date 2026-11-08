@@ -1,102 +1,106 @@
-# Distributed Ledger Management API — v0.4 integrated candidate
+# Distributed Ledger Management API — SQLite Candidate
 
-**v0.4, 2026-10-23 — OWNER-APPROVED DECISIONS INTEGRATED; EXACT-FILE APPROVAL PENDING.** This document integrates the owner-approved C1–C12 decisions. The resulting files remain unapproved and unfrozen until separate exact-artifact review. The [technical design](Database_Distributed_Ledger_Technical_Design.md) defines ledger semantics; the accompanying execution, SQL, management and fault contracts specify the PostgreSQL adapter. No approval record or signed-block wire version is changed.
+**Revision:** 2026-11-07 — proposed SQLite adapter contract v0.5  
+**Status:** Product requirements and underlying ledger invariants are Owner-approved; **exact new CLI flags, JSON field shapes, and exit codes are a draft pending separate review**, not a frozen interoperability contract.  
+**License:** Copyright © 2026 Anthony C. Olsen. Licensed under the [MIT License](LICENSE).
 
-## 1. Selection, encoding and output
+## 1. Scope and supersession
 
-`ledgerctl --pgdata ABS COMMAND ...` selects one instance. Paths are absolute. No daemon, global port, global key directory or external service is assumed. All finite commands write exactly one UTF-8 JSON object followed by LF on stdout; diagnostics go to stderr. Success is `{ok:true,data:OBJECT,error:null}`; failure is `{ok:false,data:null,error:{code:CODE,message:TEXT,retryable:BOOL,details:OBJECT}}`. Raw signed bytes use files, not JSON strings. Shell exit behavior is in §8. The [response schema](schemas/ledgerctl-v1.schema.json) is JSON Schema Draft 2020-12 with command-specific closed result objects. Error.details is extensible except that its required published fields must be present. Tests match codes/fields, not English messages. Commands do not read stdin.
+This document replaces the **PostgreSQL 18.6-specific v0.4 management adapter** as the current working interface specification. The previous `--pgdata`, `initdb`, PostgreSQL socket/process, populated-cluster adoption and AI-verifier-specific provisions are **retired**; they are not required of the SQLite implementation. Replacing those adapter-specific obligations does **not** change the approved Version 1 signed-block wire format, authenticated authority, canonical ordering, `.BLK` exact-byte retention, `DDLB` container, conflicts, or recovery guarantees in [Database_Distributed_Ledger_Technical_Design.md](Database_Distributed_Ledger_Technical_Design.md).
 
-Output UUIDs are lowercase canonical hyphenated strings; digests and public keys are lowercase hex (SHA-512:128 digits; Ed25519:64). Input UUIDs permit either hex case with the canonical hyphens; hex digests likewise permit either case. CLI integers are base-ten digits with an optional leading minus only where a signed value is allowed; no whitespace, float syntax or overflow. Timestamp filters span signed int64 milliseconds. Configuration support beyond the required range is documented, not silently wrapped. Unknown flags, malformed values and incompatible flag combinations fail INVALID_ARGUMENT without changing state.
+[SQLite_Architecture_and_Implementation_Plan.md](SQLite_Architecture_and_Implementation_Plan.md) controls SQLite file format, SQL boundary, signing-key storage and incremental delivery. The ledger operates **independently of a relational database**. Commands must report which components are available rather than imply a projection exists in Phase 1.
 
-`--operation-id TOKEN` on import/publish correlates work with fault notifications. Tokens are nonempty, control-free Unicode strings of at most 128 UTF-8 bytes, not deduplication keys, credentials or transaction identities. JSON character counts alone do not enforce the byte limit. Fault-correlation application_name constraints are separate in the fault contract; normal SQL application names are not restricted by this CLI rule.
+## 2. General CLI behavior — draft interface
 
-## 2. Lifecycle and keys
+**Proposed syntax:** `ledgerctl --instance-root ABS COMMAND ...`, with an explicitly selected local instance root. The name `ledgerctl` is retained from the original product design; spelling of `--instance-root` and subordinate options is proposed, not yet final-approved. On any platform, paths must be validated and contained within intended configured storage roots when appropriate. No PostgreSQL executable, daemon, port, user, or cluster is assumed.
 
-All result-field lists below are complete and include data.operation. Types/closed objects are defined in the response schema; ABS fields are absolute strings, IDs UUIDs, port 1..65535 and pid positive integer.
+Finite CLI commands should produce exactly one UTF-8 JSON object terminated by a newline on stdout; errors/diagnostics go to stderr. Proposed envelopes:
 
-| Command following --pgdata ABS | Inputs | Success data fields |
+```json
+{"ok":true,"data":{},"error":null}
+```
+
+```json
+{"ok":false,"data":null,"error":{"code":"CODE","message":"Human-readable text","retryable":false,"details":{}}}
+```
+
+The raw signed bytes are **always transferred by files or binary peer streams**, not JSON reserialization. Canonical UUID strings are lowercase hyphenated; SHA-512 hashes and Ed25519 public keys are lowercase hex in JSON. Private signing material never appears in status, logs, or successful responses. Exact response schemas and exit codes require later freeze and automated validation.
+
+## 3. Proposed commands and lifecycle
+
+| Command family | Proposed operation | Meaning / required guard |
 | --- | --- | --- |
-| instance init | --database NAME --socket-dir ABS --port N; optional --peer-listen 127.0.0.1:PORT, where 0 requests an available peer port | operation="instance.init", instance_id, pgdata, database, socket_dir, port |
-| instance adopt | Same options; existing stopped compatible cluster; **narrow verification adapter**, §7 | operation="instance.adopt", instance_id, pgdata, database, socket_dir, port |
-| instance start --foreground | Optional --fault-socket ABS | operation="instance.start", instance_id, pid, database, socket_dir, port, peer_endpoint (URI or null) |
-| instance stop | --mode fast\|immediate; default fast | operation="instance.stop", instance_id, stopped (Boolean) |
-| init | Optional --signing-key-file ABS, unencrypted PKCS#8 PEM Ed25519; otherwise generate | operation="init", ledger_guid, genesis_sha512, master_public_key, genesis_block_guid |
-| join | --ledger-guid UUID --genesis-sha512 HEX; optional --signing-key-file ABS | operation="join", ledger_guid, genesis_sha512, mode (master\|replica) |
-| key set | --signing-key-file ABS, same key encoding | operation="key.set", selected_public_key (hex), authorized (Boolean), mode (unbound\|master\|replica) |
-| key clear | No options | operation="key.clear", selected_public_key=null, authorized=false, mode (unbound\|replica) |
-| status | No options | operation="status", instance_id, pid (or null), database, binding, mode, signing, projection, blocks, peers, peer_endpoint |
+| `instance` | `init`, `status` | Create/inspect local instance configuration; do **not** need SQLite for ledger-only mode |
+| `ledger` | `init`, `join` | New pinned genesis or binding to existing authenticated ledger GUID + full genesis SHA-512 |
+| `key` | `create`, `import`, `select`, `clear`, `status`, `backup`, `restore` | Use persistent `ISigningKeyStore` abstraction; operations never themselves grant master authority |
+| `block` | `import`, `publish`, `get`, `export`, `status` | Store/get exact `.BLK` bytes; no SQL dependence; retain signatures |
+| `projection` | `create`, `status`, `rebuild` | Available only after SQLite projector integration; `rebuild` blocks affected queries |
+| `peer` | `add`, `remove`, `list`, `sync` | Available in peer phase; configured peers have no signing authority |
+| `config` | `get`, `set` | Resource bounds, storage policies, peer limits, timeouts |
+| `status` | consolidated | Binding, signing mode, retained blocks, current projection state if installed, configured peers |
 
-Instance init accepts nonexistent/empty PGDATA, creates an empty user database and unbound ledger store, and never overwrites an existing cluster; repeat initialization fails INVALID_ARGUMENT. Built-in catalogs are not unrelated user population. Before initialization, all other commands except adopt fail INVALID_ARGUMENT. Adoption incompatibility also uses INVALID_ARGUMENT with details.reason="INCOMPATIBLE_CLUSTER"; an already running target uses ALREADY_RUNNING. No operation gains root privileges.
+**Ledger initialization:** `ledger init` creates a new ledger GUID and self-signed **Version 1 211-byte genesis block**, stored durably as `.BLK`, and selects/creates the initial signing key. Genesis authority arises solely from the authenticated block; no key selection or local admin command manufactures authority. A ledger can be initialized **before creating `.DLDB`**. `ledger join` selects a retained ledger and verifies its full genesis fingerprint; joining an existing unrelated populated projection is not permitted.
 
-Status, config get/set, key set/clear and stop work after initialization, including while stopped. Init/join, block and peer operations require a running instance or return NOT_RUNNING. Starting a running instance returns ALREADY_RUNNING. Stop while stopped succeeds with stopped=true. Fast stop completes within the adapter bound of 30 seconds or returns PROCESSING_TIMEOUT without claiming completion. Immediate stop/crash cannot retract acknowledged durable blocks. Foreground start emits one success readiness envelope after SQL and management access work, remains attached until shutdown, logs later diagnostics to stderr, and exits 0 on requested clean stop. Signal exits may interrupt reporting. Readiness promises connectivity, not complete peer history or finished reconciliation; affected reads obey the execution contract even during recovery. Later status reports the actual projection state.
+**Master and replica modes:** A node with a selected private key currently authorized under canonical history is a master; otherwise it is a read-only replica for user mutations. Replicas can import, validate, store, export, relay, and materialize signed history. The selected key may become unauthorized after later historical replay. Signing and publishing must obey authorization at the proposed block's canonical position.
 
-Ledger init creates exactly one fresh identity/genesis for an empty unbound target. Existing unrelated user data gives NOT_EMPTY. Existing binding gives ALREADY_BOUND. Importing history alone is not adopting a database. Join requires an existing locally imported ledger and matching full-genesis fingerprint; missing genesis gives BLOCK_NOT_FOUND, wrong ledger GUID LEDGER_IDENTITY_MISMATCH, wrong pinned fingerprint GENESIS_MISMATCH. A same-ledger conflicting genesis is never silently substituted. Init/join failures do not manufacture authority, change binding or discard user data. Join starts authenticated reconstruction; its success acknowledges binding, not immediate projection completion.
+**Projection initialization:** A brand-new empty `.DLDB` may be constructed from an authenticated pinned ledger, even after the ledger already has blocks. Rebuilding a derived projection must not modify ledger block history or delete signing keys. A status operation must distinguish `ledger_only`, `ready`, `reconciling`, `rebuilding`, and `failed` projections (the exact serialized names are proposed).
 
-Key set atomically installs/selects one key for the instance. Invalid PEM/type gives INVALID_ARGUMENT; unreadable file gives IO_ERROR. Either preserves the prior selection. Key clear deselects, without promising forensic deletion of backups. Neither command publishes a block, grants authority or changes ledger binding. Key material stays private to the node; responses/logs never disclose private bytes. Selection persists across restart. Join may select an inactive key; its mode is replica until canonical history authorizes that key. Init's supplied/generated key becomes authority **only through the authenticated genesis and binding**. An already selected key can be reused for init only if supplied explicitly; otherwise init generates a new key and replaces selection on success. Init/join key/binding changes are atomic with respect to failed preconditions. A key's authorization may change on grant, two-signature revoke, regrant or late history; key possession does not override canonical authorization at the position of a proposed new block.
+## 4. Signed-block import, storage, status and export
 
-## 3. Status semantics
+### Storage organization
 
-binding is null or `{ledger_guid,genesis_sha512}`. signing is `{selected_public_key,authorized}`. Unbound implies mode=unbound and authorized=false. For a bound instance, mode=master exactly when a selected private key is authorized in currently known canonical history; otherwise mode=replica. No selected key implies authorized=false. This is a snapshot, not proof of missing-history completeness or permission to sign at every timestamp.
+The source of truth is the set of independently authenticated **exact-byte** `.BLK` files. Proposed on-disk names under UTC date directories:
 
-projection is `{state,pending_work,error}`: state ready/reconciling/rebuilding/failed, pending_work nonnegative, error null or the structured error above. Failed requires an error. Ready means no known inconsistent reconciliation work (pending_work=0), not that every retained block is applicable. Diagnosed unresolved repair/dependency conditions may remain pending with affected-query errors even when unrelated projection work is ready. Status remains callable at a fault barrier.
+```text
+YYYY/YYYY-MM/YYYY-MM-DD/
+  YYYY-MM-DD-HH-MM-SS-ssss-<block-guid>-<full-block-sha512>.BLK
+  YYYY-MM-DD-HH-MM-SS-ssss-<block-guid>-<full-block-sha512>.STAT
+```
 
-blocks is `{retained_variants,status_counts}`, with one count for each applied/pending/quarantined/opaque/rejected. Counts classify retained exact-byte variants once and sum to retained_variants; identical duplicates add no variant. Rejected input need not be retained. Applied means authenticated and materialized in the current official projection; neither retention nor a proposed correction alone qualifies. While unbound, imported genesis/history cannot claim database application. A bound genesis is applied once its binding/authority has been ingested. During queued projection, valid unapplied work is pending with reason PROJECTION_PENDING; unbound applicable history uses DATABASE_UNBOUND. Neither reason permits deletion of retained authenticated history. Other stable reasons include APPLIED, AUTHORITY_MISSING_OR_INAPPLICABLE, SCHEMA_DEPENDENCY_MISSING, REPAIR_REQUIRED, IDENTITY_CONFLICT and FUTURE_VERSION. A snapshot status can change after replay; exported bytes cannot.
+This filename layout is not a protocol encoding. Verify actual bytes even if the name appears valid. `ssss` is four-digit fractional seconds with final `0` for millisecond timestamps. Support a documented non-calendar fallback for valid signed int64 timestamps outside host calendar range. The SHA-512 suffix is over the **entire raw signed block**, including the signature, and distinguishes disputing variants of one block GUID.
 
-peers is an array of `{endpoint,connected}`. peer_endpoint is the implementation's loopback URI or null. pid is null only while stopped. No applied-position/finality cursor or global history completeness field is defined.
+### Retention and durability
 
-## 4. Block exchange
+- Parse, bound, hash, and verify received blocks before official projection effects. Unknown-future-version or missing historical authority/dependencies may be retained safely as opaque/pending; neither can be applied prematurely.
+- Write a unique temporary file in the target filesystem; flush exact bytes; publish with a safe atomic no-overwrite rename; ensure directory-entry persistence as supported on the host; only then report acknowledged durable receipt. Partial `.BLK` files must never be treated as accepted.
+- Identical exact-byte blocks are idempotent duplicates. Distinct authenticated bytes sharing `(ledger_guid, block_guid)` are retained and **quarantined without a chosen winner**. The original Version 1 conflict policy remains in force.
+- `.STAT` sidecars are **advisory, replaceable and potentially stale**. Rebuild them as needed; they never authorize materialization or override current canonical history. Projection generation/checkpoint records are committed in SQLite **with** official state changes.
 
-| Command | Inputs | Success data fields |
-| --- | --- | --- |
-| block import | --input ABS; raw block or auto-detected DDLB; optional --operation-id TOKEN | operation="block.import", results, durable_count |
-| block publish | --input ABS; exactly one already signed raw block; optional --operation-id TOKEN | operation="block.publish", results, durable_count |
-| block get | --id UUID --output ABS; optional --sha512 HEX and --ledger-guid UUID | operation="block.get", path, bytes, sha512 |
-| block export | --output ABS; optional --id UUID, --ledger-guid UUID, inclusive --from-ms INT64 / --to-ms INT64, --exclude-sha512-list ABS | operation="block.export", path, bytes, sha512, block_count |
+A block's reported disposition follows the existing vocabulary `applied`, `pending`, `quarantined`, `opaque`, `rejected` with a machine-readable reason. **Retained**, **durable**, and **applied** are distinct. Imported history can remain pending while no `.DLDB` exists. A full replay or late earlier block can change statuses without changing original `.BLK` bytes.
 
-Each results item is exactly `{ledger_guid,block_guid,sha512,status,reason,duplicate,durable}`. reason is an uppercase identifier. Item statuses use §3. durable means exact received bytes have been durably retained, including optional diagnostic retention; it does not mean applicable/materialized. Duplicate=true means identical retained bytes already existed. Newly received conflicting authenticated variants are both quarantined; no manual winner exists. A presently missing/inapplicable authorization/schema dependency is retained pending and reconsidered, never discarded solely by receipt time. Safely retained known-envelope future-version input is opaque; unsupported/unparseable future encodings may fail safely instead. Input files are never rewritten.
+### Import/export behavior
 
-Results follow input order for processed items whose complete IDs/digest can safely be determined. An unframeable tail is described by structured cause/details without fabricated IDs. durable_count equals the number of results records with durable=true, including duplicates and any diagnostic retention, not the number of unique or applicable blocks. A rejected single input fails even if its bytes are retained diagnostically; retained pending/quarantined/opaque input succeeds with its status. A batch stops at its first failed input. PARTIAL_IMPORT takes precedence only if this invocation first newly durably accepted a non-rejected authenticated variant (duplicate=false, durable=true). Merely encountering old duplicates or retaining rejected diagnostics does not mask a later ordinary error. PARTIAL_IMPORT details requires results, durable_count and cause={code,message,retryable,details}; already durable bytes remain. An ordinary block error also includes processed results/durable_count when available. Exact count equality/order and these stateful conditions require behavioral validation beyond schema.
+- Import exact single-block bytes or the existing `DDLB` container; validate framing, hash, signature and ledger identity safely. A partially completed batch retains independently durable preceding blocks; never claim all-or-nothing batch import.
+- `block get` chooses by ledger/block GUID, and by full SHA-512 when identity is disputed; a disputed lookup without exact variant selection must fail clearly.
+- Single-block export returns the **exact original signed bytes**. Batch export remains the existing Version 1 `DDLB` framing: `DDLB` magic (4 bytes), version uint16 big-endian, count uint64 big-endian, then count repetitions of `(length uint64 big-endian, original full signed block bytes)`; no re-signing or reserialization.
+- Deterministic batch ordering uses canonical event order with full-block digest as tie-breaker when needed. Incremental missing-set exchange must compare hashes/IDs, not only timestamps.
+- Limits on raw bytes, decoded bytes, import memory, CPU/time and peer resources remain required and configurable. Earlier PostgreSQL adapter exact min/max validation tuples and test-harness timing conventions are **not automatically inherited**.
 
-Get without a digest fails BLOCK_ID_DISPUTED for a disputed identity; selecting its exact digest succeeds if retained. Get may return retained diagnostic raw bytes explicitly, without implying they are valid. Export of --id returns raw exact bytes and block_count=1; disputed single export without a digest-selection facility fails BLOCK_ID_DISPUTED, with block get --sha512 used instead. ID mode cannot combine with range/exclusion flags. Batch export is exact design §11 DDLB, ordered by timestamp, raw signer bytes, raw block GUID and full-block SHA-512 for variants; never reserialized/re-signed. Full/range/missing exports exclude unauthenticated diagnostic bytes; authenticated semantic-invalid retained variants may remain exportable and rejected. Range endpoints are independently optional; from>to is INVALID_ARGUMENT. The exclusion file is a JSON array of full-block digests; duplicates are harmless. Hash/digest output describes the exact output file; byte/block counts describe what was actually written. Resource failures must not report a complete output as success.
+## 5. SQL behavior, read barriers, and errors
 
-**Ledger selection (C9):** A bound instance defaults to its pinned ledger. An unbound store defaults to its only retained ledger, fails BLOCK_NOT_FOUND if none, or LEDGER_SELECTION_REQUIRED with sorted ledger_guids if several. Explicit unknown selector fails BLOCK_NOT_FOUND; a selector different from a bound ledger gives LEDGER_IDENTITY_MISMATCH. Unbound stores may retain multiple ledgers; selecting/exporting one never binds them. After binding, foreign imported blocks fail LEDGER_IDENTITY_MISMATCH and preexisting unrelated stored history never materializes into the bound target.
+This CLI is an operational surface **alongside** ordinary SQLite C API/SQL access; it is **not a substitute** for standard supported SQL mutation submission. An authorized master's supported SQL mutation path publishes authenticated blocks first. Only the trusted projector changes official `.DLDB`. Unsupported SQL commands or alternate mutation interfaces must fail safely rather than bypass the ledger. A replica refuses user mutations.
 
-## 5. Peers
+Supported SQL reads observe a consistent locally projected state and may be network-stale. Affected SELECTs pause while an already-known reconciliation/rebuild would expose intermediate inconsistent state; they never wait for hypothetical unreceived remote blocks. A successful write publication acknowledgment need not make the value immediately SELECT-visible. `RETURNING`, transaction result tags, and partial-publication reports must describe what actually happened, without promising group-atomic multi-block commits.
 
-`peer add --endpoint URI`, `peer remove --endpoint URI`, `peer list` return exactly operation=peer.add/peer.remove/peer.list and peers. Absent-peer removal is idempotent. Configured loopback peers of the same build accept the advertised URI and exchange all relevant intact blocks; transport/scheme/discovery/retry implementation is free. Endpoints are bounded/documented and do not confer signing authority. Replicas may relay. No ordinary local master write needs peers or a quorum.
+**Important distinction:** The original PostgreSQL-specific SQLSTATE codes `ZL001`, `ZL002`, `ZL003`, `08007`, server error fields, `COPY FROM STDIN`, `COPY TO STDOUT`, and PostgreSQL `MERGE` requirements do not automatically apply to SQLite clients. The SQLite implementation needs an explicit, separately reviewed mapping to SQLite's result/extended-error APIs and normal SQLite transaction behavior. This specification **does not claim that mapping has been finalized**.
 
-Removing peers disables configured automatic exchange; it is not a security proof that malicious processes cannot coordinate over shared localhost. File/UID isolation, TCP authentication and enforced network partitioning are distinct concerns. Offline file exchange remains usable.
+## 6. Private signing keys and recovery
 
-## 6. Configuration (C9)
+**Approved direction:** Use a portable `ISigningKeyStore`-style interface for persistent **Ed25519 private signing keys**, separate from `.DLDB`, `.BLK`, `.STAT`, the Git repository, and automatic projection backups. Platform backends can use Windows DPAPI/dedicated service accounts, Apple Keychain, Android Keystore-backed protection, or appropriate Linux secure storage/restricted service files. Allow encrypted offline key-recovery backups, verify recovery against the original public key, and never silently regenerate a missing key. A rebuilt projection must keep the selected signing identity. Hardware security and platform-specific key exportability are implementation-dependent; no universal application-only access guarantee is claimed.
 
-config get returns operation="config.get", limits. config set accepts any nonempty subset of --max-raw-block-bytes N, --max-decoded-event-bytes N, --max-import-memory-bytes N, --block-timeout-ms N and returns operation="config.set" plus every effective setting. No options to config set is INVALID_ARGUMENT. An invalid tuple changes nothing. Settings persist across restart; an admitted import snapshots its limits, and later changes apply to subsequent operations. Reconfiguring limits cannot erase durable history.
+This project uses **digital signatures**, not private-key encryption of public ledger bytes. The ledger GUID is an identity, not a signing credential. A private key's mere possession is not canonical master authorization.
 
-| limits key | Approved default | Required supported range, inclusive |
-| --- | --- | --- |
-| max_raw_block_bytes | 16777216 | 211..16777216 |
-| max_decoded_event_bytes | 67108864 | 1..67108864 |
-| max_import_memory_bytes | 134217728 | 8388608..134217728 |
-| block_timeout_ms | 60000 | 1..60000 |
+## 7. Replay, status, and diagnostics
 
-All combinations in these ranges are required support, not protocol maxima or eager-allocation promises. Larger documented values may be supported. Reject unsupported or invalid settings with INVALID_ARGUMENT and details.setting; the 8 MiB minimum and full cross-product are owner-approved adapter conventions, not protocol-wide bounds. Schema minima reflect these required support minima; no schema maximum imposes a wire-wide cap. The raw minimum includes the 211-byte genesis envelope; small legal settings need not admit every row block.
+The projector must reproduce state from signed retained history including genesis, authority history, schema events and row changes. Full deterministic replay is an acceptable first implementation. It should guard affected reads and official writers, use SQLite-supported recovery lifecycle, and atomically persist projection progress alongside projected changes. Reconciliation/failure states must be visible through management commands and persistent diagnostics; a failed rebuild must never silently expose half-reconstructed state. Selective replay and zero-downtime projection swaps are future optimizations, not exceptions to full-replay correctness.
 
-Do not infer raw<=decoded<=memory: independently enforce the actual limits. If a valid input cannot fit its current working-import budget, return RESOURCE_LIMIT safely. Count dictionary/decoder/input/validation working memory in the import budget; fixed server/static program memory and independent projection state are excluded. No exact implementation allocation strategy is required. Block timeout uses elapsed monotonic processing time excluding intentionally paused fault-barrier intervals, not a universal end-to-end publication/visibility deadline. Resource/time errors have details.limit/configured and observed or required when knowable. Practical CPU/peer/disk bounds must be documented/enforced safely; exact hidden peer counts or CPU quotas are not invented here. Limits never authorize unauthenticated effects or retract durable bytes.
+A status report should distinguish current canonical applied work from unapplied retained variants, pending authority/schema dependencies, disputed identities, and missing projection. The status is a local snapshot and **cannot prove global network completeness**.
 
-## 7. Populated-cluster verification adapter (C10)
+## 8. Incremental implementation and contract freeze
 
-instance adopt is a narrowly defined test-facing verification adapter, not a general-purpose migration feature. Its fixture is a stopped compatible PostgreSQL 18.6 cluster owned by the node UID, created with the trusted baseline initdb (--username=candidate), ordinary SQL-populated with held-out rows, then cleanly stopped. Adopt attaches lifecycle metadata without dropping, rewriting or ledger-authorizing unrelated user rows/schema. It leaves the instance stopped; start is then explicit. A stopped compatible baseline-format cluster and database NAME are preconditions; arbitrary releases, storage formats and migration compatibility are not required. Empty target adoption can later bind normally.
+1. **Ledger-only:** genesis/key selection, Version 1 codec, signing, verification, durable `.BLK`, import/export/status; no SQLite required.
+2. **SQLite projector:** customized `.DLDB`, exact types, authenticated-only projection, `.STAT` regeneration, crash recovery and read consistency.
+3. **Native SQL interception:** ordinary SQLite C API-compatible supported mutations, provisional evaluation, ledger-first publication, replica write rejection, secure official-write boundary.
+4. **Peer exchange:** configured peers, independent offline masters, missing-block reconciliation and eventual convergence.
 
-On a populated adopted target, both init and join return NOT_EMPTY, preserve rows/schema, leave binding null, and generate no genesis/grant/correction. Pre-adoption legacy state is not advertised as a ledger-derived official projection. Candidate-run unbound SQL mutations still fail; the fixture is never created through a candidate bypass. Local read-only inspection is permitted for trusted preservation checks and status remains unbound. No hidden physical-layout mutation is authorized; the fixture does not license candidate-run unbound writes.
-
-## 8. Errors and exit status
-
-| Exit | Codes / meaning |
-| --- | --- |
-| 0 | ok=true; no error, including retained pending/quarantined/opaque |
-| 2 | INVALID_ARGUMENT, BAD_FRAME, HASH_MISMATCH, BAD_SIGNATURE, BAD_EVENT, LEDGER_IDENTITY_MISMATCH, GENESIS_MISMATCH |
-| 3 | PARTIAL_IMPORT under §4; cause describes the underlying error |
-| 4 | ALREADY_RUNNING, ALREADY_BOUND, BLOCK_ID_DISPUTED, BLOCK_NOT_FOUND, NOT_EMPTY, NOT_RUNNING, NOT_AUTHORIZED, LEDGER_SELECTION_REQUIRED |
-| 5 | RESOURCE_LIMIT, PROCESSING_TIMEOUT |
-| 6 | IO_ERROR, INTERNAL_ERROR; additional implementation-specific diagnostic codes unless a published extension assigns another exit |
-
-retryable means the same request's condition may clear, not that a repeated SQL write is safe. Input/identity/authority/quarantine failures are false; NOT_RUNNING/PROCESSING_TIMEOUT true; RESOURCE_LIMIT/IO_ERROR/INTERNAL_ERROR derive from actual cause; PARTIAL_IMPORT inherits cause retryability but does not authorize automatic replay. Other state preconditions are false. No automatic request-resumption/retry identity protocol is required. A hung command is diagnosed by the trusted harness, never reinterpreted as successful. The 30-second stop bound and exact lexical/error conventions are adapter requirements; none supplies a universal SQL visibility deadline. Exact-artifact approval remains pending.
+**Before declaring the CLI stable**, freeze exact flags, output schemas, exit/error mapping, durability-acknowledgment policy per supported filesystem, timestamp filename fallback, status sidecar format, and peer protocol. These operational details are *draft engineering obligations*, not changes to the Version 1 signed-wire format. Tests and implementation are assigned by the Project Manager to the Developer and QA under their respective permissions.
