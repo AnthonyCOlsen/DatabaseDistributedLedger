@@ -1,6 +1,6 @@
 # Database Distributed Ledger — SQLite Architecture and Implementation Plan
 
-**Revision:** 2026-11-07 — ARCH-002 documentation draft  
+**Revision:** 2026-11-08 — ARCH-002 SQLite upstream provenance clarification; original architecture approved 2026-11-07  
 **Authority:** Project Owner approvals confirmed through ARCH-001 and acknowledged by the Project Manager.  
 **Status:** Approved direction with implementation details identified below as *proposed* or *to be validated*. No implementation is represented as complete.  
 **License:** Copyright © 2026 Anthony C. Olsen. Licensed under the [MIT License](LICENSE).
@@ -16,6 +16,19 @@ This document specifies the **current SQLite implementation direction** for [Dat
 ## 2. Engine, fork, and distribution
 
 - **SQLite baseline:** official complete SQLite 3.54.1 release (upstream C implementation), held as an internally maintained fork with a pristine upstream baseline commit and documented provenance. New application components target **C#/.NET 10 LTS**; Visual Studio 2026 Community is a supported development environment.
+
+**Exact upstream source provenance (SQLite 3.54.1):**
+
+| Attribute | Baseline reference |
+| --- | --- |
+| SQLite release | **3.54.1**, released 2026-10-16 |
+| Official full canonical source archive | `sqlite-src-3540100.zip` (not the amalgamation archive) |
+| Official archive URL | https://www.sqlite.org/2026/sqlite-src-3540100.zip |
+| Archive size | **14,899,528 bytes** |
+| **Archive SHA-256** | `387e7f6cad4797b17848c07d453dc6606917bb356a6cfe5a3abafd38c240c71b` |
+| **Archive SHA3-256** (as published by SQLite) | `877c6f4996ce7adb368686bce21638de9e3d91534832ad3d9d119037d1bc22ad` |
+
+The SHA3-256 is published on the [official SQLite download page](https://www.sqlite.org/download.html). The SHA-256 and byte count are independently recorded in the [APSW SQLite release checksum list](https://github.com/rogerbinns/apsw/blob/master/checksums) and FreeBSD's SQLite distribution metadata. These are **reference checksums for the original ZIP archive**, not checksums of the extracted tree or customized fork. The Developer must verify the actual downloaded source ZIP against these values before recording the imported baseline as verified; the documentation update does not constitute an inspection of the Developer's local imported archive. Preserve that verification result and document future native changes and upstream update decisions in repository provenance records.
 - **Official database extension:** `.DLDB` (Distributed Ledger Database).
 - **Exact file-identification signature:** fifteen ASCII bytes `UDDL database 1` followed by one NUL byte, for a total of **16 bytes**. This is the value of the `SQLITE_FILE_HEADER` compile-time override. Do not change the SQLite page layout merely to achieve this signature.
 - **Compatibility:** standard SQLite libraries should reject `.DLDB` content under ordinary database APIs, even if renamed. The customized native library should open it. Test this rather than treating it as proof of security.
