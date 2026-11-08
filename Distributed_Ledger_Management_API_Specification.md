@@ -1,6 +1,6 @@
 # Distributed Ledger Management API — SQLite Candidate
 
-**Revision:** 2026-11-07 — proposed SQLite adapter contract v0.5  
+**Revision:** 2026-11-08 — proposed SQLite adapter contract v0.5 with Owner-approved SEC-002 signing-key lifecycle  
 **Status:** Product requirements and underlying ledger invariants are Owner-approved; **exact new CLI flags, JSON field shapes, and exit codes are a draft pending separate review**, not a frozen interoperability contract.  
 **License:** Copyright © 2026 Anthony C. Olsen. Licensed under the [MIT License](LICENSE).
 
@@ -30,18 +30,18 @@ The raw signed bytes are **always transferred by files or binary peer streams**,
 
 | Command family | Proposed operation | Meaning / required guard |
 | --- | --- | --- |
-| `instance` | `init`, `status` | Create/inspect local instance configuration; do **not** need SQLite for ledger-only mode |
+| `instance` | `init`, `status` | Explicit `init` generates and durably persists the instance's own Ed25519 identity **even for a replica**; no SQLite required. Ordinary startup never regenerates an existing identity |
 | `ledger` | `init`, `join` | New pinned genesis or binding to existing authenticated ledger GUID + full genesis SHA-512 |
-| `key` | `create`, `import`, `select`, `clear`, `status`, `backup`, `restore` | Use persistent `ISigningKeyStore` abstraction; operations never themselves grant master authority |
+| `key` | `status`, `backup`, `restore`; `create`, `import`, `select`, `clear` remain **unfrozen proposals** | Instance identity creation belongs to explicit first-time `instance init`. Import/restore must not replace an existing identity silently; selecting/clearing signing eligibility never deletes the instance identity or creates master authority |
 | `block` | `import`, `publish`, `get`, `export`, `status` | Store/get exact `.BLK` bytes; no SQL dependence; retain signatures |
 | `projection` | `create`, `status`, `rebuild` | Available only after SQLite projector integration; `rebuild` blocks affected queries |
 | `peer` | `add`, `remove`, `list`, `sync` | Available in peer phase; configured peers have no signing authority |
 | `config` | `get`, `set` | Resource bounds, storage policies, peer limits, timeouts |
 | `status` | consolidated | Binding, signing mode, retained blocks, current projection state if installed, configured peers |
 
-**Ledger initialization:** `ledger init` creates a new ledger GUID and self-signed **Version 1 211-byte genesis block**, stored durably as `.BLK`, and selects/creates the initial signing key. Genesis authority arises solely from the authenticated block; no key selection or local admin command manufactures authority. A ledger can be initialized **before creating `.DLDB`**. `ledger join` selects a retained ledger and verifies its full genesis fingerprint; joining an existing unrelated populated projection is not permitted.
+**Ledger initialization:** `ledger init` creates a new ledger GUID and self-signed **Version 1 211-byte genesis block**, stored durably as `.BLK`, using the **already persisted instance signing key** created by explicit `instance init`. It must not silently generate or substitute a key during ledger creation. Genesis authority arises solely from the authenticated block; no key selection or local admin command manufactures authority. A ledger can be initialized **before creating `.DLDB`**. `ledger join` selects a retained ledger and verifies its full genesis fingerprint; joining an existing unrelated populated projection is not permitted.
 
-**Master and replica modes:** A node with a selected private key currently authorized under canonical history is a master; otherwise it is a read-only replica for user mutations. Replicas can import, validate, store, export, relay, and materialize signed history. The selected key may become unauthorized after later historical replay. Signing and publishing must obey authorization at the proposed block's canonical position.
+**Master and replica modes:** Every initialized instance owns an Ed25519 signing identity. A node whose **available** instance key is currently authorized under canonical history is a master for user mutations; otherwise it operates as a read-only replica. Replicas can import, validate, store, export, relay, and materialize signed history. The selected key may become unauthorized after later historical replay. Signing and publishing must obey authorization at the proposed block's canonical position.
 
 **Projection initialization:** A brand-new empty `.DLDB` may be constructed from an authenticated pinned ledger, even after the ledger already has blocks. Rebuilding a derived projection must not modify ledger block history or delete signing keys. A status operation must distinguish `ledger_only`, `ready`, `reconciling`, `rebuilding`, and `failed` projections (the exact serialized names are proposed).
 
@@ -86,9 +86,9 @@ Supported SQL reads observe a consistent locally projected state and may be netw
 
 ## 6. Private signing keys and recovery
 
-**Approved direction:** Use a portable `ISigningKeyStore`-style interface for persistent **Ed25519 private signing keys**, separate from `.DLDB`, `.BLK`, `.STAT`, the Git repository, and automatic projection backups. Platform backends can use Windows DPAPI/dedicated service accounts, Apple Keychain, Android Keystore-backed protection, or appropriate Linux secure storage/restricted service files. Allow encrypted offline key-recovery backups, verify recovery against the original public key, and never silently regenerate a missing key. A rebuilt projection must keep the selected signing identity. Hardware security and platform-specific key exportability are implementation-dependent; no universal application-only access guarantee is claimed.
+**SEC-002 approved baseline (2026-11-08):** Every explicitly initialized instance, master or replica, generates an Ed25519 keypair using secure randomness and durably persists it before initialization succeeds. Private material resides in a separate **versioned key file**, encrypted at rest with **AES-256-GCM**, a **fresh random nonce for each encryption**, and a **versioned application-wide symmetric key embedded in the public source**. The embedded wrapping key is recoverable by anyone reading the source: this is **obfuscation against casual inspection, not protection against determined file holders**. Use a portable `ISigningKeyStore` abstraction and appropriate best-effort OS file permissions; no mandatory DPAPI, Keychain, Keystore, hardware service, cloud provider or startup password/PIN. Keep the key and nonsecret instance identity record outside `.DLDB`, `.BLK`, `.STAT`, repository and normal projection backups. The identity survives projection deletion/rebuild. Verification/replay are unattended and require only public keys; loss of private key makes signing unavailable, never triggers silent regeneration, and does not prohibit safe read-only replay. Optional disaster recovery must restore **the identical Ed25519 public key**. Exact file bytes and command flags remain unfrozen; the candidate representation is in [SQLite_Architecture_and_Implementation_Plan.md](SQLite_Architecture_and_Implementation_Plan.md) §8.
 
-This project uses **digital signatures**, not private-key encryption of public ledger bytes. The ledger GUID is an identity, not a signing credential. A private key's mere possession is not canonical master authorization.
+This project uses **digital signatures**, not private-key encryption of public ledger bytes. The ledger GUID is an identity, not a signing credential. A private key's mere possession is not canonical master authorization. Normal startup, replay and reconstruction **must not prompt** for a phrase, PIN, password or key-unlock action. Existing keys whose file is missing, malformed, undecryptable or whose derived public key differs from the persistent instance-identity record are explicitly unavailable; do not silently replace them. Key rotation, restore and version upgrades must preserve identity unless the Owner separately approves an identity replacement operation.
 
 ## 7. Replay, status, and diagnostics
 
@@ -103,4 +103,4 @@ A status report should distinguish current canonical applied work from unapplied
 3. **Native SQL interception:** ordinary SQLite C API-compatible supported mutations, provisional evaluation, ledger-first publication, replica write rejection, secure official-write boundary.
 4. **Peer exchange:** configured peers, independent offline masters, missing-block reconciliation and eventual convergence.
 
-**Before declaring the CLI stable**, freeze exact flags, output schemas, exit/error mapping, durability-acknowledgment policy per supported filesystem, timestamp filename fallback, status sidecar format, and peer protocol. These operational details are *draft engineering obligations*, not changes to the Version 1 signed-wire format. Tests and implementation are assigned by the Project Manager to the Developer and QA under their respective permissions.
+**Before declaring the CLI stable**, freeze exact flags, output schemas, exit/error mapping, key-file and instance-identity metadata grammars/version migration, signing-availability diagnostics, durability-acknowledgment policy per supported filesystem, timestamp filename fallback, status sidecar format, and peer protocol. These operational details are *draft engineering obligations*, not changes to the Version 1 signed-wire format. Tests and implementation are assigned by the Project Manager to the Developer and QA under their respective permissions.

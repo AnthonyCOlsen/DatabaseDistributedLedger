@@ -101,11 +101,58 @@ The ledger is immutable and can exist without SQLite. The initial projector may 
 
 **Full rebuild:** Stop/guard projector writes and affected reads; recover or close SQLite correctly; reconstruct into a clean `.DLDB` from authenticated block history; commit consistent projection/progress; regenerate `.STAT`; reopen reads only after a consistent projection is established. If rebuild fails, remain unavailable for affected reads and persist diagnostics. Do not merely delete `.DLDB` while it has active handles or associated WAL/journal recovery state. A staged rebuild followed by atomic activation may be added later.
 
-## 8. Signing keys and genesis
+## 8. Persistent signing identities and key storage — SEC-002 (OWNER APPROVED 2026-11-08)
 
-**Approved:** A portable `ISigningKeyStore`-style abstraction stores **Ed25519 private signing keys outside** `.DLDB`, `.BLK`/`.STAT` stores, code repository and routine projection backups. Calls to sign should normally use an opaque key identifier rather than exposing private bytes to ordinary components. Native protected storage candidates: Windows DPAPI under a dedicated account, macOS/iOS Keychain, Android Keystore-backed wrapping, Linux Secret Service or restricted service-account secrets; platform capabilities and unattended operation differ. Provide separately protected **encrypted offline recovery backups**, verified restoration, and explicit error if a previously selected key is missing. Key lifetime is independent of database rebuilding.
+### 8.1 Identity, lifecycle and authorization (approved requirements)
 
-Use Ed25519 **sign/verify**, not private-key encryption/public-key decryption. Initial sole authority derives from the self-signed, pinned genesis block; later authority from `GRANT_MASTER` and the existing two-party `REVOKE_MASTER` event. The ledger GUID is an identifier, **not an authorization key**. The existing protocol cannot ordinarily revoke an unavailable/uncooperative target key without its required signature; this remains a documented limitation, not a change approved here.
+- **Every explicitly initialized instance, including a replica, generates its own Ed25519 keypair** with a cryptographically secure random generator. Its expected public key and private signing seed are durably persisted **before** initialization reports success. A new ledger uses the existing instance identity for self-signed genesis; a new replica joining an existing ledger keeps its independent identity, initially unauthorized to sign ledger changes. An authenticated `GRANT_MASTER` can authorize that existing identity later.
+- Store the identity separately from `.DLDB`, `.BLK`, `.STAT`, the Git repository, and routine projection/ledger backups. **Never delete, regenerate, overwrite, or silently replace the identity during startup or rebuilding**. A database can be deleted or rebuilt without changing its signing identity. Normal startup/replay/rebuild are unattended, without a required phrase, PIN, password, manual approval, cloud service, or OS secure-store unlock.
+- **Use Ed25519 signing and public verification.** A public key alone cannot sign; the ledger GUID is not a signing key. Possessing a private key does **not** grant master authority; canonical genesis/grant/revocation history exclusively determines it. Private-key loss does not prevent verification or replay: the node may continue as a read-only replica while clearly reporting signing unavailability.
+- Keep an instance-scoped `ISigningKeyStore`-style abstraction providing creation during explicit first-time initialization, load, public-key lookup, signing, backup/restore and diagnostic operations. Normal callers use an opaque instance/key handle and never receive private seed bytes. Separate non-destructive signing availability/selection from immutable instance identity.
+
+### 8.2 Baseline confidentiality model (approved requirements)
+
+The Version 1 default is a **portable encrypted key file**, not an OS-specific secret store. Encrypt Ed25519 seed bytes with **AES-256-GCM** using a **fresh cryptographically random nonce per encryption**, authenticated ciphertext/tag, and a **versioned application-wide 256-bit symmetric key embedded in publicly released source and binaries**. The key is publicly recoverable; this is **obfuscation against casual file inspection, not meaningful secrecy against a determined actor** who has the encrypted file and open-source application. Apply filesystem permissions where available and trust the host OS under the accepted Version 1 threat model.
+
+**No mandatory** Windows DPAPI, Apple Keychain/Secure Enclave, Android Keystore, Linux Secret Service, TPM/HSM, cloud key management or interactive startup. These are optional future hardening. A hardware-specific provider is not required for portable Ed25519 support. The application must not misrepresent this file encryption as protecting against privileged host compromise or a holder of the encrypted file plus published wrapping key.
+
+### 8.3 Proposed portable private-key file representation (NOT YET BYTE-FROZEN)
+
+This is an **adapter-level implementation proposal**, not a new ledger block/event encoding or an approval of exact serialized bytes. Use a UTF-8 JSON object of explicitly named fields, with no embedded secrets outside authenticated ciphertext:
+
+```json
+{
+  "format": "UDDL-ED25519-KEY",
+  "version": 1,
+  "instance_guid": "00000000-0000-4000-8000-000000000000",
+  "public_key_hex": "<64 lowercase hex characters>",
+  "wrap_key_id": "application-wide-v1",
+  "encryption": "AES-256-GCM",
+  "nonce_b64": "<12 random bytes, Base64>",
+  "ciphertext_b64": "<32 encrypted seed bytes, Base64>",
+  "tag_b64": "<16 authentication-tag bytes, Base64>"
+}
+```
+
+The GUID shown is only a **schema example**, not a value that any implementation may generate as a real identity. Version 1 would encrypt a 32-byte Ed25519 seed (not the public key or arbitrary-length PKCS#8 text); derive its 32-byte public key using a well-reviewed Ed25519 implementation after decryption and require **exact equality** with `public_key_hex`. The proposed 96-bit nonce and 128-bit tag sizes use conventional AES-GCM parameters; enforce length checks and unique random nonce generation on every fresh encryption or migration. Do not treat the public, embedded `wrap_key_id` as a per-instance secret.
+
+**Proposed authenticated associated data (AAD)**, independent of JSON whitespace/property order: ASCII literal `UDDL-ED25519-KEY-v1` followed by the instance GUID's 16 RFC 9562 bytes, the raw 32-byte expected public key, and a length-delimited UTF-8 wrapping-key identifier. This binds key-file metadata to the ciphertext; applications must agree on an exact byte grammar before implementing a long-lived file format. Always authenticate before using decrypted seed bytes. Future format/wrapping-key versions must either retain previous decoding support or provide explicit, crash-safe in-place migration **without changing the Ed25519 identity**.
+
+### 8.4 Distinguishing first-time initialization from key loss
+
+**Approved invariant:** Key loss is never permission for silent identity replacement. **Proposed mechanism:** Persist a small, nonsecret instance identity record (for example, `instance.identity.json`) separately from `.DLDB` and `.BLK`, with a version, instance GUID, expected public key and an opaque reference to the signing-key file. This is an application-controlled configuration record, not a signed ledger block, and it survives `.DLDB` recreation. Physical paths and filenames are **not yet frozen** and must not embed an individual developer's local directory.
+
+- **Explicit new-instance initialization:** Only when no prior metadata/key remnants indicate an existing identity, create one new keypair; durably publish the key record, then the identity record; acknowledge initialization **only after both are persisted**. If a crash leaves an orphan key file or partial identity record, flag the incomplete initialization and recover/repair it explicitly rather than overwriting or silently generating a different key.
+- **Ordinary restart:** Load the persistent identity record and matching key file. Missing/malformed/undecryptable key, bad tag, unsupported format, or derived-public-key mismatch yields explicit `signing_identity_unavailable` diagnostics; do not regenerate. Ledger verification, public-key-based replay, and safe read-only operation remain available where possible.
+- **Database deletion/rebuild:** Never delete identity/key metadata as a side effect; preserve and reload the same signing identity. This applies whether the local database is master-authorized or only a replica.
+- **All metadata lost:** Without any surviving identity evidence, no software can distinguish a completely wiped former instance from a genuinely new installation. No ordinary startup is allowed to create a key automatically; require a deliberate explicit initialization action.
+- **Optional disaster recovery:** Accept explicitly restored seed material from a portable encrypted backup/recovery phrase only as a user-requested operation, and verify that the derived public key matches the original expected identity before activation. The precise backup format is separately reviewable and **never required for normal operation**.
+
+Key-file and manifest publication must be crash resistant using platform-appropriate flush/rename semantics and should not rely on `.DLDB` commit progress. The public embedded wrapping key and expected public key must not appear in logs as *secrets*; never log decrypted seed/private key material. Stronger OS isolation remains optional hardening.
+
+### 8.5 SEC-002 test obligations
+
+QA and Security shall verify initial persistence on master and replica, restart and unattended signing, replica-to-master promotion on canonical `GRANT_MASTER`, `.DLDB` deletion/rebuild without identity replacement, missing/corrupted key failures, AES-GCM tag validation, public-key identity matching, portable file decoding and format upgrades, and no secret leakage through logs or routine backups. Existing revoked/uncooperative/lost-master limitations remain part of the unchanged ledger protocol.
 
 ## 9. Incremental delivery plan and quality gates
 
@@ -120,6 +167,6 @@ Engineering experiments may occur *within implementation work* and be reverted i
 
 ## 10. Decisions not silently filled in
 
-The following are engineering details or product limitations requiring validation or a targeted design decision, not invitations to relax approved invariants: precise native SQLite interception mechanism; projector-only native write token/authority boundary; full native API behavioral compatibility limits; SQL DECIMAL expression and bind/result matrix including division; durable directory-entry publication on each supported OS; timestamp out-of-range filename fallback; platform-specific key backup/unattended availability; and the original protocol's unspecified competing CREATE/INSERT events for one still-live entity GUID. Accidental UUIDv4 collisions are negligible under the project generator assumption; the existing block-identity dispute rule remains mandatory.
+The following are engineering details or product limitations requiring validation or a targeted design decision, not invitations to relax approved invariants: precise native SQLite interception mechanism; projector-only native write token/authority boundary; full native API behavioral compatibility limits; SQL DECIMAL expression and bind/result matrix including division; durable directory-entry publication on each supported OS; timestamp out-of-range filename fallback; versioned portable signing-key file grammar, identity manifest and migration; and the original protocol's unspecified competing CREATE/INSERT events for one still-live entity GUID. Accidental UUIDv4 collisions are negligible under the project generator assumption; the existing block-identity dispute rule remains mandatory.
 
 **Change control:** Any modification to signed-block bytes, event codes, identity semantics, authorization, supported ordinary SQLite SQL interface, or ledger-first publication requires separate Owner approval. Historical PostgreSQL-only constraints and AI-verifier fixture requirements are not inherited into this SQLite implementation solely by reference.

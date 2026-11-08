@@ -2,7 +2,7 @@
 
 An MIT-licensed, independently developed distributed ledger that cryptographically authenticates changes and reconstructs relational database state across independently operating masters and replicas.
 
-**Project status (2026-11-07): Architecture and design documentation; not a released implementation.** The Project Owner approved a C#/.NET 10 implementation backed by an internally maintained SQLite 3.54.1 fork. Earlier PostgreSQL-specific integration and AI-verifier contracts are no longer the active implementation target. The **Version 1 signed ledger block protocol** remains unchanged.
+**Project status (2026-11-08): Architecture, design documentation and upstream SQLite baseline validation; not a released distributed-ledger implementation.** The Project Owner approved a C#/.NET 10 implementation backed by an internally maintained SQLite 3.54.1 fork. Earlier PostgreSQL-specific integration and AI-verifier contracts are no longer the active implementation target. The **Version 1 signed ledger block protocol** remains unchanged.
 
 ## Documents
 
@@ -17,7 +17,7 @@ The existing `.docx` documents are historical copies of the earlier design; **th
 
 The independent, immutable ledger is authoritative; the local SQLite relational database is **derived state**. Each authorized master can publish signed blocks without network quorum. Replicas may verify, retain, relay, and apply those blocks without signing authority. Identical relevant history produces deterministic state, including when older blocks arrive late. The public SQL interface remains compatible with ordinary supported SQLite operations, but all changes must flow through signed ledger blocks before official database projection.
 
-The official SQLite database uses extension **`.DLDB`** and a custom 16-byte signature (`UDDL database 1` followed by NUL) to discourage accidental editing by stock SQLite applications. This is **not encryption** or a guarantee against hostile filesystem access. Signed blocks use independent immutable **`.BLK` files**; local **`.STAT` sidecars are advisory only**. Private Ed25519 signing keys live outside both ledger blocks and the rebuildable database.
+The official SQLite database uses extension **`.DLDB`** and a custom 16-byte signature (`UDDL database 1` followed by NUL) to discourage accidental editing by stock SQLite applications. This is **not encryption** or a guarantee against hostile filesystem access. Signed blocks use independent immutable **`.BLK` files**; local **`.STAT` sidecars are advisory only**. Every initialized instance, including a replica, has its own durable Ed25519 signing identity outside both ledger blocks and the rebuildable database. **SEC-002 (Owner approved November 8, 2026):** Version 1 obfuscates each private seed with AES-256-GCM under a versioned **publicly embedded** application-wide key. This permits unattended, cross-platform operation but **does not protect the seed from anyone with the encrypted file and public application source**. Normal reconstruction never requires the signing key or a recovery phrase. Missing keys are not regenerated automatically; public-key authorization still depends on genesis/grant/revocation history.
 
 ## Intended delivery order
 
