@@ -9,7 +9,7 @@
 | Repository location | `QA_TEST_PLAN.md` (repository root; no new folder required) |
 | Maintainer | `Database Distributed Ledger - QA-Tester` |
 | Initial edition | 2026-11-09 |
-| Last QA update | 2026-11-09 |
+| Last QA update | 2026-11-09 (protocol 1.01 / ARCH-009 alignment, revision 2) |
 | Status | Planning; **no ledger-specific QA automated tests executed by this thread** |
 | Primary references | `Database_Distributed_Ledger_Technical_Design.md`; `SQLite_Architecture_and_Implementation_Plan.md`; `Distributed_Ledger_Management_API_Specification.md`; `README.md` |
 | Baseline | Upstream SQLite 3.54.1 verified with a documented Windows sandbox qualification; **not a ledger-fork QA pass** |
@@ -27,17 +27,17 @@ Verify that authenticated independent `.BLK` events are the only authority for o
 
 ## 2. Architecture invariants QA must protect
 
-1. Signed independent Version 1 blocks remain exact-byte immutable; each block is not hash-linked. Genesis pins ledger GUID plus **full signed genesis SHA-512**.
+1. Signed independent **protocol 1.01 (`0x0101`)** blocks remain exact-byte immutable; each block is not hash-linked. Genesis pins ledger GUID plus **full signed genesis SHA-512**.
 2. Canonical history order, **amended by Owner 2026-11-09**, is `(signed timestamp UTC ms, raw block GUID, raw signer public key)`, ascending. This supersedes signer-first vectors and can change same-timestamp replay interpretation.
 3. Authority comes only from authenticated genesis and canonical `GRANT_MASTER`/two-signature `REVOKE_MASTER`, never mere private-key possession. Late authority changes can invalidate/revalidate earlier applications.
-4. `ABC.DLDB` has `ABC/ABC.DLID`, `ABC/instance.identity.json`, `ABC/signing-key.v1.json`, `ABC/BLK/`, `ABC/STAT/`, and possibly retired `ABC/DELn/`; **no nested GUID directory**. Identity and pinned ledger/genesis survive projection deletion/rebuild.
+4. `ABC.DLDB` has same-basename support folder `ABC/` containing `instance.identity.json`, `signing-key.v1.json`, `BLK/`, `STAT/`, and possibly retired `DELn/`. **No `.DLID` and no nested GUID directory.** Identity and pinned ledger/genesis survive projection deletion/rebuild.
 5. SEC-002: every instance (including replica) has its own persisted Ed25519 identity. Owner-approved strict key JSON uses 32-byte seed, AES-256-GCM, 12-byte fresh nonce, 16-byte tag, publicly embedded versioned wrap key, and **88-byte AAD**. This is **obfuscation, not secrecy against a file-holder**.
 6. Under ARCH-003, **missing/corrupt/mismatched existing identity pauses ALL routine SQL and ledger activity**, including SELECT, import/export, relay and replay; only diagnostics/status/explicit original-identity recovery remain. Never silently regenerate or rebind.
 7. A durable acknowledged `.BLK` precedes any official projection effect; only the authenticated projector modifies official `.DLDB`. `.STAT` and `TREE.HASH` are rebuildable/advisory, not authority. Progress and official SQLite effects commit together.
 8. Full replay rotates `STAT/` to next free `DELn/` under the exclusive STAT manager while processing is paused; an external blocking lock prevents replay and is diagnosed/retried; safe retired `DELn/` cleanup is asynchronous.
 9. Historically invalidated `.BLK` may be renamed to local `.XBLK` **without modifying its bytes**; `.XBLK` is excluded from `TREE.HASH`, announcements, ordinary export, serving, and relay. After historical reauthorization it may return to canonical `.BLK` and reenter inventory/propagation. This is **intentional**, not an unresolved defect. Matching active inventories do **not** imply identical local archives.
 10. `projection_delay_seconds` is nonnegative, default **0**, and delays only ordinary row/schema projection by signed timestamp/UTC cutoff, not verification, durable retention, or current authorization. SELECT may be locally stale yet consistent. Delay is not finality.
-11. Exact DECIMAL uses arbitrary-precision integer coefficient/scale with canonical normalization. Supported SQL arithmetic/compare/sort/round-trips must not silently pass through approximate SQLite REAL or fixed .NET decimal. Unsupported non-exact operations fail explicitly.
+11. Protocol 1.01 transmits **five SQLite storage classes**: NULL, INTEGER (int64 ZigZag), REAL (binary64), TEXT (length-prefixed UTF-8), and BLOB (length-prefixed bytes). Declared SQLite type **text** is recorded in column definitions, with supported native SQLite affinity/precision semantics. The earlier custom DECIMAL/DATETIME/BOOLEAN/GUID value tags and arbitrary-precision DECIMAL promise are **retired**; do not test for them as active requirements. The signed-block header is `0x0101` while the independent DDLB container version remains `0x0001` and local signing-key JSON version remains 1.
 
 ## 3. Phase-based acceptance matrix (planned, not yet executed)
 
@@ -45,20 +45,25 @@ Verify that authenticated independent `.BLK` events are the only authority for o
 
 | ID | Phase | Priority | Automated acceptance objective | State |
 |---|---:|---|---|---|
-| L-01 | 1 | P0 | Independent Version 1 codec: exact envelope/offsets, SHA-512, Ed25519, strict parsing, canonical event grammar, malformed/oversized and LZMA2 boundaries | P |
+| L-01 | 1 | P0 | Independent **1.01 (`0x0101`)** codec: header/offsets, five value classes, declared-type text, SHA-512, Ed25519, strict parsing, LZMA2, malformed/oversized inputs; never decode historical `0x0001` value grammar as 1.01 | P |
 | L-02 | 1 | P0 | Genesis fingerprint pin; canonical grant/revoke history including two-signature revoke; equal-ms **block-GUID-first** order and reversed arrival | P |
 | L-03 | 1 | P0 | Duplicate bytes are idempotent; authenticated conflicting same-identity variants are both retained/quarantined; no first-arrival winner | P |
-| L-04 | 1 | P0 | `.BLK` exact-byte durable publication, failure before acknowledgment, no-overwrite, restart/import/export, truncated batch and partial import | P |
+| L-04 | 1 | P0 | `.BLK` exact-byte durable publication, failure before acknowledgment, no-overwrite, restart/import/export, truncated DDLB batch and partial import | P |
+| L-05 | 1 | P0 | Approved `ledgerctl` command/flag/JSON envelope/exit-group conformance; negative arguments, partial-import honest outcomes, distinct durable vs applied status, no private-seed leaks | P — strict response details under review |
+| L-06 | 1 | P0 | Independent authorized signing and durable publication of grant/revoke and data/schema blocks; verify same timestamp tie order and authorized signing at canonical position | B — signing/publication test API not identified |
+| L-07 | 1 | P1 | Calendar-boundary/`OUTOFRANGE` filenames, int64 min/max, reversible signed-bias `T`-hex mapping, complete signed-byte retrieval and sorted path handling | P |
 | K-01 | 1 | P0 | Strict approved key JSON/AAD 88-byte conformance; AES-GCM tag, nonce/ciphertext/metadata mutations, wrong key ID, duplicate JSON properties | P |
 | K-02 | 1 | P0 | New master/replica create unique persistent identity; crash at each initialization file; restart keeps same identity and ledger/genesis binding | P |
-| K-03 | 1+ | P0 | Missing/mismatched/corrupted key or descriptor triggers `recovery_required`; all ordinary operations denied; original-key restore only | P |
+| K-03 | 1+ | P0 | Missing/mismatched/corrupted **manifest/key** triggers `recovery_required`; all ordinary operations denied; original-key restore only | P |
 | K-04 | 1+ | P1 | Cross-platform key byte encoding (when platforms accepted), migrations/backup restoration preserving public key and binding; secret-free logs | P |
+| K-05 | 1 | P0 | Interrupted `instance init`, `ledger init` after durable genesis but before binding, and `ledger join` after genesis discovery; explicit same-identity recovery without new genesis or identity | B — exact recovery CLI lifecycle under review |
+| K-06 | 1 | P1 | Same-host duplicate active-identity detection (including concurrent process opens) and safe relocation/collision preflight | P |
 | S-01 | 2 | P0 | Native `sqlite3_prepare*`/`sqlite3_step` supported master mutations yield signed durable blocks or fail closed; **no official `.DLDB` write** | B — Developer Phase 2 |
 | S-02 | 2 | P0 | Replica rejects user DML/DDL; no bypass via alternate supported native API, PRAGMA, ATTACH, BLOB, backup, extension or open mode | B — Developer Phase 2 |
 | S-03 | 2 | P0 | `BEGIN`/rollback/savepoints emit no blocks for rolled-back work; final effective row changes; honest partial publication and `RETURNING` | B — Developer Phase 2 |
 | P-01 | 3 | P0 | Custom `.DLDB` header accepts fork and rejects stock SQLite, even when renamed; native-library provenance verified | B — Developer Phase 3 |
 | P-02 | 3 | P0 | Authenticated-only projection, SQLite progress commit atomicity, crash replay, no double-application and consistent read admission | B — Developer Phase 3 |
-| P-03 | 3 | P0 | Exact DECIMAL and all approved typed values: binary encoding, SQL bindings/results/filter/order/arithmetic, NULL/omitted, overflows | B — SQL matrix + Phase 3 |
+| P-03 | 3 | P0 | SQLite-native five-class value fidelity: actual affinity and stored class, supported bind/results, NULL/omitted, float edge policy, declared type text and schema replay | B — supported SQL matrix + Phase 3 |
 | P-04 | 3 | P0 | `.STAT` manager ownership, `STAT → DELn` rotation, external locks, interrupted replay, restart, clean `STAT`, asynchronous safe cleanup | B — Developer Phase 3 |
 | P-05 | 3 | P0 | Full replay derives identical canonical logical schema/rows from same authenticated history despite late blocks and different import orders | B — Developer Phase 3 |
 | P-06 | 3 | P1 | Projection age buffer: default/positive delay, boundary cutoffs, out-of-order history, clock changes, restart/full reconstruction | B — clock policy + Phase 3 |
@@ -88,7 +93,7 @@ Reference-model fixture (times are illustrative signed timestamps, not runtime c
 
 Add minimal, test-only, production-disabled checkpoints **after each phase handoff** and notify Developer of all changes outside test scripts. Prefer an explicit barrier handshake / externally observable state and bounded status polling over arbitrary sleeps. Recommended hook locations:
 
-- **Phase 1:** before/after key-file, identity-manifest and `.DLID` durable publication; before/after `.BLK` rename/durable acknowledgment.
+- **Phase 1:** before/after key-file and identity-manifest durable publication, genesis `.BLK` durability and manifest-binding commit, and other `.BLK` rename/durable acknowledgment. **No `.DLID` hook.**
 - **Phase 2:** after SQL provisional evaluation, before/after each block durability/partial COMMIT, before any official projector (which is absent in Phase 2).
 - **Phase 3:** before/after SQLite projection+checkpoint transaction, STAT manager invalidation, `STAT → DELn`, `.BLK ↔ .XBLK` rename, `TREE.HASH` cache invalidation if implemented, read admission and replay completion.
 - **Phase 4:** before/after active-inventory generation/announcement, peer send/receive, reconnect/missing-set reconciliation.
@@ -99,16 +104,20 @@ Each injected process crash is followed by independent file/hash and logical-sta
 
 | ID | Needed before | Item / owner route |
 |---|---|---|
-| O-01 | Phase 1 format conformance | Freeze exact `.DLID` and `instance.identity.json` bytes and recovery/migration rules — **Designer → Owner** |
-| O-02 | Phase 1 CLI conformance | Freeze Phase 1 command flags, outputs, error codes, identity-recovery status — **Designer/Developer → Owner** |
-| O-03 | Phase 1 `.BLK` platform gate | Windows filesystem durable rename/flush/ack implementation and out-of-calendar timestamp filename fallback — **Developer/Designer** |
+| O-01 | Phase 1 manifest conformance | Confirm whether §8.4 `instance.identity.json` serialization is Owner-frozen or a proposed implementation-facing schema; finalize strict required/unknown-field behavior — **Designer → Owner** |
+| O-02 | Phase 1 CLI conformance | Approved commands/flags/exit categories exist; finish command-specific JSON field schema, import status for ledger-only instances, export digest and error.details requirements before acceptance — **Designer/Developer/QA** |
+| O-03 | Phase 1 `.BLK` platform gate | **OUTOFRANGE fallback specified** (§11); qualify Windows filesystem atomic no-overwrite rename, file+directory durability, path limits and crash acknowledgments — **Developer/QA** |
 | O-04 | Phase 2 gate | Supported native SQLite API/open-mode/mutation rejection matrix and Phase 2 ephemeral evaluation boundary — **Designer/Developer** |
-| O-05 | Phase 2–3 gate | Exact DECIMAL SQL operator/bind/result/aggregation/division/conversion matrix and explicit error mapping — **Designer → Owner if material** |
+| O-05 | Phase 2–3 gate | Define supported SQLite native bind/result/expression/schema subset and error mapping; **no custom exact DECIMAL obligation** under 1.01 — **Designer/Developer** |
 | O-06 | Phase 3 gate | `.BLK ↔ .XBLK` no-overwrite, interrupted rename, STAT invalidation and recovery state machine — **Designer/Developer** |
 | O-07 | Phase 3 gate | Projection delay max/serialization, wall-clock jumps, age-pending status, replay/ restart behavior — **Designer/Developer → Owner if material** |
 | O-08 | Phase 4 gate | Inventory binary/cache grammar, consistent-generation guarantees, opaque inclusion, default sync interval and peer protocol — **Designer/Developer** |
-| O-09 | Future interoperability | Explicit compatibility strategy for pre-2026-11-09 signer-first same-timestamp histories — **Designer/Owner**, no automatic migration assumed |
+| O-09 | Protocol compatibility | `0x0101` uses new five-class grammar; historical `0x0001` must not be parsed as 1.01. Verify rejection/opaque classification and document that no released migration is owed — **QA/Developer** |
 | O-10 | Later semantic coverage | Competing CREATE/INSERT events with distinct block IDs for the same live entity GUID remain unspecified — **Designer/Owner** |
+| O-11 | Phase 1 grant/revoke gate | Identify supported library/CLI/test-builder entry point for creating and durably publishing authorized **non-genesis** 1.01 signed events; `block publish` not in current Phase 1 CLI list — **Designer/Developer** |
+| O-12 | Phase 1 recovery gate | Specify concrete command sequence and checks for local orphan key/manifest and durable genesis with missing/incomplete binding; differentiate `instance recover --from` and `key restore --directory` — **Designer/Developer** |
+| O-13 | Phase 1 REAL conformance | Reconcile retained old non-finite FLOAT/-0.0 statements with new **SQLite-native REAL** input/output policy and exact wire validity — **Designer/Owner if material** |
+| O-14 | Documentation reconciliation | Remove superseded phrases about `.DLID`, three identity records, unchanged signed-version header, no approved version change, and unfrozen Phase 1 CLI from active sections — **Architect-Designer** |
 
 The above are **not all blockers for Phase 1 coding**; each matters at the indicated acceptance gate. The `.XBLK` local-only/no-hash/no-propagation policy is **settled**, not an open question.
 
@@ -122,7 +131,9 @@ Severity guidance: **P0/blocker** = unauthorized official effect, lost acknowled
 
 **2026-11-08 — Owner-reported upstream verification (accepted with qualification):** SQLite 3.54.1 public Windows matrix: 23 build, 40 fuzz, 5 make, 8,021 Tcl jobs, 4,164,068 checks; 14 failures isolated to default `win_unc_locking/walthread.test` inside Codex sandbox. Entire failing job rerun in ordinary Windows PowerShell: **58/58 PASS**, exit 0, integrity checks pass, no leaks. Separate native fuzz: 46,391 tests and 9,839 query invariants passed. Acceptance is the **combined** matrix and outside-sandbox rerun, **not** one zero-failure matrix run. Import baseline commit `cc0dd4a` / tag `sqlite/upstream-3.54.1`; provenance commit `b0191db`. This verifies upstream baseline, **not** ledger modifications. Avast interference not established.
 
-**2026-11-09 — QA planning:** Reviewed latest approved SQLite/SEC-002/ARCH-003 designs and PM QA-002 `.XBLK` assignment. Canonical tie order changed to block-GUID-first; implementation phases updated to ledger → SQL interception → projector → peers. Tests in §3 are **planned only**. **No ledger-specific QA tests executed; no defects verified; no source/tests modified by QA.**
+**2026-11-09 — QA planning:** Reviewed approved SQLite/SEC-002/ARCH-003 designs and PM QA-002 `.XBLK` assignment. Canonical tie order changed to block-GUID-first; implementation phases updated to ledger → SQL interception → projector → peers. Tests in §3 are **planned only**. **No ledger-specific QA tests executed; no defects verified; no source/tests modified by QA.**
+
+**2026-11-09 — ARCH-009 QA plan alignment (revision 2):** Replaced obsolete `.DLID` expectations with manifest-only identity; replaced historical nine-type/exact DECIMAL tests with 1.01 five-class SQLite-native codec; added approved `OUTOFRANGE` and Phase 1 CLI tests, same-host duplicate checks and explicit interrupted-binding recovery. Identified four Phase 1 clarification requests in §6. **Design review only; no code executed or modified.**
 
 ### Future run log (append, do not replace past evidence)
 
