@@ -26,11 +26,11 @@ The official SQLite database uses extension **`.DLDB`** and a custom 16-byte sig
 3. **Ledger-driven SQLite projector** — official `.DLDB` writes from authenticated blocks only; `.STAT`, precise types, consistent SELECTs and crash-safe deterministic rebuild.
 4. Peer exchange and eventual convergence — offline masters and permissionless replicas.
 
-**ARCH-003 approved operational layout:** A same-basename `.DLID` descriptor sits beside `.DLDB` and points to a persistent same-basename sibling directory (for example, `ABC/` beside `ABC.DLDB`) containing `instance.identity.json`, `signing-key.v1.json`, `BLK/`, and `STAT/`. `instance.identity.json` pins the ledger GUID and entire-genesis SHA-512 outside rebuildable `.DLDB`. A single STAT manager rotates `STAT` to `DEL1`/`DEL2` etc. before full replay; a blocking external lock pauses ordinary processing until cleared, with diagnostics. Original upstream SQLite tests remain tracked; each proposed exclusion requires review/Owner approval. The existing Version 1 risk of backdated blocks from a compromised master key is explicitly accepted. No phase may expose a supported direct mutation path bypassing the authenticated ledger. The Project Manager coordinates implementation and test assignments; the Developer owns production code, QA owns tests under project permissions, and the Architect owns design documentation.
+**ARCH-003 approved operational layout (revised November 9):** Beside `ABC.DLDB` is the **`ABC/`** support directory, which contains its same-basename descriptor **`ABC/ABC.DLID`**, `instance.identity.json`, `signing-key.v1.json`, `BLK/`, and `STAT/`. This replaces the earlier location of `ABC.DLID` next to `.DLDB`. `instance.identity.json` pins the ledger GUID and entire-genesis SHA-512 outside rebuildable `.DLDB`. A single STAT manager rotates `STAT` to `DEL1`/`DEL2` etc. before full replay; a blocking external lock pauses ordinary processing until cleared, with diagnostics. Original upstream SQLite tests remain tracked; each proposed exclusion requires review/Owner approval. The existing Version 1 risk of backdated blocks from a compromised master key is explicitly accepted. No phase may expose a supported direct mutation path bypassing the authenticated ledger. The Project Manager coordinates implementation and test assignments; the Developer owns production code, QA owns tests under project permissions, and the Architect owns design documentation.
 
-**Note:** The ledger GUID and first master's Ed25519 public key are distinct identifiers cryptographically associated by the genesis block. Multiple `.DLDB` files may share a parent directory while retaining independent `.DLID` descriptors and support directories.
+**Note:** The ledger GUID and first master's Ed25519 public key are distinct identifiers cryptographically associated by the genesis block. Multiple `.DLDB` files may share a parent directory while retaining independent same-basename support directories with their own in-folder `.DLID` descriptors.
 
-**Under review (not approved features):** Exact local JSON/AAD identity format is an Architect candidate requiring Owner/Security/QA sign-off. Selected-history recovery into a new ledger is future planning only; hierarchical SHA-256 block inventory (daily leaf inputs use alphabetically sorted `.BLK` filename stems with binary record framing), best-effort peer push and periodic pull are under evaluation, not approved protocols.
+**Under review:** The local Ed25519 signing-key JSON/AAD format is Owner-approved; the separate `.DLID` and identity-manifest byte grammar remains a candidate requiring formal review. Selected-history recovery into a new ledger is future planning only. **Approved synchronization direction:** SHA-256 `TREE.HASH` inventories over `BLK/` day/month/year/root levels, daily leaf inputs from alphabetically sorted full `.BLK` filename stems (including signed-block SHA-512), binary serialization, immediate best-effort pushes to known peers and periodic pull reconciliation. Exact cache/peer bytes and implementation timing still require review.
 
 **Repository:** https://github.com/AnthonyCOlsen/DatabaseDistributedLedger
 
@@ -40,4 +40,21 @@ The official SQLite database uses extension **`.DLDB`** and a custom 16-byte sig
 - A join starts with the ledger GUID but must discover/import and validate genesis, then **display and explicitly confirm the full genesis SHA-512** against a trusted expected fingerprint before binding.
 - Version 1 signing-key JSON/AES-256-GCM **88-byte AAD** format is approved in the SQLite Architecture Plan §8.3; no mandatory OS keystore or interactive unlock.
 - **Canonical ordering changed by Owner approval:** `(timestamp_utc_ms, block_guid, signer_public_key)` ascending. The earlier signer-before-GUID ordering is obsolete. Binary signed-block format is unchanged, but equal-timestamp historical replay semantics are not backward-compatible without assessment.
-- Proposed binary hash-tree inventories remain **unapproved for implementation** and are distinct from the authoritative canonical block order.
+- Hierarchical SHA-256 inventories and best-effort push/periodic pull are **Owner-approved design goals**; exact binary serialization/peer protocol remains under review. Advertised hashes describe the active `.BLK` set. Historically invalidated `.XBLK` archives remain local-only and do not appear in peer inventories until revalidated, restored to `.BLK`, and reannounced. Inventory order does not replace canonical replay order.
+
+## November 9 Owner proposals awaiting reconciliation
+
+The Owner directs reversible local archival of blocks that become **historically unauthorized** after late authorization history. Their `.STAT` entries are invalidated; unchanged signed bytes are renamed from `.BLK` into compact `.XBLK`, and official projection is rebuilt. They are distinct from corrupt-signature blocks. **Archived `.XBLK` is never propagated or inventoried to peers.** If later historical evidence restores authorization, verify the archived bytes, rename to the canonical full-SHA-512 `.BLK` filename, update active hashes, and allow normal push/pull. The approach intentionally does not promise that active inventory equality implies identical privately retained archives.
+
+The **Owner-approved** nonnegative per-instance projection delay (`projection_delay_seconds`, default **0**) applies only to SQL row/schema materialization, not block receipt/verification, durable retention, or canonical authority checks. It reduces some unnecessary replay but provides no finality or guarantee against late blocks. The `.XBLK` local-only/restore policy is Owner-directed; exact binary peer inventory serialization and crash-safe reclassification mechanics remain engineering review items. See SQLite Architecture Plan §§18–19.
+
+### Compact local block filenames (Owner-approved November 9)
+
+```text
+ABC.DLDB
+ABC/ABC.DLID
+ABC/BLK/YYYY/YYYYMM/YYYYMMDD/YYYYMMDD-HHMMSSssss-<block-guid>-<full-block-sha512>.BLK
+ABC/STAT/YYYY/YYYYMM/YYYYMMDD/YYYYMMDD-HHMMSSssss-<block-guid>-<full-block-sha512>.STAT
+```
+
+The local invalidation archive filename is `YYYYMMDD-HHMMSSssss-<block-guid>-<signer-public-key>.XBLK` (64 lowercase hex signer-key digits). `.XBLK` is retained and locally reevaluated but **never propagated**. When reauthorized, the original signed bytes return to a standard SHA-512-bearing `.BLK` filename and become eligible for inventory/push/pull. The signed binary block format and no-overwrite retention rules remain unchanged.
