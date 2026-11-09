@@ -2,7 +2,7 @@
 
 An MIT-licensed, independently developed distributed ledger that cryptographically authenticates changes and reconstructs relational database state across independently operating masters and replicas.
 
-**Project status (2026-11-08): Architecture, design documentation and upstream SQLite baseline validation; not a released distributed-ledger implementation.** The Project Owner approved a C#/.NET 10 implementation backed by an internally maintained SQLite 3.54.1 fork. Earlier PostgreSQL-specific integration and AI-verifier contracts are no longer the active implementation target. The **Version 1 signed ledger block protocol** remains unchanged.
+**Project status (2026-11-09): ARCH-003 architecture revisions and qualified upstream SQLite baseline validation; not a released distributed-ledger implementation.** The Project Owner approved a C#/.NET 10 implementation backed by an internally maintained SQLite 3.54.1 fork. Earlier PostgreSQL-specific integration and AI-verifier contracts are no longer the active implementation target. The **Version 1 signed ledger block protocol** remains unchanged.
 
 ## Documents
 
@@ -17,15 +17,15 @@ The existing `.docx` documents are historical copies of the earlier design; **th
 
 The independent, immutable ledger is authoritative; the local SQLite relational database is **derived state**. Each authorized master can publish signed blocks without network quorum. Replicas may verify, retain, relay, and apply those blocks without signing authority. Identical relevant history produces deterministic state, including when older blocks arrive late. The public SQL interface remains compatible with ordinary supported SQLite operations, but all changes must flow through signed ledger blocks before official database projection.
 
-The official SQLite database uses extension **`.DLDB`** and a custom 16-byte signature (`UDDL database 1` followed by NUL) to discourage accidental editing by stock SQLite applications. This is **not encryption** or a guarantee against hostile filesystem access. Signed blocks use independent immutable **`.BLK` files**; local **`.STAT` sidecars are advisory only**. Every initialized instance, including a replica, has its own durable Ed25519 signing identity outside both ledger blocks and the rebuildable database. **SEC-002 (Owner approved November 8, 2026):** Version 1 obfuscates each private seed with AES-256-GCM under a versioned **publicly embedded** application-wide key. This permits unattended, cross-platform operation but **does not protect the seed from anyone with the encrypted file and public application source**. Normal reconstruction never requires the signing key or a recovery phrase. Missing keys are not regenerated automatically; public-key authorization still depends on genesis/grant/revocation history.
+The official SQLite database uses extension **`.DLDB`** and a custom 16-byte signature (`UDDL database 1` followed by NUL) to discourage accidental editing by stock SQLite applications. This is **not encryption** or a guarantee against hostile filesystem access. Signed blocks use independent immutable **`.BLK` files**; local **`.STAT` sidecars are advisory only**. Every initialized instance, including a replica, has its own durable Ed25519 signing identity outside both ledger blocks and the rebuildable database. **SEC-002 (Owner approved November 8, 2026):** Version 1 obfuscates each private seed with AES-256-GCM under a versioned **publicly embedded** application-wide key. This permits unattended, cross-platform operation but **does not protect the seed from anyone with the encrypted file and public application source**. Cryptographic verification requires no signing key, and normal reconstruction with an **available** identity needs no recovery phrase. **ARCH-003:** If an existing key is missing, corrupted or unavailable, ordinary SQLite and ledger operations (including read-only replay) pause until the original identity is restored; diagnostics/status/recovery remain available. No silent key replacement; public-key authorization still depends on genesis/grant/revocation history.
 
 ## Intended delivery order
 
-1. Independent ledger — format, signing, authority, exact `.BLK` storage and import/export.
-2. Ledger-driven SQLite projector — `.DLDB`, exact typed values, SQL reads, full rebuild and crash recovery.
-3. Native SQLite SQL write interception — preserve standard interfaces, create ledger blocks, never modify official projection directly.
-4. Peer exchange and eventual convergence — multiple offline masters and read-only replicas.
+1. Independent ledger — format, identity/signing, authorization and durable `.BLK` storage.
+2. **Native SQLite SQL interception** — preserve standard interfaces; supported master mutations publish authenticated durable blocks or fail without modifying official `.DLDB`. Test-only provisional SQL state is isolated and non-authoritative.
+3. **Ledger-driven SQLite projector** — official `.DLDB` writes from authenticated blocks only; `.STAT`, precise types, consistent SELECTs and crash-safe deterministic rebuild.
+4. Peer exchange and eventual convergence — offline masters and permissionless replicas.
 
-No phase may expose a supported direct mutation path bypassing the authenticated ledger. The Project Manager coordinates implementation and test assignments; the Developer owns production code, QA owns tests under project permissions, and the Architect owns design documentation.
+**ARCH-003 operational proposals:** Runtime instance data may live under the resolved main `.DLDB` parent, partitioned by persistent instance GUID. Separate sibling `blocks`/`status` trees and generation-based status rotation require further Owner approval. Upstream SQLite tests remain in source control; proposed exclusions require review. No phase may expose a supported direct mutation path bypassing the authenticated ledger. The Project Manager coordinates implementation and test assignments; the Developer owns production code, QA owns tests under project permissions, and the Architect owns design documentation.
 
 **Repository:** https://github.com/AnthonyCOlsen/DatabaseDistributedLedger
