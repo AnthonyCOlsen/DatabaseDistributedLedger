@@ -1,0 +1,9 @@
+# Build and Developer test outputs
+**/bin/
+**/obj/
+TestResults/
+.vs/
+# Runtime identity/private key files must never be committed.
+**/signing-key.v1.json
+**/instance.identity.json
+**/instance.config.json

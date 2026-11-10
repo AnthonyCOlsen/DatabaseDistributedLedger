@@ -1,0 +1,1 @@
+<Solution><Project Path="src/UserDimensions.Ledger/UserDimensions.Ledger.csproj"/><Project Path="src/ledgerctl/ledgerctl.csproj"/><Project Path="tests/UserDimensions.Ledger.Tests/UserDimensions.Ledger.Tests.csproj"/></Solution>

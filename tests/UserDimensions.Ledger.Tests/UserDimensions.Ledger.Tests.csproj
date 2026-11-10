@@ -1,0 +1,1 @@
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType></PropertyGroup><ItemGroup><ProjectReference Include="../../src/UserDimensions.Ledger/UserDimensions.Ledger.csproj"/></ItemGroup></Project>
