@@ -2,7 +2,7 @@
 
 An MIT-licensed open-source distributed signed ledger that derives relational state from immutable authenticated history. **The ledger is authoritative; SQLite `.DLDB` is a rebuildable projection.** Independent masters publish offline, and replicas may verify/relay blocks.
 
-**Status (2026-11-09; ARCH-010):** Architecture/design, not a released distributed-ledger implementation. Baseline: internally maintained **SQLite 3.54.1** fork with official upstream source provenance in the SQLite architecture plan; C#/.NET 10 application components. PostgreSQL/AI-task adapter obligations are historical. **Active signed-block protocol: 1.01 (`0x0101`), a breaking value/schema-grammar revision from historical `0x0001`; no released historical ledger migration is required.**
+**Status (2026-11-09; ARCH-011):** Architecture/design, not a released distributed-ledger implementation. Baseline: internally maintained **SQLite 3.54.1** fork with official upstream source provenance in the SQLite architecture plan; C#/.NET 10 application components. PostgreSQL/AI-task adapter obligations are historical. **Active signed-block protocol: 1.01 (`0x0101`), a breaking value/schema-grammar revision from historical `0x0001`; no released historical ledger migration is required.**
 
 ## Authoritative documents
 
@@ -20,6 +20,7 @@ ABC.DLDB                              # SQLite derived projection; absent in led
 ABC/                                  # support folder derived from database basename
     instance.identity.json            # stable instance GUID/public key; optional pinned ledger/genesis
     signing-key.v1.json               # Version 1 AES-256-GCM-obfuscated Ed25519 seed
+    instance.config.json              # optional Version 1 persisted resource limits
     BLK/YYYY/YYYYMM/YYYYMMDD/         # validated raw signed blocks, exact bytes
     BLK/OUTOFRANGE/                   # timestamp outside UTC calendar years 0001–9999
     STAT/                             # disposable local statuses; mirrors BLK hierarchy
@@ -32,7 +33,7 @@ The signed block header is two bytes `01 01` for **1.01**. Owner-approved REAL b
 
 ## Approved Phase 1 CLI and lifecycle
 
-`ledgerctl --instance-root ABS COMMAND ...` exposes `instance init/status/recover`, `ledger init/join/recover-genesis`, `key backup/restore`, `block publish/import/get/export`, `config get/set`, and consolidated `status`. One JSON response per finite command; exit groups 0 success, 2 invalid input, 3 partial import, 4 state/authority/recovery, 5 resources/time, 6 I/O/internal. New identity creation is explicit, initialization crash recovery uses `ledger recover-genesis`, and genesis binding requires a ledger GUID and trusted entire-genesis SHA-512. The **exact local Version 1 `instance.identity.json` schema is approved**. `block publish` can sign non-genesis events before any SQLite projector exists; ambiguous multi-ledger retrieval/export requires an explicit ledger selection. Signed timestamps beyond years 0001–9999 use the deterministic `OUTOFRANGE/T<sign-biased-16-hex>-<block-guid>-<sha512>.BLK` format.
+`ledgerctl --instance-root ABS COMMAND ...` exposes `instance init/status/recover`, `ledger init/join/recover-genesis`, `key backup/restore`, `block publish/import/get/export`, **`master countersign-revocation`**, `config get/set`, and consolidated `status`. Key-only original-instance recovery requires explicit `--confirm-unbound-initialization`; a missing config uses defaults and present corrupted config fails closed. One JSON response per finite command; exit groups 0 success, 2 invalid input, 3 partial import, 4 state/authority/recovery, 5 resources/time, 6 I/O/internal. New identity creation is explicit, initialization crash recovery uses `ledger recover-genesis`, and genesis binding requires a ledger GUID and trusted entire-genesis SHA-512. The **exact local Version 1 `instance.identity.json` schema is approved**. `block publish` can sign non-genesis events before any SQLite projector exists; ambiguous multi-ledger retrieval/export requires an explicit ledger selection. Signed timestamps beyond years 0001–9999 use the deterministic `OUTOFRANGE/T<sign-biased-16-hex>-<block-guid>-<sha512>.BLK` format.
 
 ## Delivery order
 
@@ -45,4 +46,6 @@ Normal `.BLK` inventory is independent of local-only historical `.XBLK` archives
 
 **Repository:** https://github.com/AnthonyCOlsen/DatabaseDistributedLedger
 
-**ARCH-010 peer-review handoff:** Phase 1 command argument/output/error details, authorizations, partial-import accounting, genesis crash repair, REAL conformance and deterministic QA acceptance objectives are now specified in [Management API §13](Distributed_Ledger_Management_API_Specification.md). QA/Tester owns independent protocol vectors and crash-injection tests; architectural documentation does not claim that those tests have been run or that Phase 1 implementation is complete. `TREE.HASH` grammar, native SQLite SQL interception and projector durability remain later-phase gates.
+**ARCH-011 peer-review handoff:** Phase 1 command argument/output/error details, authorizations, partial-import accounting, genesis crash repair, REAL conformance and deterministic QA acceptance objectives are now specified in [Management API §13](Distributed_Ledger_Management_API_Specification.md). QA/Tester owns independent protocol vectors and crash-injection tests; architectural documentation does not claim that those tests have been run or that Phase 1 implementation is complete. `TREE.HASH` grammar, native SQLite SQL interception and projector durability remain later-phase gates.
+
+**ARCH-011 Owner approvals:** Phase 1 uses `status="retained"` for authorized, durable blocks that have **not** been projected; only unresolved historical authority is `pending`. Locally archived `.XBLK` contains pending, unauthorized/inapplicable and disputed authenticated variants (all excluded from normal get/export and peer inventories). `retained_count` counts all authenticated durable variants by full SHA-512 including genesis and archived `.XBLK`; `pending_count` and `quarantined_count` are disjoint; `disputed_count` is a subset of quarantine; `opaque_count=0` because unsupported signed versions are rejected without retention. Reclassifications preserve bytes and obey no-overwrite rules. `block get` emits a raw signed block; `block export` always emits a DDLB wrapper, even for zero/one block. Phase 1 requires independent ledger signing/archival without a SQLite projector, `.STAT`, or peer networking. The detailed normative contracts and Owner-approved recovery/countersigning/configuration formats are in [Management API §14](Distributed_Ledger_Management_API_Specification.md).
