@@ -230,6 +230,7 @@ public static class BlockCodec
         Errors.Require(bytes.LongLength <= limits.MaxDecompressedEventBytes, "RESOURCE_LIMIT", 5, "Decoded event exceeds limit.");
         Errors.Require(watch.Elapsed.TotalSeconds <= limits.PerBlockTimeoutSeconds, "PROCESSING_TIMEOUT", 5, "Block processing deadline exceeded.");
         var e = length == 0 ? null : EventCodec.Decode(bytes);
+        Errors.Require(watch.Elapsed.TotalSeconds <= limits.PerBlockTimeoutSeconds, "PROCESSING_TIMEOUT", 5, "Event processing deadline exceeded.");
         if (e?.Kind == 0x21)
         {
             Errors.Require(!key.AsSpan().SequenceEqual(e.Countersigner) && (key.AsSpan().SequenceEqual(e.PublicKey) || e.Countersigner!.AsSpan().SequenceEqual(e.PublicKey)), "BAD_EVENT", 2, "Invalid revocation signer roles.");
@@ -270,7 +271,7 @@ public static class Lzma2
                 if (control >= 192) { Errors.Require(pos < payload.Length, "BAD_EVENT", 2, "Missing LZMA properties."); pos++; }
             }
             decoded += unpacked;
-            Errors.Require(decoded <= limits.MaxDecompressedEventBytes && decoded <= int.MaxValue && decoded + payload.LongLength * 4 <= limits.MaxInflightImportBytes, "RESOURCE_LIMIT", 5, "LZMA2 decoded/memory limit.");
+            Errors.Require(decoded <= limits.MaxDecompressedEventBytes && decoded <= int.MaxValue && decoded * 4 + payload.LongLength * 4 + 4194304 <= limits.MaxInflightImportBytes, "RESOURCE_LIMIT", 5, "LZMA2 decoded/memory limit.");
             Errors.Require(packed <= payload.Length - pos, "BAD_EVENT", 2, "Truncated LZMA2 data."); pos += packed;
         }
         Errors.Require(ended && pos == payload.Length, "BAD_EVENT", 2, "LZMA2 needs exact EOS with no trailing garbage.");
@@ -287,6 +288,6 @@ public static class Lzma2
             Errors.Require(output.Length == decoded, "BAD_EVENT", 2, "Decoded length mismatch."); return output.ToArray();
         }
         catch (LedgerException) { throw; }
-        catch (Exception e) when (e is IOException or InvalidOperationException or ArgumentException) { throw new LedgerException("BAD_EVENT", 2, "Malformed LZMA2 stream."); }
+        catch (Exception e) when (e is not OutOfMemoryException) { throw new LedgerException("BAD_EVENT", 2, "Malformed LZMA2 stream."); }
     }
 }

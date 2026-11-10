@@ -1,1 +1,2 @@
-Console.Error.WriteLine("ledgerctl integration in progress"); return 6;
+using UserDimensions.Ledger;
+return Management.Run(args,Console.Out,Console.Error);

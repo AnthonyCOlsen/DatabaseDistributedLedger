@@ -95,10 +95,12 @@ public sealed class LedgerInstance : IDisposable
             var length=new FileInfo(path).Length; Limits.CheckRaw(length);
             Errors.Require(resident + length*8 <= Limits.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Canonical replay exceeds configured buffered history memory; raise the limit.");
             var block=BlockCodec.Parse(Paths.ReadBounded(path,Math.Min(Limits.MaxRawBlockBytes,Limits.MaxInflightImportBytes/4)),Limits);
-            Errors.Require(Manifest.Binding==null || Manifest.Binding.LedgerId==block.LedgerId,"LEDGER_IDENTITY_MISMATCH",4,"Stored block belongs to another ledger.");
+            if (Manifest.Binding!=null && Manifest.Binding.LedgerId!=block.LedgerId) continue;
             var expected=BlockPath(block,path.EndsWith(".XBLK",StringComparison.Ordinal));
             Errors.Require(string.Equals(path,expected,OperatingSystem.IsWindows()?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal),"RECOVERY_REQUIRED",4,"Block filename does not match verified bytes.");
-            resident+=length*8; result.Add((block,path));
+            resident+=length*8+block.EventBytes.LongLength*4;
+            Errors.Require(resident<=Limits.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Decoded history exceeds configured memory.");
+            result.Add((block,path));
         }
         return result;
     }
@@ -165,14 +167,26 @@ public sealed class LedgerInstance : IDisposable
     public SignedBlock InitializeLedger()
     {
         EnsureConfig(); Errors.Require(Manifest.Binding==null,"ALREADY_BOUND",4,"Instance already bound.");
-        var inventory=Inventory(); Errors.Require(inventory.Count==0,"GENESIS_BINDING_INCOMPLETE",4,"Existing ledger history requires join or explicit genesis recovery.");
-        Errors.Require(!Directory.EnumerateFileSystemEntries(Root,".uddl-*",SearchOption.AllDirectories).Any(),"RECOVERY_REQUIRED",4,"Unfinished publication artifacts require explicit recovery.");
+        var inventory=Inventory(); Errors.Require(!inventory.Any(x=>x.Block.IsGenesis && Binary.Hex(x.Block.Signer)==PublicKey),"GENESIS_BINDING_INCOMPLETE",4,"Existing original genesis requires explicit recovery.");
+        var priorBlockRoot=Path.Combine(Root,"BLK");
+        Errors.Require(!Directory.Exists(priorBlockRoot) || !Directory.EnumerateFileSystemEntries(priorBlockRoot,".uddl-*",SearchOption.AllDirectories).Any(),"RECOVERY_REQUIRED",4,"Unfinished ledger publication artifacts require explicit recovery.");
         var raw=identity.CreateBlock(Guid.NewGuid(),Guid.NewGuid(),DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),null);
         var genesis=Import(raw,out _).Block; files.Checkpoint("genesis-durable-before-binding"); Bind(genesis); return genesis;
     }
     public SignedBlock RecoverGenesis(Guid ledger,string hash)
     {
         EnsureConfig(); var inventory=Inventory();
+        // A fully flushed original genesis temporary file can be explicitly finished, never silently replaced.
+        var blockRoot=Path.Combine(Root,"BLK");
+        if (Directory.Exists(blockRoot)) foreach (var temporary in Directory.EnumerateFiles(blockRoot,".uddl-*.tmp",SearchOption.AllDirectories))
+        {
+            SignedBlock candidate;
+            try { candidate=BlockCodec.Parse(Paths.ReadBounded(temporary,Limits.MaxRawBlockBytes),Limits); } catch(LedgerException) { continue; }
+            if(!candidate.IsGenesis || candidate.LedgerId!=ledger || candidate.Hash!=hash || Binary.Hex(candidate.Signer)!=PublicKey) continue;
+            var destination=BlockPath(candidate,false);
+            if(!File.Exists(destination)) files.Move(temporary,destination);
+        }
+        inventory=Inventory();
         Errors.Require(Manifest.Binding==null || Manifest.Binding==new LedgerBinding(ledger,hash),"GENESIS_MISMATCH",4,"Existing binding differs.");
         var own=inventory.Select(x=>x.Block).Where(b=>b.IsGenesis && Binary.Hex(b.Signer)==PublicKey).DistinctBy(b=>b.Hash).ToList();
         Errors.Require(own.Count<=1,"GENESIS_CONFLICT",4,"Multiple original genesis candidates.");
@@ -204,7 +218,9 @@ public sealed class LedgerInstance : IDisposable
         var binding=Bound(); var local=identity.PublicKey;
         Errors.Require(!local.AsSpan().SequenceEqual(outer) && (target.AsSpan().SequenceEqual(local) || target.AsSpan().SequenceEqual(outer)),"NOT_AUTHORIZED",4,"Invalid signer/target roles.");
         var all=Inventory().Select(x=>x.Block).ToList();
-        var prefix=all.Where(x=>x.Timestamp<timestamp || (x.Timestamp==timestamp && (Binary.CompareGuid(x.Id,block)<0 || (x.Id==block && x.Signer.AsSpan().SequenceCompareTo(outer)<0))));
+        var disputes=all.GroupBy(x=>x.Id).Where(g=>g.Select(x=>x.Hash).Distinct().Count()>1).Select(g=>g.Key).ToHashSet();
+        Errors.Require(all.Where(x=>x.IsGenesis).DistinctBy(x=>x.Hash).Count()==1,"AUTHORITY_UNRESOLVED",4,"Unique trusted genesis is required.");
+        var prefix=all.Where(x=>!disputes.Contains(x.Id) && (x.Timestamp<timestamp || (x.Timestamp==timestamp && (Binary.CompareGuid(x.Id,block)<0 || (x.Id==block && x.Signer.AsSpan().SequenceCompareTo(outer)<0)))));
         var snapshot=AuthorizationReplay.Evaluate(prefix,binding);
         Errors.Require(snapshot.AuthorizedKeys.Contains(PublicKey) && snapshot.AuthorizedKeys.Contains(Binary.Hex(outer)),
             all.Any(x=>Binary.Hex(x.Signer)==Binary.Hex(outer))?"NOT_AUTHORIZED":"AUTHORITY_UNRESOLVED",4,"Both distinct signers must be authorized at the proposed position.");
@@ -272,6 +288,15 @@ public sealed class LedgerInstance : IDisposable
         else
         {
             manifest=InstanceManifest.Decode(Paths.ReadBounded(Path.Combine(source,"instance.identity.json"),4096,"IDENTITY_MISMATCH")); Match(manifest,key);
+            if(File.Exists(manifestPath))
+            {
+                InstanceManifest? current=null; try { current=InstanceManifest.Decode(Paths.ReadBounded(manifestPath,4096,"IDENTITY_MISMATCH")); } catch(LedgerException) { }
+                if(current!=null)
+                {
+                    Errors.Require(current.InstanceId==manifest.InstanceId && current.PublicKey==manifest.PublicKey && (manifest.Binding==null || current.Binding==null || current.Binding==manifest.Binding),"IDENTITY_MISMATCH",4,"Backup conflicts with surviving original identity/binding.");
+                    if(current.Binding!=null) manifest=current;
+                }
+            }
             if (!File.Exists(manifestPath) && Directory.Exists(Path.Combine(root,"BLK")))
             {
                 Errors.Require(manifest.Binding!=null,"RECOVERY_REQUIRED",4,"Original binding evidence is required for ledger-bearing recovery.");
@@ -279,9 +304,34 @@ public sealed class LedgerInstance : IDisposable
                 Errors.Require(matching,"GENESIS_MISMATCH",4,"Original pinned genesis not found.");
             }
         }
-        if (File.Exists(manifestPath)) Errors.Require(InstanceManifest.Decode(Paths.ReadBounded(manifestPath,4096,"IDENTITY_MISMATCH"))==manifest,"IDENTITY_MISMATCH",4,"Existing manifest is a different original identity/binding.");
-        if (File.Exists(keyPath)) { using var existing=SigningIdentity.Decode(Paths.ReadBounded(keyPath,4096,"IDENTITY_MISMATCH")); Match(manifest,existing); }
-        else files.Publish(keyPath,Paths.ReadBounded(sourceKey,4096,"IDENTITY_MISMATCH"));
+        if (File.Exists(manifestPath))
+        {
+            InstanceManifest? existing=null;
+            try { existing=InstanceManifest.Decode(Paths.ReadBounded(manifestPath,4096,"IDENTITY_MISMATCH")); } catch(LedgerException) { }
+            if(existing!=null)
+            {
+                Errors.Require(existing.InstanceId==manifest.InstanceId && existing.PublicKey==manifest.PublicKey && (existing.Binding==null || existing.Binding==manifest.Binding),"IDENTITY_MISMATCH",4,"Existing manifest is a different original identity/binding.");
+                if(existing!=manifest) files.Publish(manifestPath,manifest.Encode(),true);
+            }
+            else
+            {
+                // A corrupt manifest needs surviving original-key evidence before backup replacement.
+                using var original=SigningIdentity.Decode(Paths.ReadBounded(keyPath,4096,"IDENTITY_MISMATCH")); Match(manifest,original);
+                files.Move(manifestPath,Path.Combine(root,".uddl-corrupt-manifest-"+Guid.NewGuid().ToString("N")+".tmp"));
+            }
+        }
+        if (File.Exists(keyPath))
+        {
+            SigningIdentity? existing=null;
+            try { existing=SigningIdentity.Decode(Paths.ReadBounded(keyPath,4096,"IDENTITY_MISMATCH")); } catch(LedgerException) { }
+            if(existing!=null) { using(existing) Match(manifest,existing); }
+            else
+            {
+                Errors.Require(File.Exists(manifestPath) && InstanceManifest.Decode(Paths.ReadBounded(manifestPath,4096,"IDENTITY_MISMATCH"))==manifest,"IDENTITY_MISMATCH",4,"No surviving original manifest to authenticate key restoration.");
+                files.Move(keyPath,Path.Combine(root,".uddl-corrupt-key-"+Guid.NewGuid().ToString("N")+".tmp"));
+            }
+        }
+        if (!File.Exists(keyPath)) files.Publish(keyPath,Paths.ReadBounded(sourceKey,4096,"IDENTITY_MISMATCH"));
         if (!File.Exists(manifestPath)) files.Publish(manifestPath,manifest.Encode());
         return manifest;
     }

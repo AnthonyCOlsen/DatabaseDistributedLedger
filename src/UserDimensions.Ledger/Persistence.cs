@@ -162,9 +162,9 @@ public sealed class SigningIdentity(Guid instanceId, byte[] seed) : IDisposable
     {
         using var s = new MemoryStream(); s.Write("UDDL-ED25519-KEY-v1"u8); s.Write(Binary.GuidBytes(id)); s.Write(key); s.Write([0,19]); s.Write("application-wide-v1"u8); return s.ToArray();
     }
-    public byte[] Encode(byte[]? nonce = null)
+    public byte[] Encode()
     {
-        nonce ??= RandomNumberGenerator.GetBytes(12); Errors.Require(nonce.Length == 12, "IDENTITY_MISMATCH", 4, "Nonce length."); var ciphertext = new byte[32]; var tag = new byte[16];
+        var nonce = RandomNumberGenerator.GetBytes(12); var ciphertext = new byte[32]; var tag = new byte[16];
         using var aes = new AesGcm(WrapKey,16); aes.Encrypt(nonce,seed,ciphertext,tag,Aad(InstanceId,PublicKey));
         return StrictJson.Write(new { format="UDDL-ED25519-KEY", version=1, instance_guid=InstanceId.ToString("D"), public_key_hex=Binary.Hex(PublicKey), wrap_key_id="application-wide-v1", encryption="AES-256-GCM", nonce_b64=Convert.ToBase64String(nonce), ciphertext_b64=Convert.ToBase64String(ciphertext), tag_b64=Convert.ToBase64String(tag) });
     }

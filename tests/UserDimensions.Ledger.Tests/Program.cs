@@ -1,6 +1,9 @@
 using UserDimensions.Ledger;
+if(args.Length>0 && args[0]=="--worker") return Tests.Worker(args[1..]);
 Tests.RunProtocol();
 Tests.RunIdentity();
+Tests.RunIntegration();
+Tests.RunProcesses();
 return Tests.Finish();
 
 internal static partial class Tests
