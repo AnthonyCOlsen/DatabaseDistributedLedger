@@ -1,0 +1,69 @@
+DEV-003 — Step 1 independent ledger implementation handoff
+Date: 2026-11-09 (America/Chicago)
+Repository: C:\AnthonyO\32GB_HOME\Development\UserDimensions.DatabaseDistributedLedger
+Authority reviewed: all four ARCH-011 Markdown documents at 8674e4c.
+Status: implementation ready for independent QA; not an independent QA acceptance or production durability certification.
+
+IMPLEMENTED
+1. Database-independent C#/.NET 10 library and finite ledgerctl executable.
+2. Protocol 1.01: exact 147-byte header, 64-byte Ed25519 signature, 211-byte genesis, signed int64 timestamps, big-endian GUIDs, SHA-512, strict minimal ULEB128/ZigZag, five value classes, all specified row/schema/grant/revoke events and column/default fields. Reject every REAL NaN; accept infinities and retain negative-zero wire bits.
+3. Raw LZMA2: property 20, compressed reset chunks and stored fallback, exact EOS/no trailing garbage, bounded decoding and processing deadlines. Encoded chunks use at most 32 KiB of history within the permitted 4 MiB decoder dictionary. No XZ/7z wrapper in production. Independent 7-Zip interoperability tested in both directions; XZ wrapper exists only in Developer tests.
+4. Ed25519 via locked BouncyCastle.Cryptography 2.7.0; exact 149-byte revocation intent. Raw LZMA decoder/encoder primitives via locked SharpCompress 1.0.0. MIT notices accompany build output.
+5. Explicit persistent master/replica identity; strict Version 1 key and manifest JSON; exact 88-byte AES-GCM AAD, fresh nonce, public versioned wrapping key, original-public-key validation. Missing/corrupt identity gates ordinary commands. No silent replacement or authority from key possession.
+6. Genesis creation/pinning/join and explicit idempotent genesis repair, backup/restore, approved key-only never-bound recovery, same-host root/identity mutexes (including copied-root detection), preserving original identity and binding.
+7. Immutable UTC/out-of-calendar .BLK storage; exact raw bytes; atomic no-overwrite publication; full canonical authorization replay, grants/two-signature revocations, late invalidation/regrant, pending/quarantine/disputes, recoverable .XBLK transitions and inclusive SHA-512-variant counts. Archives never enter normal get/export. No STAT or projector is needed.
+8. Every Phase 1 command family in Management API sections 13–14, including countersign-revocation, durable config get/set, diagnostics, JSON envelopes, numeric timestamp strings, exit groups, ordered partial-import accounting, duplicate idempotence, multi-ledger selection, raw get and DDLB-only export (including empty/one-block exports).
+
+SOURCE AND BUILD INVENTORY
+global.json; Directory.Build.props; UserDimensions.Ledger.slnx; .gitignore; THIRD_PARTY_NOTICES.txt.
+src/UserDimensions.Ledger/: Protocol.cs, Persistence.cs, Authorization.cs, LedgerInstance.cs, Management.cs, project and locked dependency graph.
+src/ledgerctl/: Program.cs, executable project and locked dependency graph.
+tests/UserDimensions.Ledger.Tests/: standalone Developer regression runner, protocol, identity, integration, adversarial, process-interruption and compression interoperability tests, project and lock file.
+scripts/build.ps1; scripts/run-native-acceptance.ps1; this Developer-owned report.
+Architect-owned documents, QA_TEST_PLAN.md, local notes and all pristine upstream SQLite source/tests were preserved.
+
+LOCAL REVIEW COMMITS
+7819201 — protocol, cryptography and initial regressions.
+d025cbb — persistent identity, durable storage and canonical authorization.
+151b6d4 — complete management integration and process regression coverage.
+Final hardening/report commit follows these; use git log to obtain its exact SHA.
+No push was performed for DEV-003.
+
+VERIFICATION
+Latest checked Developer suite: 57 scenarios passed, 0 failed, Release build 0 warnings/0 errors.
+Saved receipt: C:\AnthonyO\32GB_HOME\Development\UserDimensions.DatabaseDistributedLedger\.git\dev-003-work\native-20261109-211837 (execution context explicitly recorded as Codex sandbox; exit-code.txt=0).
+The built ledgerctl.dll was also invoked as a separate process for instance init, ledger init and status; it returned the required single JSON response and bound/authorized state with one retained genesis and projection not_installed.
+Includes RFC 8032 known-key/signature vector; independently generated compressed input; independent 7-Zip decode of authored compressed/stored output; all event kinds; malformed signature/hash/frame/value tests; strict identity/config JSON; separate-instance grants and countersigning; late revoke/regrant; disputes and pending promotion; exact retained bytes; full CLI command walkthrough; empty/single DDLB; duplicate/truncated/partial imports; original-key/manifest recovery; no-overwrite and external locks; cross-process duplicate identity; abrupt process exits after key/genesis publication, during archive rename and on either side of config replacement.
+Fault callbacks are explicit injected test dependencies with no production environment-variable activation. Worker Environment.Exit(77) bypasses stack unwinding and models process interruption, not machine power failure.
+Earlier system-temp-directory mutations were denied by the execution environment. Tests were relocated to repository-local .git/dev-003-work scratch, where native Windows operations pass. Initial NuGet HTTP-cache and build-server access restrictions were resolved using repository-local caches, serial builds and no shared compiler; no assertion or production durability guarantee was weakened.
+
+DURABILITY PROCEDURE AND QUALIFICATIONS
+Complete unique temporary file; write-through FileStream; Flush(true); same-filesystem MoveFileExW with WRITE_THROUGH, no COPY_ALLOWED, and no REPLACE_EXISTING for immutable records. Explicitly replaceable config/manifest uses atomic replacement. New directories are published via collision-safe temporary-directory rename. No success acknowledgment before that procedure finishes. OS errors and uncertain publication produce structured failure; interrupted imports retain truthful durable-prefix receipts and original bytes for recovery.
+Initial mutation support is local fixed NTFS on Windows. Unsupported filesystems/platforms fail DURABILITY_UNCERTAIN rather than claiming portable publication guarantees. Format portability is implemented; Linux/macOS/mobile filesystem durability is not qualified.
+References: https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw and https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers .
+Observed process/restart/locking results are not a physical power-cut, controller-cache or storage-media test. Independent Windows 11 acceptance in an ordinary terminal and QA durability qualification remain required. No Avast settings changed or causation claimed.
+The baseline SQLite tree remains exactly 9e69364cf105a1d38e1d17ee66290967f640f78d, matching pristine import cc0dd4a. Its earlier combined-suite plus native targeted rerun qualification remains separate from DEV-003 QA.
+
+LIMITATIONS / HANDOFF ITEMS
+No independent QA certification yet; QA owns independent vectors and crash schedules. No Step 2–4 work begun.
+History replay/import/export uses bounded in-memory buffers. It returns RESOURCE_LIMIT when configured limits or implementation-supported bounds cannot safely cover required data; it does not promise unlimited streamed history. Enforceable byte limits are at most Int32.MaxValue; timeouts are cooperative checks at bounded processing boundaries, not hard real-time preemption. Compression uses independent small reset chunks; ratio optimization is not a protocol requirement.
+SEC-002 wrapping key is SHA-256 of UTF-8 literal UserDimensions/SEC-002/application-wide-v1/public-obfuscation-key, visibly documented in source. This is intentionally public obfuscation, not confidentiality or malicious-file-holder authentication. Original backup recovery trusts the explicitly selected original backup while checking surviving identity/genesis evidence and preserving corrupt remnants.
+For QA review: a classification transition interrupted after byte publication returns failed/partial command plus truthful retained-byte receipts; classification is repaired on subsequent successful reconciliation. Confirm final error/count behavior against independent QA vectors. No collision-risk decision or wire grammar was reopened.
+No architectural blocker prevented implementing the assigned Phase 1 commands. Current failure-path and durability qualifications above must remain visible in acceptance reports.
+
+RUN BUILD AND DEVELOPER REGRESSIONS
+PowerShell:
+  $repo = 'C:\AnthonyO\32GB_HOME\Development\UserDimensions.DatabaseDistributedLedger'
+  & "$repo\scripts\build.ps1" -Test
+Use .NET SDK 10.0.403 (global.json permits compatible latest patch), Windows and local NTFS. Restore uses version-controlled lock files. No system dependency installation is performed by the script. Optional external 7-Zip interop test runs only if 7-Zip is already installed.
+
+ORDINARY-TERMINAL RECEIPT FOR QA
+  & "$repo\scripts\run-native-acceptance.ps1" -AntivirusState 'Record actual Avast state here'
+This writes Git HEAD/environment, tests.log and exit-code.txt under .git/dev-003-work/native-YYYYMMDD-HHMMSS. It does not alter antivirus settings. Test fixtures/identities are disposable nonproduction data under .git/dev-003-work and never committed.
+
+CLI EXAMPLE (operator selects an appropriate runtime location outside the source checkout)
+  $instanceRoot = 'C:\LedgerData\ABC'
+  dotnet "$repo\src\ledgerctl\bin\Release\net10.0\ledgerctl.dll" --instance-root $instanceRoot instance init
+  dotnet "$repo\src\ledgerctl\bin\Release\net10.0\ledgerctl.dll" --instance-root $instanceRoot ledger init
+  dotnet "$repo\src\ledgerctl\bin\Release\net10.0\ledgerctl.dll" --instance-root $instanceRoot status
+Use the approved Management API command arguments for publication/import/countersigning/export. The instance root is a support directory, not a .DLDB file. Phase 1 creates no SQLite projection.

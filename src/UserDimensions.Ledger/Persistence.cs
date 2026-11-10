@@ -12,7 +12,8 @@ public static class Paths
     public static string Absolute(string path)
     {
         Errors.Require(Path.IsPathFullyQualified(path), "INVALID_ARGUMENT", 2, "Absolute path required.");
-        var full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path)); Safe(full); return full;
+        try { var full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path)); Safe(full); return full; }
+        catch(Exception e) when(e is ArgumentException or NotSupportedException) { throw new LedgerException("INVALID_ARGUMENT",2,"Unsupported absolute path."); }
     }
     public static void Safe(string path)
     {

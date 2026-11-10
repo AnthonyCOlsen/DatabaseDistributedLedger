@@ -11,7 +11,7 @@ $env:NUGET_SCRATCH = Join-Path $ledgerRoot '.git/dev-003-work/nuget-scratch'
 $env:NUGET_PLUGINS_CACHE_PATH = Join-Path $ledgerRoot '.git/dev-003-work/plugin-cache'
 $env:DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE = 'true'
 $env:DOTNET_GENERATE_ASPNET_CERTIFICATE = 'false'
-dotnet build (Join-Path $ledgerRoot 'UserDimensions.Ledger.slnx') -c Release --nologo -m:1 /p:BuildInParallel=false /p:UseSharedCompilation=false /p:MSBuildEnableWorkloadResolver=false
+dotnet build (Join-Path $ledgerRoot 'UserDimensions.Ledger.slnx') -c Release --nologo -m:1 /p:BuildInParallel=false /p:UseSharedCompilation=false /p:MSBuildEnableWorkloadResolver=false /p:RestoreLockedMode=true
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if ($Test) {
  dotnet run --project (Join-Path $ledgerRoot 'tests/UserDimensions.Ledger.Tests') -c Release --no-build

@@ -242,15 +242,25 @@ public static class BlockCodec
 
 public static class Lzma2
 {
-    // LZMA2's stored-chunk mode is interoperable raw LZMA2. No archive/header is emitted.
-    // Incompressible output is deliberately permitted; decoding also supports compressed chunks.
+    // Independent reset chunks: LZMA range-coded bytes with no LZMA1 EOS, wrapped as raw LZMA2.
+    // The wire dictionary property remains 20 (4 MiB). A chunk uses at most 32 KiB history.
     public static byte[] Encode(byte[] data)
     {
         using var s = new MemoryStream(); s.WriteByte(20);
         for (var pos = 0; pos < data.Length;)
         {
-            var n = Math.Min(65536, data.Length - pos); s.WriteByte(pos == 0 ? (byte)1 : (byte)2);
-            s.WriteByte((byte)((n - 1) >> 8)); s.WriteByte((byte)(n - 1)); s.Write(data, pos, n); pos += n;
+            var n = Math.Min(32768, data.Length - pos);
+            using var compressed = new MemoryStream(); byte property;
+            using (var encoder = new LzmaStream(new LzmaEncoderProperties(false, 65536), false, compressed))
+            { property = encoder.Properties[0]; encoder.Write(data,pos,n); }
+            var packed = compressed.ToArray();
+            if(packed.Length + 6 < n + 3 && packed.Length <= 65536)
+            {
+                s.WriteByte(0xe0); s.WriteByte((byte)((n-1)>>8)); s.WriteByte((byte)(n-1));
+                s.WriteByte((byte)((packed.Length-1)>>8)); s.WriteByte((byte)(packed.Length-1)); s.WriteByte(property); s.Write(packed);
+            }
+            else { s.WriteByte(1); s.WriteByte((byte)((n-1)>>8)); s.WriteByte((byte)(n-1)); s.Write(data,pos,n); }
+            pos += n;
         }
         s.WriteByte(0); return s.ToArray();
     }

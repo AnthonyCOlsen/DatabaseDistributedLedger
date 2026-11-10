@@ -4,6 +4,8 @@ using System.Security.Cryptography;
 
 namespace UserDimensions.Ledger;
 
+internal sealed record ImportInterruption(BlockDisposition Disposition,bool NewlyPersisted,string Cause);
+
 public sealed class LedgerInstance : IDisposable
 {
     public string Root { get; }
@@ -43,7 +45,8 @@ public sealed class LedgerInstance : IDisposable
         root=Paths.Absolute(root); files ??= new();
         using var lease=new IdentityLease("root:"+Normalize(root));
         Errors.Require(!Directory.Exists(root) || !Directory.EnumerateFileSystemEntries(root).Any(),"RECOVERY_REQUIRED",4,"Existing instance content requires original-identity recovery.");
-        Errors.Require(!File.Exists(root + ".DLDB"),"RECOVERY_REQUIRED",4,"Existing database requires recovery.");
+        Errors.Require(!File.Exists(root + ".DLDB") || new FileInfo(root+".DLDB").Length==0,"RECOVERY_REQUIRED",4,"Existing database requires recovery.");
+        Paths.Safe(root+".DLDB-journal");
         Errors.Require(root.Length + 250 < 32000,"INVALID_ARGUMENT",2,"Root leaves insufficient room for ledger paths.");
         // Check fixed media and platform before creating identity remnants.
         Errors.Require(OperatingSystem.IsWindows(),"DURABILITY_UNCERTAIN",6,"Windows 11 NTFS is the initial durability platform.");
@@ -54,7 +57,7 @@ public sealed class LedgerInstance : IDisposable
     }
     private static void Match(InstanceManifest manifest, SigningIdentity key) => Errors.Require(manifest.InstanceId==key.InstanceId && manifest.PublicKey==Binary.Hex(key.PublicKey),"IDENTITY_MISMATCH",4,"Manifest and signing key do not match.");
     public void Dispose() { identity.Dispose(); identityLease.Dispose(); rootLease.Dispose(); }
-    public void EnsureConfig() => Errors.Require(ConfigError==null,ConfigError ?? "CONFIG_CORRUPT",4,"Configuration requires explicit repair.");
+    public void EnsureConfig() => Errors.Require(ConfigError==null,ConfigError ?? "CONFIG_CORRUPT",ConfigError=="RESOURCE_LIMIT"?5:4,"Configuration requires explicit repair.");
     private ResourceLimits LoadConfig()
     {
         if (!File.Exists(ConfigPath)) return new();
@@ -67,7 +70,7 @@ public sealed class LedgerInstance : IDisposable
             var l=r.GetProperty("limits"); StrictJson.Fields(l,"max_raw_block_bytes","max_decompressed_event_bytes","max_inflight_import_bytes","per_block_timeout_seconds");
             var limits=new ResourceLimits(StrictJson.Integer(l,"max_raw_block_bytes"),StrictJson.Integer(l,"max_decompressed_event_bytes"),StrictJson.Integer(l,"max_inflight_import_bytes"),StrictJson.Integer(l,"per_block_timeout_seconds")); ValidateLimits(limits); return limits;
         }
-        catch (LedgerException e) when (e.Code!="CONFIG_IDENTITY_MISMATCH") { throw new LedgerException("CONFIG_CORRUPT",4,"Malformed or unsupported configuration."); }
+        catch (LedgerException e) when (e.Code is not "CONFIG_IDENTITY_MISMATCH" and not "RESOURCE_LIMIT") { throw new LedgerException("CONFIG_CORRUPT",4,"Malformed or unsupported configuration."); }
     }
     private static void ValidateLimits(ResourceLimits l)
     {
@@ -148,6 +151,7 @@ public sealed class LedgerInstance : IDisposable
         return snapshot;
     }
     public AuthorizationSnapshot Snapshot() => Reclassify(Inventory());
+    internal AuthorizationSnapshot EvaluateRetained() => AuthorizationReplay.Evaluate(Inventory().Select(x=>x.Block),Manifest.Binding);
     public BlockDisposition Import(byte[] raw, out bool duplicate)
     {
         EnsureConfig(); var block=BlockCodec.Parse(raw,Limits);
@@ -158,7 +162,12 @@ public sealed class LedgerInstance : IDisposable
         {
             var path=BlockPath(block,classified.Status!="retained"); files.Publish(path,block.Raw); inventory.Add((block,path));
         }
-        return Reclassify(inventory).Blocks.Single(x=>x.Block.Hash==block.Hash);
+        try { return Reclassify(inventory).Blocks.Single(x=>x.Block.Hash==block.Hash); }
+        catch(Exception e) when(e is LedgerException or IOException or UnauthorizedAccessException)
+        {
+            throw new LedgerException("DURABILITY_UNCERTAIN",6,"Signed bytes are retained, but classification transition needs recovery.",
+                new ImportInterruption(classified,!duplicate,e is LedgerException le?le.Code:"IO_ERROR"));
+        }
     }
     private void Bind(SignedBlock genesis)
     {
@@ -275,6 +284,11 @@ public sealed class LedgerInstance : IDisposable
         {
             Errors.Require(string.Equals(source,keyPath,OperatingSystem.IsWindows()?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal),"INVALID_ARGUMENT",2,"Key-only recovery requires the canonical surviving original key.");
             manifest=new(key.InstanceId,Binary.Hex(key.PublicKey),null);
+            if(File.Exists(manifestPath))
+            {
+                InstanceManifest? current=null; try { current=InstanceManifest.Decode(Paths.ReadBounded(manifestPath,4096,"IDENTITY_MISMATCH")); } catch(LedgerException) { }
+                if(current!=manifest) throw new LedgerException("RECOVERY_REQUIRED",4,"Existing or malformed manifest is conflicting binding evidence.",new { reason="BOUND_OR_CONFLICTING_EVIDENCE" });
+            }
             var allowed=new HashSet<string>(StringComparer.OrdinalIgnoreCase){"signing-key.v1.json","instance.identity.json"};
             var conflicts=Directory.EnumerateFileSystemEntries(root).Where(p=>!allowed.Contains(Path.GetFileName(p))).ToList();
             // Only a complete matching temp manifest is recoverable automatically; unknown remnants are preserved for operator diagnosis.
@@ -288,20 +302,22 @@ public sealed class LedgerInstance : IDisposable
         else
         {
             manifest=InstanceManifest.Decode(Paths.ReadBounded(Path.Combine(source,"instance.identity.json"),4096,"IDENTITY_MISMATCH")); Match(manifest,key);
+            var readableOriginalManifest=false;
             if(File.Exists(manifestPath))
             {
                 InstanceManifest? current=null; try { current=InstanceManifest.Decode(Paths.ReadBounded(manifestPath,4096,"IDENTITY_MISMATCH")); } catch(LedgerException) { }
                 if(current!=null)
                 {
+                    readableOriginalManifest=true;
                     Errors.Require(current.InstanceId==manifest.InstanceId && current.PublicKey==manifest.PublicKey && (manifest.Binding==null || current.Binding==null || current.Binding==manifest.Binding),"IDENTITY_MISMATCH",4,"Backup conflicts with surviving original identity/binding.");
                     if(current.Binding!=null) manifest=current;
                 }
             }
-            if (!File.Exists(manifestPath) && Directory.Exists(Path.Combine(root,"BLK")))
+            if (!readableOriginalManifest && Directory.Exists(Path.Combine(root,"BLK")))
             {
-                Errors.Require(manifest.Binding!=null,"RECOVERY_REQUIRED",4,"Original binding evidence is required for ledger-bearing recovery.");
-                var matching=SafeInventoryFiles(Path.Combine(root,"BLK")).Select(p=>BlockCodec.Parse(Paths.ReadBounded(p,16777216))).Any(b=>b.IsGenesis && b.LedgerId==manifest.Binding!.LedgerId && b.Hash==manifest.Binding.GenesisHash);
-                Errors.Require(matching,"GENESIS_MISMATCH",4,"Original pinned genesis not found.");
+                var geneses=SafeInventoryFiles(Path.Combine(root,"BLK")).Select(p=>BlockCodec.Parse(Paths.ReadBounded(p,16777216))).Where(b=>b.IsGenesis).ToList();
+                if(manifest.Binding==null) Errors.Require(!geneses.Any(b=>Binary.Hex(b.Signer)==manifest.PublicKey),"RECOVERY_REQUIRED",4,"Local original genesis requires binding recovery.");
+                else Errors.Require(geneses.Any(b=>b.LedgerId==manifest.Binding.LedgerId && b.Hash==manifest.Binding.GenesisHash),"GENESIS_MISMATCH",4,"Original pinned genesis not found.");
             }
         }
         if (File.Exists(manifestPath))
@@ -316,7 +332,10 @@ public sealed class LedgerInstance : IDisposable
             else
             {
                 // A corrupt manifest needs surviving original-key evidence before backup replacement.
-                using var original=SigningIdentity.Decode(Paths.ReadBounded(keyPath,4096,"IDENTITY_MISMATCH")); Match(manifest,original);
+                SigningIdentity? original=null;
+                if(File.Exists(keyPath)) try { original=SigningIdentity.Decode(Paths.ReadBounded(keyPath,4096,"IDENTITY_MISMATCH")); } catch(LedgerException) { }
+                if(original!=null) { using(original) Match(manifest,original); }
+                else Errors.Require(!keyOnly,"RECOVERY_REQUIRED",4,"Explicit original backup is required.");
                 files.Move(manifestPath,Path.Combine(root,".uddl-corrupt-manifest-"+Guid.NewGuid().ToString("N")+".tmp"));
             }
         }
@@ -327,7 +346,7 @@ public sealed class LedgerInstance : IDisposable
             if(existing!=null) { using(existing) Match(manifest,existing); }
             else
             {
-                Errors.Require(File.Exists(manifestPath) && InstanceManifest.Decode(Paths.ReadBounded(manifestPath,4096,"IDENTITY_MISMATCH"))==manifest,"IDENTITY_MISMATCH",4,"No surviving original manifest to authenticate key restoration.");
+                Errors.Require(!keyOnly,"RECOVERY_REQUIRED",4,"Explicit original backup is required for corrupt key restoration.");
                 files.Move(keyPath,Path.Combine(root,".uddl-corrupt-key-"+Guid.NewGuid().ToString("N")+".tmp"));
             }
         }

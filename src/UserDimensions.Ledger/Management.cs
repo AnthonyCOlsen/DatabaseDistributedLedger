@@ -15,7 +15,8 @@ public static class Management
             var e=exception as LedgerException ?? (exception is IOException or UnauthorizedAccessException
                 ? new LedgerException("IO_ERROR",6,"Filesystem operation failed: "+exception.Message)
                 : new LedgerException("INTERNAL_ERROR",6,"Internal operation failed."));
-            stdout.Write(JsonSerializer.Serialize(new { ok=false,data=(object?)null,error=new { code=e.Code,message=e.Message,retryable=e.Code is "IO_ERROR" or "DUPLICATE_INSTANCE",details=e.Details } })+"\n");
+            var details=e.Details is ImportInterruption receipt ? new { ledger_guid=receipt.Disposition.Block.LedgerId,block_guid=receipt.Disposition.Block.Id,sha512=receipt.Disposition.Block.Hash,durable=true,reason=receipt.Cause } : e.Details;
+            stdout.Write(JsonSerializer.Serialize(new { ok=false,data=(object?)null,error=new { code=e.Code,message=e.Message,retryable=e.Code is "IO_ERROR" or "DUPLICATE_INSTANCE",details } })+"\n");
             stderr.WriteLine(e.Code+": "+e.Message); return e.ExitCode;
         }
     }
@@ -84,7 +85,7 @@ public static class Management
             return new { operation=op,instance_guid=m.InstanceId,public_key_hex=m.PublicKey,recovered=true,state=m.Binding==null?"unbound":"bound",recovery_kind=keyOnly?"key_only_unbound":"original_backup" };
         }
         if(op is "instance.status" or "status") return Status(a.Root,op);
-        using var instance=LedgerInstance.Open(a.Root); instance.EnsureConfig();
+        using var instance=OpenForOperation(a.Root); instance.EnsureConfig();
         switch(op)
         {
             case "ledger.init": var genesis=instance.InitializeLedger(); return new { operation=op,ledger_guid=genesis.LedgerId,genesis_sha512=genesis.Hash,genesis_block_guid=genesis.Id,durable=true,binding_durable=true };
@@ -114,11 +115,17 @@ public static class Management
             default: throw new LedgerException("INVALID_ARGUMENT",2,"Unknown operation.");
         }
     }
+    private static LedgerInstance OpenForOperation(string root)
+    {
+        try { return LedgerInstance.Open(root); }
+        catch(LedgerException e) when(e.Code is "IDENTITY_MISMATCH" or "SIGNING_IDENTITY_UNAVAILABLE")
+        { throw new LedgerException("RECOVERY_REQUIRED",4,"Original identity must be restored before ordinary processing.",new {reason=e.Code}); }
+    }
     private sealed record ImportResult(int index,Guid? ledger_guid,Guid? block_guid,string? sha512,string status,string reason,string authorization,bool duplicate,bool durable);
     private static object Import(LedgerInstance instance,string path)
     {
         Paths.Safe(path); using var input=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read);
-        var results=new List<ImportResult>(); LedgerException? first=null; long total=1; var committed=0; var duplicates=0; var rejected=0;
+        var results=new List<ImportResult>(); LedgerException? first=null; long total=1; var committed=0; var duplicates=0; var rejected=0; var transitionInterrupted=false;
         void Item(byte[] raw)
         {
             SignedBlock? block=null;
@@ -128,7 +135,17 @@ public static class Management
                 results.Add(new(results.Count,block.LedgerId,block.Id,block.Hash,d.Status,d.Reason,d.Authorization,duplicate,true));
                 if(duplicate) duplicates++; else committed++;
             }
-            catch(LedgerException e) { first ??= e; rejected++; results.Add(new(results.Count,block?.LedgerId,block?.Id,block?.Hash,"rejected",e.Code,"not_evaluated",false,false)); }
+            catch(LedgerException e)
+            {
+                first ??= e;
+                if(e.Details is ImportInterruption receipt)
+                {
+                    transitionInterrupted=true; var d=receipt.Disposition;
+                    results.Add(new(results.Count,d.Block.LedgerId,d.Block.Id,d.Block.Hash,d.Status,d.Reason,d.Authorization,!receipt.NewlyPersisted,true));
+                    if(receipt.NewlyPersisted) committed++; else duplicates++;
+                }
+                else { rejected++; results.Add(new(results.Count,block?.LedgerId,block?.Id,block?.Hash,"rejected",e.Code,"not_evaluated",false,false)); }
+            }
             catch(IOException e) { first ??= new LedgerException("IO_ERROR",6,e.Message); rejected++; results.Add(new(results.Count,block?.LedgerId,block?.Id,block?.Hash,"rejected","IO_ERROR","not_evaluated",false,false)); }
         }
         try
@@ -142,9 +159,17 @@ public static class Management
                 var lengthBytes=new byte[8];
                 for(long i=0;i<total;i++)
                 {
-                    input.ReadExactly(lengthBytes); var size=BinaryPrimitives.ReadUInt64BigEndian(lengthBytes);
-                    Errors.Require(size<=long.MaxValue && size<=(ulong)(input.Length-input.Position),"BAD_FRAME",2,"Truncated/overflowed DDLB record.");
-                    instance.Limits.CheckRaw((long)size); var raw=new byte[(int)size]; input.ReadExactly(raw); Item(raw);
+                    try
+                    {
+                        input.ReadExactly(lengthBytes); var size=BinaryPrimitives.ReadUInt64BigEndian(lengthBytes);
+                        Errors.Require(size<=long.MaxValue && size<=(ulong)(input.Length-input.Position),"BAD_FRAME",2,"Truncated/overflowed DDLB record.");
+                        instance.Limits.CheckRaw((long)size); var raw=new byte[(int)size]; input.ReadExactly(raw); Item(raw);
+                    }
+                    catch(Exception e) when(e is EndOfStreamException or LedgerException)
+                    {
+                        var failure=e as LedgerException ?? new LedgerException("BAD_FRAME",2,"Truncated DDLB record.");
+                        first ??= failure; rejected++; results.Add(new(results.Count,null,null,null,"rejected",failure.Code,"not_evaluated",false,false)); break;
+                    }
                 }
                 Errors.Require(input.Position==input.Length,"BAD_FRAME",2,"Trailing DDLB bytes.");
             }
@@ -152,11 +177,16 @@ public static class Management
         }
         catch(EndOfStreamException) { first ??= new LedgerException("BAD_FRAME",2,"Truncated DDLB framing."); }
         catch(LedgerException e) { first ??= e; }
+        catch(Exception e) when(e is IOException or UnauthorizedAccessException) { first ??= new LedgerException("IO_ERROR",6,"Input I/O failed: "+e.Message); }
         // Earlier/later inputs may have reclassified already accepted variants: report one coherent final snapshot.
         if(committed+duplicates>0)
         {
-            var final=instance.Snapshot().Blocks.ToDictionary(x=>x.Block.Hash,StringComparer.Ordinal);
-            for(var i=0;i<results.Count;i++) if(results[i].durable && final.TryGetValue(results[i].sha512!,out var d)) results[i]=results[i] with {status=d.Status,reason=d.Reason,authorization=d.Authorization};
+            try
+            {
+                var final=(transitionInterrupted?instance.EvaluateRetained():instance.Snapshot()).Blocks.ToDictionary(x=>x.Block.Hash,StringComparer.Ordinal);
+                for(var i=0;i<results.Count;i++) if(results[i].durable && final.TryGetValue(results[i].sha512!,out var d)) results[i]=results[i] with {status=d.Status,reason=d.Reason,authorization=d.Authorization};
+            }
+            catch(Exception e) when(e is LedgerException or IOException or UnauthorizedAccessException) { first ??= e as LedgerException ?? new LedgerException("IO_ERROR",6,"Final classification I/O failed."); }
         }
         var counts=new { results,durable_count=committed,duplicate_count=duplicates,rejected_count=rejected,total_count=total };
         if(first!=null) throw new LedgerException(committed+duplicates>0?"PARTIAL_IMPORT":first.Code,committed+duplicates>0?3:first.ExitCode,"Import did not complete without errors.",new { counts.results,counts.durable_count,counts.duplicate_count,counts.rejected_count,counts.total_count,reason=first.Code });
@@ -165,7 +195,7 @@ public static class Management
     private static object Status(string root,string operation)
     {
         InstanceManifest? manifest=null; var available=false; var authorized=false; var codes=new List<string>(); AuthorizationSnapshot? snapshot=null;
-        var newRoot=!Directory.Exists(root) || !Directory.EnumerateFileSystemEntries(root).Any();
+        var newRoot=(!Directory.Exists(root) || !Directory.EnumerateFileSystemEntries(root).Any()) && (!File.Exists(root+".DLDB") || new FileInfo(root+".DLDB").Length==0);
         try
         {
             if(!newRoot)

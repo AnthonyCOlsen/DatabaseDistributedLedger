@@ -4,6 +4,8 @@ Tests.RunProtocol();
 Tests.RunIdentity();
 Tests.RunIntegration();
 Tests.RunProcesses();
+Tests.RunAdversarial();
+Tests.RunCompressionInterop();
 return Tests.Finish();
 
 internal static partial class Tests
