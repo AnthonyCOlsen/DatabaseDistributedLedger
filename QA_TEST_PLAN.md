@@ -9,8 +9,8 @@
 | Repository location | `QA_TEST_PLAN.md` (repository root; no new folder required) |
 | Maintainer | `Database Distributed Ledger - QA-Tester` |
 | Initial edition | 2026-11-09 |
-| Last QA update | 2026-11-09 (protocol 1.01 / ARCH-009 alignment, revision 2) |
-| Status | Planning; **no ledger-specific QA automated tests executed by this thread** |
+| Last QA update | 2026-11-09 (ARCH-010/ARCH-011 QA-007 planning, revision 3) |
+| Status | Planning and independent ARCH-011 peer review; **no ledger-specific QA automated tests executed by this thread** |
 | Primary references | `Database_Distributed_Ledger_Technical_Design.md`; `SQLite_Architecture_and_Implementation_Plan.md`; `Distributed_Ledger_Management_API_Specification.md`; `README.md` |
 | Baseline | Upstream SQLite 3.54.1 verified with a documented Windows sandbox qualification; **not a ledger-fork QA pass** |
 
@@ -30,12 +30,12 @@ Verify that authenticated independent `.BLK` events are the only authority for o
 1. Signed independent **protocol 1.01 (`0x0101`)** blocks remain exact-byte immutable; each block is not hash-linked. Genesis pins ledger GUID plus **full signed genesis SHA-512**.
 2. Canonical history order, **amended by Owner 2026-11-09**, is `(signed timestamp UTC ms, raw block GUID, raw signer public key)`, ascending. This supersedes signer-first vectors and can change same-timestamp replay interpretation.
 3. Authority comes only from authenticated genesis and canonical `GRANT_MASTER`/two-signature `REVOKE_MASTER`, never mere private-key possession. Late authority changes can invalidate/revalidate earlier applications.
-4. `ABC.DLDB` has same-basename support folder `ABC/` containing `instance.identity.json`, `signing-key.v1.json`, `BLK/`, `STAT/`, and possibly retired `DELn/`. **No `.DLID` and no nested GUID directory.** Identity and pinned ledger/genesis survive projection deletion/rebuild.
+4. `ABC.DLDB` has same-basename support folder `ABC/` containing `instance.identity.json`, `signing-key.v1.json`, `BLK/`, `STAT/`, optional approved `instance.config.json`, and possibly retired `DELn/`. **No `.DLID` and no nested GUID directory.** Identity and pinned ledger/genesis survive projection deletion/rebuild.
 5. SEC-002: every instance (including replica) has its own persisted Ed25519 identity. Owner-approved strict key JSON uses 32-byte seed, AES-256-GCM, 12-byte fresh nonce, 16-byte tag, publicly embedded versioned wrap key, and **88-byte AAD**. This is **obfuscation, not secrecy against a file-holder**.
 6. Under ARCH-003, **missing/corrupt/mismatched existing identity pauses ALL routine SQL and ledger activity**, including SELECT, import/export, relay and replay; only diagnostics/status/explicit original-identity recovery remain. Never silently regenerate or rebind.
 7. A durable acknowledged `.BLK` precedes any official projection effect; only the authenticated projector modifies official `.DLDB`. `.STAT` and `TREE.HASH` are rebuildable/advisory, not authority. Progress and official SQLite effects commit together.
 8. Full replay rotates `STAT/` to next free `DELn/` under the exclusive STAT manager while processing is paused; an external blocking lock prevents replay and is diagnosed/retried; safe retired `DELn/` cleanup is asynchronous.
-9. Historically invalidated `.BLK` may be renamed to local `.XBLK` **without modifying its bytes**; `.XBLK` is excluded from `TREE.HASH`, announcements, ordinary export, serving, and relay. After historical reauthorization it may return to canonical `.BLK` and reenter inventory/propagation. This is **intentional**, not an unresolved defect. Matching active inventories do **not** imply identical local archives.
+9. Historically invalidated or otherwise currently ineligible authenticated `.BLK` may be retained as local `.XBLK` **without modifying its bytes**; `.XBLK` is excluded from `TREE.HASH`, announcements, ordinary export, serving, and relay. After historical reauthorization it may return to canonical `.BLK` and reenter inventory/propagation. This is **intentional**, not an unresolved defect. Matching active inventories do **not** imply identical local archives.
 10. `projection_delay_seconds` is nonnegative, default **0**, and delays only ordinary row/schema projection by signed timestamp/UTC cutoff, not verification, durable retention, or current authorization. SELECT may be locally stale yet consistent. Delay is not finality.
 11. Protocol 1.01 transmits **five SQLite storage classes**: NULL, INTEGER (int64 ZigZag), REAL (binary64), TEXT (length-prefixed UTF-8), and BLOB (length-prefixed bytes). Declared SQLite type **text** is recorded in column definitions, with supported native SQLite affinity/precision semantics. The earlier custom DECIMAL/DATETIME/BOOLEAN/GUID value tags and arbitrary-precision DECIMAL promise are **retired**; do not test for them as active requirements. The signed-block header is `0x0101` while the independent DDLB container version remains `0x0001` and local signing-key JSON version remains 1.
 
@@ -45,19 +45,25 @@ Verify that authenticated independent `.BLK` events are the only authority for o
 
 | ID | Phase | Priority | Automated acceptance objective | State |
 |---|---:|---|---|---|
-| L-01 | 1 | P0 | Independent **1.01 (`0x0101`)** codec: header/offsets, five value classes, declared-type text, SHA-512, Ed25519, strict parsing, LZMA2, malformed/oversized inputs; never decode historical `0x0001` value grammar as 1.01 | P |
+| L-01 | 1 | P0 | Independent **1.01 (`0x0101`)** codec: header/offsets, five value classes, declared-type text, SHA-512, Ed25519, strict parsing, LZMA2, malformed/oversized inputs; reject NaN REAL, accept ±infinity, preserve ±zero raw bits; never decode historical `0x0001` value grammar as 1.01 | P |
 | L-02 | 1 | P0 | Genesis fingerprint pin; canonical grant/revoke history including two-signature revoke; equal-ms **block-GUID-first** order and reversed arrival | P |
 | L-03 | 1 | P0 | Duplicate bytes are idempotent; authenticated conflicting same-identity variants are both retained/quarantined; no first-arrival winner | P |
 | L-04 | 1 | P0 | `.BLK` exact-byte durable publication, failure before acknowledgment, no-overwrite, restart/import/export, truncated DDLB batch and partial import | P |
-| L-05 | 1 | P0 | Approved `ledgerctl` command/flag/JSON envelope/exit-group conformance; negative arguments, partial-import honest outcomes, distinct durable vs applied status, no private-seed leaks | P — strict response details under review |
-| L-06 | 1 | P0 | Independent authorized signing and durable publication of grant/revoke and data/schema blocks; verify same timestamp tie order and authorized signing at canonical position | B — signing/publication test API not identified |
+| L-05 | 1 | P0 | ARCH-010 `ledgerctl` §13 command/flag/JSON envelope/exit-group conformance; errors, partial import, durable/authorization/projection distinction and no private-seed leaks | P — ARCH-011 status/count reconciliation needed |
+| L-06 | 1 | P0 | ARCH-010 `block publish` and independent library event publication; grant/revoke and schema/data events, canonical signing eligibility, exact event bytes and durability | P — API approved; countersign command detail under review |
 | L-07 | 1 | P1 | Calendar-boundary/`OUTOFRANGE` filenames, int64 min/max, reversible signed-bias `T`-hex mapping, complete signed-byte retrieval and sorted path handling | P |
 | K-01 | 1 | P0 | Strict approved key JSON/AAD 88-byte conformance; AES-GCM tag, nonce/ciphertext/metadata mutations, wrong key ID, duplicate JSON properties | P |
 | K-02 | 1 | P0 | New master/replica create unique persistent identity; crash at each initialization file; restart keeps same identity and ledger/genesis binding | P |
-| K-03 | 1+ | P0 | Missing/mismatched/corrupted **manifest/key** triggers `recovery_required`; all ordinary operations denied; original-key restore only | P |
+| K-03 | 1+ | P0 | Missing/mismatched/corrupted **manifest/key** triggers `recovery_required`; all ordinary operations denied; explicit verified same-identity recovery only | P |
 | K-04 | 1+ | P1 | Cross-platform key byte encoding (when platforms accepted), migrations/backup restoration preserving public key and binding; secret-free logs | P |
-| K-05 | 1 | P0 | Interrupted `instance init`, `ledger init` after durable genesis but before binding, and `ledger join` after genesis discovery; explicit same-identity recovery without new genesis or identity | B — exact recovery CLI lifecycle under review |
+| K-05 | 1 | P0 | ARCH-010 `ledger recover-genesis` retries after durable genesis and interrupted manifest binding; checked original identity and no second genesis; separately test ARCH-011 key-only pre-manifest recovery | P — genesis API approved; key-only recovery CLI detail pending |
 | K-06 | 1 | P1 | Same-host duplicate active-identity detection (including concurrent process opens) and safe relocation/collision preflight | P |
+| A-01 | 1 | P0 | ARCH-011 public revocation-consent CLI/library: independent keys, both valid signer/target orientations, exact 149-byte intent, wrong GUID/time/target/signature and authorization failure; do not expose seed | P — exact consent command grammar pending |
+| ST-01 | 1 | P0 | ARCH-011 unique SHA-512 variant accounting incl. genesis and archived `.XBLK`; pending-vs-quarantined mutual exclusion; identity disputes and authorized/no-projector import classifications | P — status/count mapping pending clarification |
+| X-00 | 1 | P0 | ARCH-011 Phase 1 unknown-authority and currently-unauthorized imports classified separately and locally archived as `.XBLK`; late evidence restores qualified original signed bytes to `.BLK`, with no SQL or peer dependency | P — Phase 1 file transition scope pending confirmation |
+| CF-01 | 1 | P0 | `instance.config.json`: missing defaults, durable `config set/get`, version/field validation, corrupt file diagnostic, interrupted atomic publication and unchanged identity/genesis manifest | P — precise JSON/error contract pending |
+| K-07 | 1 | P0 | ARCH-011 key-only interrupted initialization: valid encrypted signing-key file but absent manifest/genesis, explicit operator confirmation, original GUID/public key verification, safe unbound manifest creation and conflict denial | P — CLI confirmation/error detail pending |
+| L-08 | 1 | P0 | Unknown signed protocol rejected as `UNSUPPORTED_VERSION`; no durable retention and `opaque_count=0` in Phase 1; repeated requests leave storage unchanged | P |
 | S-01 | 2 | P0 | Native `sqlite3_prepare*`/`sqlite3_step` supported master mutations yield signed durable blocks or fail closed; **no official `.DLDB` write** | B — Developer Phase 2 |
 | S-02 | 2 | P0 | Replica rejects user DML/DDL; no bypass via alternate supported native API, PRAGMA, ATTACH, BLOB, backup, extension or open mode | B — Developer Phase 2 |
 | S-03 | 2 | P0 | `BEGIN`/rollback/savepoints emit no blocks for rolled-back work; final effective row changes; honest partial publication and `RETURNING` | B — Developer Phase 2 |
@@ -93,7 +99,7 @@ Reference-model fixture (times are illustrative signed timestamps, not runtime c
 
 Add minimal, test-only, production-disabled checkpoints **after each phase handoff** and notify Developer of all changes outside test scripts. Prefer an explicit barrier handshake / externally observable state and bounded status polling over arbitrary sleeps. Recommended hook locations:
 
-- **Phase 1:** before/after key-file and identity-manifest durable publication, genesis `.BLK` durability and manifest-binding commit, and other `.BLK` rename/durable acknowledgment. **No `.DLID` hook.**
+- **Phase 1:** before/after key-file, manifest, and new `instance.config.json` durable publication; key-only recovery confirmation/commit; genesis `.BLK` durability and manifest-binding commit; other `.BLK`/`.XBLK` archive/restoration rename and durable acknowledgment **if ARCH-011 classifications are Phase 1 responsibilities**. **No `.DLID` hook.**
 - **Phase 2:** after SQL provisional evaluation, before/after each block durability/partial COMMIT, before any official projector (which is absent in Phase 2).
 - **Phase 3:** before/after SQLite projection+checkpoint transaction, STAT manager invalidation, `STAT → DELn`, `.BLK ↔ .XBLK` rename, `TREE.HASH` cache invalidation if implemented, read admission and replay completion.
 - **Phase 4:** before/after active-inventory generation/announcement, peer send/receive, reconnect/missing-set reconciliation.
@@ -104,22 +110,42 @@ Each injected process crash is followed by independent file/hash and logical-sta
 
 | ID | Needed before | Item / owner route |
 |---|---|---|
-| O-01 | Phase 1 manifest conformance | Confirm whether §8.4 `instance.identity.json` serialization is Owner-frozen or a proposed implementation-facing schema; finalize strict required/unknown-field behavior — **Designer → Owner** |
-| O-02 | Phase 1 CLI conformance | Approved commands/flags/exit categories exist; finish command-specific JSON field schema, import status for ledger-only instances, export digest and error.details requirements before acceptance — **Designer/Developer/QA** |
+| O-01 | **Closed by ARCH-010** | Exact `instance.identity.json` field grammar and validation Owner-approved (§8.4); QA fixture work remains |
+| O-02 | **Mostly closed by ARCH-010; ARCH-011 follow-up** | Management API §13 defines commands/JSON; reconcile revised pending/quarantined counts and import `status` values (see O-15) |
 | O-03 | Phase 1 `.BLK` platform gate | **OUTOFRANGE fallback specified** (§11); qualify Windows filesystem atomic no-overwrite rename, file+directory durability, path limits and crash acknowledgments — **Developer/QA** |
 | O-04 | Phase 2 gate | Supported native SQLite API/open-mode/mutation rejection matrix and Phase 2 ephemeral evaluation boundary — **Designer/Developer** |
 | O-05 | Phase 2–3 gate | Define supported SQLite native bind/result/expression/schema subset and error mapping; **no custom exact DECIMAL obligation** under 1.01 — **Designer/Developer** |
 | O-06 | Phase 3 gate | `.BLK ↔ .XBLK` no-overwrite, interrupted rename, STAT invalidation and recovery state machine — **Designer/Developer** |
 | O-07 | Phase 3 gate | Projection delay max/serialization, wall-clock jumps, age-pending status, replay/ restart behavior — **Designer/Developer → Owner if material** |
 | O-08 | Phase 4 gate | Inventory binary/cache grammar, consistent-generation guarantees, opaque inclusion, default sync interval and peer protocol — **Designer/Developer** |
-| O-09 | Protocol compatibility | `0x0101` uses new five-class grammar; historical `0x0001` must not be parsed as 1.01. Verify rejection/opaque classification and document that no released migration is owed — **QA/Developer** |
+| O-09 | Phase 1 protocol compatibility | `0x0101` five-class wire; reject historical `0x0001` and unsupported versions as `UNSUPPORTED_VERSION` without durable opaque retention in Phase 1; `opaque_count=0` |
 | O-10 | Later semantic coverage | Competing CREATE/INSERT events with distinct block IDs for the same live entity GUID remain unspecified — **Designer/Owner** |
-| O-11 | Phase 1 grant/revoke gate | Identify supported library/CLI/test-builder entry point for creating and durably publishing authorized **non-genesis** 1.01 signed events; `block publish` not in current Phase 1 CLI list — **Designer/Developer** |
-| O-12 | Phase 1 recovery gate | Specify concrete command sequence and checks for local orphan key/manifest and durable genesis with missing/incomplete binding; differentiate `instance recover --from` and `key restore --directory` — **Designer/Developer** |
-| O-13 | Phase 1 REAL conformance | Reconcile retained old non-finite FLOAT/-0.0 statements with new **SQLite-native REAL** input/output policy and exact wire validity — **Designer/Owner if material** |
-| O-14 | Documentation reconciliation | Remove superseded phrases about `.DLID`, three identity records, unchanged signed-version header, no approved version change, and unfrozen Phase 1 CLI from active sections — **Architect-Designer** |
+| O-11 | **Closed by ARCH-010** | `block publish --event-file` and equivalent independent managed library specified; separate countersign consent workflow in O-16 |
+| O-12 | **Partially closed by ARCH-010** | `ledger recover-genesis` specified for durable genesis/unbound manifest; ARCH-011 key-only interrupted-init workflow still needs CLI details (O-17) |
+| O-13 | **Closed by ARCH-010** | REAL allows infinities, preserves -0 on wire, rejects all NaNs; SQLite-origin NaN becomes NULL at Phase 2 gate |
+| O-14 | ARCH-011 document cleanup | Architect reports planned removal of stale `.DLID`/unchanged-header/OUTOFRANGE language; verify against final ARCH-011 files, not this decision notice alone |
+| O-15 | **Phase 1 acceptance** | Define item `status` and `reason` for valid authorized but nonprojected `.BLK` while `pending_count` excludes waiting for SQLite; define variant-count rules and disputed-identity precedence — **Designer/QA** |
+| O-16 | **Phase 1 acceptance** | Finalize consent CLI/library arguments, exact 149-byte input/output and authorization/error semantics, separate instances with no secret export — **Designer/Developer/QA** |
+| O-17 | **Phase 1 acceptance** | Define in-place key-only recovery command/confirmation, absent genesis/no-manifest checks, conflicting evidence and deterministic errors — **Designer/Developer/QA** |
+| O-18 | **Phase 1 acceptance** | `instance.config.json` exact versioned grammar, atomic replace/failure diagnostics, defaults-vs-corruption error behavior and relevant status/CLI mapping — **Designer/Developer/QA** |
+| O-19 | **Phase 1 acceptance** | Specify Phase 1 `.XBLK` classification/transitions without STAT/projector/TREE.HASH; missing-auth vs known-unauthorized vs disputed variant precedence; never export archived bytes — **Designer/Developer/QA** |
 
 The above are **not all blockers for Phase 1 coding**; each matters at the indicated acceptance gate. The `.XBLK` local-only/no-hash/no-propagation policy is **settled**, not an open question.
+
+## 6A. QA-007 / ARCH-011 independent review and deterministic acceptance additions (2026-11-09)
+
+**Source of these changes:** Owner-approved decisions A–F relayed by Architect. The final ARCH-011 documentation was **not** supplied with the QA-007 notice; exact API/schema text remains subject to review. This section records planned tests and reported approvals, **not execution**.
+
+| Decision | Planned deterministic positive/negative cases | Acceptance boundary |
+|---|---|---|
+| A — Revocation consent | Two distinct, independently initialized Ed25519 identities; target signs as outer or consent signer; verify precise 149-byte intent, exact ledger/block/time/key binding; tampered intent and unauthorized signer fail; private keys never exported | CLI + managed library; Phase 1; consent command exact flags/JSON pending |
+| B — Counts | Count unique full signed-block SHA-512 variants across `.BLK` and `.XBLK`, include genesis, ensure identical bytes not double-counted; distinguish missing-authority pending, currently unauthorized archived quarantine, and disputed same-ID variants | Phase 1; unresolved item `status` / aggregate counter mapping O-15 |
+| C — Unsupported version | `0x0001`, unknown/future signed versions and malformed version bytes report `UNSUPPORTED_VERSION` as applicable, no durable opaque `.BLK`, `opaque_count=0`; valid `0x0101` still accepted | Phase 1; do not require optional future opaque retention |
+| D — Config | Missing `instance.config.json` yields four approved defaults; set/get persists valid values; corrupt/truncated/unsupported JSON produces explicit diagnostic, not silent reset; crash before/after replace yields old or new complete state; manifest and pinned genesis unchanged | Phase 1; exact parser/error contract O-18 |
+| E — Pending/quarantined archives | Missing authority evidence vs known-current-history unauthorized case; both retained exact bytes as local `.XBLK`, no normal get/export/inventory/propagation; late historical evidence rechecks and restores eligible `.BLK` no-overwrite; repeat/crash/restart idempotent | Phase 1 local classification/rename if confirmed O-19; STAT/reprojection Phase 3, network/`TREE.HASH` Phase 4 |
+| F — Key-only recovery | Crash after durable `signing-key.v1.json` but before first manifest/genesis; `instance init` does not silently retry/regenerate; explicit operator confirmation allows same identity to become unbound; conflicting key/ledger/history remnants fail; retry idempotent | Phase 1; confirmed command/confirmation/errors O-17 |
+
+**Critical review notes:** (1) ARCH-010 import `status=pending, reason=AWAITING_PROJECTOR` and ARCH-011 `pending_count` limited to missing authorization must be reconciled explicitly, without asserting a projected `applied` status in Phase 1. (2) The previously approved same-block-GUID differing signed variants remain disputed/quarantined; ARCH-011 uses quarantine also for historically unauthorized `.XBLK`. Define counters and mutually exclusive precedence without suppressing those original dispute rules. (3) No new signed wire grammar, new collision campaign, or mandatory peer/projector work is requested for Phase 1.
 
 ## 7. Evidence and defect-report convention
 
@@ -134,6 +160,8 @@ Severity guidance: **P0/blocker** = unauthorized official effect, lost acknowled
 **2026-11-09 — QA planning:** Reviewed approved SQLite/SEC-002/ARCH-003 designs and PM QA-002 `.XBLK` assignment. Canonical tie order changed to block-GUID-first; implementation phases updated to ledger → SQL interception → projector → peers. Tests in §3 are **planned only**. **No ledger-specific QA tests executed; no defects verified; no source/tests modified by QA.**
 
 **2026-11-09 — ARCH-009 QA plan alignment (revision 2):** Replaced obsolete `.DLID` expectations with manifest-only identity; replaced historical nine-type/exact DECIMAL tests with 1.01 five-class SQLite-native codec; added approved `OUTOFRANGE` and Phase 1 CLI tests, same-host duplicate checks and explicit interrupted-binding recovery. Identified four Phase 1 clarification requests in §6. **Design review only; no code executed or modified.**
+
+**2026-11-09 — ARCH-010/ARCH-011 QA peer review (revision 3):** Accepted ARCH-010 `block publish`, `ledger recover-genesis`, strict manifest, REAL wire rules and CLI §13. Reviewed Owner-approved ARCH-011 decisions A–F, added revocation-consent, status-count, `.XBLK` classification, config durability, unsupported-version and key-only recovery cases. Open acceptance-contract items O-15–O-19 are documentation clarifications, not objections to approved behavior. **No implementation changes, automated tests or fixture runs by QA.**
 
 ### Future run log (append, do not replace past evidence)
 
