@@ -1,5 +1,6 @@
 using UserDimensions.Ledger;
 Tests.RunProtocol();
+Tests.RunIdentity();
 return Tests.Finish();
 
 internal static partial class Tests
