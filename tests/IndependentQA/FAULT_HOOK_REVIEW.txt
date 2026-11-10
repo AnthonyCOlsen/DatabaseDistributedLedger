@@ -1,0 +1,37 @@
+DEV-003 independent QA fault-matrix review — 2026-11-10
+Integration-owned review. The QA-owned original matrix is unchanged. No new production hooks were added.
+Candidate: 5c585cefa59509f9fad8cba55000e374768685b7.
+
+Existing mechanisms
+DurableFiles accepts an explicitly injected Action<string>. Published callbacks are:
+before-write:<filename>, after-flush:<filename>, before-rename:<filename>, after-rename:<filename>, after-publish:<filename>.
+LedgerInstance.InitializeLedger additionally calls genesis-durable-before-binding.
+Default production/CLI paths do not arm a callback. There is no environment-variable fault switch.
+The existing Developer test executable --worker supports init, genesis, config and publish actions, terminating itself with Environment.Exit(77) at a selected callback. Its lease worker has a positive ready-file/release-file handshake. These are Developer mechanisms, not independent QA evidence.
+
+Matrix mapping (all FI cases remain NOT EXECUTED as independent QA in this integration)
+FI-01: after-flush:signing-key.v1.json; existing init worker can terminate here. QA-owned barrier/observer adapter needed for the requested external arm/ack/kill protocol.
+FI-02: after-publish:signing-key.v1.json; existing init worker; same barrier qualification needed.
+FI-03: after-flush:instance.identity.json during LedgerInstance.Recover. Existing library injection supports the boundary, but the Developer worker has no recovery action. Needs a QA test-only adapter/coordination, not necessarily a new production hook.
+FI-04: genesis-durable-before-binding; existing genesis worker. Exact boundary exists; independent observer/kill execution still pending.
+FI-05: after-flush:instance.identity.json during genesis binding; existing genesis worker can select it after initial identity setup.
+FI-06: after-flush:<canonical .BLK filename>; callback exists. Caller must distinguish the requested block from other file operations. CLI library injection is not exposed by the existing production CLI.
+FI-07: no separate callback between final rename and directory-entry durability confirmation. MoveFileExW(WRITE_THROUGH) is one call; before-rename/after-rename cannot truthfully represent an internal intermediate boundary. Developer/QA/Owner coordination required; no new hook added.
+FI-08: after-publish:<.BLK filename> exists before success JSON. A test-only observer can inspect exact durable bytes; independent run pending.
+FI-09: no dedicated Management/DDLB callback after a completed accepted item and before reading the next item. A per-file callback is not a substitute for asserting the exact CLI batch boundary. Needs coordination and authorization before any production hook change.
+FI-10: before-rename:<.XBLK filename>; callback exists. Existing publish worker can match an exact filename. Positive independent barrier adapter pending.
+FI-11: after-rename:<.XBLK filename>; existing publish worker has an archive selector. Developer regression coverage is supporting evidence only.
+FI-12: before-rename:<restored .BLK filename>; existing library callback. Regrant/import operation driver and independent barrier are not supplied by the QA archive.
+FI-13: after-rename:<restored .BLK filename>; existing library callback. Independent restoration driver pending.
+FI-14: after-flush:instance.config.json; existing config worker; positive observer/barrier qualification pending.
+FI-15: no separately observable post-replace/pre-directory-durability boundary; same single-call limitation as FI-07. after-rename is after successful WRITE_THROUGH return, not the requested intermediate checkpoint.
+FI-16: after-flush:<consent output filename>; library callback exists through WriteOutput. Existing worker has no countersign action. Test-only adapter/coordination needed.
+FI-17: existing lease worker supplies a ready/release handshake. Can support independent competing CLI calls without changing production code; full independent case not executed here.
+FI-18: no new hook needed for deliberate isolated key loss/corruption and restart. Supplied CLI suite checks missing-key status and export denial, then restores the original file; that is partial coverage, not all listed command restrictions or key corruption cases.
+FI-19: no new hook needed for isolated config corruption/identity mismatch. Supplied CLI suite checks corrupt JSON diagnostics/get denial/restoration; GUID mismatch and crash cases remain uncovered.
+FI-20: no new hook needed for an isolated preexisting destination/external-lock test. The supplied CLI suite does not implement the full collision/held-path scenario. Preserve bytes and no-overwrite; do not add a random-GUID collision campaign.
+
+Execution distinctions
+Existing callbacks do not by themselves constitute independently executed tests. Adding a QA-owned driver that injects existing callbacks is distinct from changing production hooks, but its exact handshake and oracles must be coordinated with QA. No original QA test, expected result or Developer regression was changed here.
+Process interruption (including Environment.Exit or an external process kill) does not prove physical power-loss, controller-cache or storage-media durability. This review makes no such claim.
+The archive's O-20/O-21/O-22/O-23 schema/authority/backdating/config-precedence questions remain for QA/Architect/PM/Owner; this integration chooses no new normative behavior.

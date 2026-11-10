@@ -1,1 +1,2 @@
 third_party/sqlite/** -text
+tests/IndependentQA/** -text

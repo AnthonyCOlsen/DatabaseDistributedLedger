@@ -1,0 +1,38 @@
+PROJECT CHECKPOINT — 2026-11-10 (America/Chicago)
+Repository: https://github.com/AnthonyCOlsen/DatabaseDistributedLedger
+Local checkout: C:\AnthonyO\32GB_HOME\Development\UserDimensions.DatabaseDistributedLedger
+
+READ THIS FIRST WHEN RESUMING
+This checkpoint preserves the initial independent ledger implementation and its independent QA evidence. The application and supplied QA fixtures implement protocol 1.01, not the newly approved protocol 1.02. Formal Step 1 acceptance has NOT been declared. No Step 2–4 implementation has begun.
+
+CURRENT STATE
+1. Existing C#/.NET 10 implementation: DEV-003 through 5c585cefa59509f9fad8cba55000e374768685b7. Four original implementation commits: 7819201, d025cbb, 151b6d4, 5c585ce.
+2. Latest architecture update already integrated before this checkpoint: b636f0b449abff86f28c95b3f01ba093018b5809 (ARCH-012). It changes the four Architect-owned Markdown documents only, with no accompanying production-code update.
+3. The approved specification is now protocol 1.02 (0x0102): 32-byte original genesis Ed25519 public key as ledger ID instead of a ledger UUID, 163-byte header, 227-byte empty genesis, exact 165-byte DDL-REVOKE-v2 revocation consent, identity manifest Version 2 using ledger_binding.ledger_id_hex. Full signed-genesis SHA-512 trust pin and signature verification remain mandatory. Signing-key JSON Version 1/AAD 88 bytes and DDLB container Version 1 remain separate and unchanged.
+4. Existing production code and independent fixtures still use 1.01/147-byte header/211-byte genesis/149-byte DDL-REVOKE-v1/Version 1 manifest. Do not silently reinterpret or rewrite old signed bytes or claim that old tests validate 1.02.
+
+VERIFIED EVIDENCE (1.01 BASELINE ONLY)
+Developer regression result: 57 scenarios passed, 0 failed. This remains Developer evidence, not independent acceptance.
+Independent Python reference verifier: 26 signed fixture vectors PASS; hashes/signatures, 149-byte consent, 88-byte AES-GCM AAD, raw LZMA2, DDLB, expected negative cases, plus historical Developer evidence ZIP integrity.
+Independent QA candidate CLI suite: Owner executed in an ordinary Windows PowerShell window outside Codex; saved receipt inspected. Exit 0, FINAL PASS, 35 CLI invocations, 46 non-FINAL PASS events, 0 FAIL events. Outer Windows PowerShell 5.1 starts the unchanged QA script under existing PowerShell 7.6.9; .NET SDK 10.0.403/runtime 10.0.14; Windows 10.0.26300.0 and local fixed NTFS.
+Tested candidate commit: 5c585cefa59509f9fad8cba55000e374768685b7.
+Tested ledgerctl.dll SHA-256: 721caa6f896d0712eb591bfd81af36c812325705f8221dbcf617df3320405343.
+Full local receipt: .git/dev-003-work/independent-qa-20261110-104255-ed324b81.
+Review INTEGRATION_RESULTS_20261110.txt and NATIVE_QA_EVIDENCE_20261110.zip. The bundle contains selected receipt/command logs and explicit diagnostic failures, not generated instance files or signing keys. Original eight-file QA package stays together unchanged with its own hash manifest.
+
+IMPORTANT QUALIFICATIONS
+FI-01..FI-20 were reviewed, not independently executed. FAULT_HOOK_REVIEW.txt maps existing callbacks/worker capabilities and gaps. FI-07 and FI-15 lack a distinct post-rename/pre-directory-durability boundary inside the single MoveFileExW(WRITE_THROUGH) operation; FI-09 lacks a dedicated completed-DDLB-item barrier. Positive independently armable barrier coordination is still needed. No new production hook was authorized or added.
+The supplied candidate script does not test all positive value/schema/compression/out-of-range fixtures against the candidate; reference validation of those vectors is not candidate conformance.
+Windows PowerShell 5.1 cannot parse the original UTF-8/no-BOM QA script on this machine. PowerShell 7 executes its unchanged bytes successfully. Any BOM/ASCII correction belongs to QA approval. Original historical QA status files and the Python verifier's fixed old BLOCKED message remain untouched; use the new integration report for current execution results.
+No physical power-loss/controller-cache qualification, cross-platform filesystem acceptance or formal Step 1 approval is claimed. Antivirus settings were not changed; native invocation did not record current antivirus state. No production defect was confirmed by the executed QA suite, but that does not prove the code is defect-free.
+
+RECOMMENDED NEXT ASSIGNMENT
+Obtain/confirm Developer's scoped protocol 1.02/manifest Version 2 implementation assignment against all four current Architect documents. Preserve the reproducible 1.01 baseline and never rewrite authenticated history. QA should independently prepare 1.02 fixtures and acceptance coverage; keep existing 1.01 evidence as historical/regression material. Coordinate approved fault barriers and unresolved authority/backdating/config-priority cases with QA/Architect/PM/Owner. Do not advance Steps 2–4 on the current evidence.
+
+REPRODUCTION AND LOCAL DATA
+INTEGRATION_README.txt describes the independent QA entry point. Its default expected candidate commit is intentionally pinned to 5c585ce; after documentation/checkpoint commits, a historical 1.01 rerun must explicitly select the current Git commit with -ExpectedCommit only after confirming production source is unchanged from the tested baseline. This does not qualify 1.02. A new protocol implementation requires independently updated QA vectors, not a silent fixture reinterpretation.
+Existing Python/PowerShell runtime paths are local hints in .git/dev-003-work/independent-qa-runtimes.json. On a different machine pass -PythonExe/-PowerShellExe explicitly or use installed Python 3 + cryptography/lzma and PowerShell 7. No system-wide software installation was performed.
+Runtime test data, generated nonproduction keys, build caches and full local evidence remain under .git/dev-003-work and are not pushed. Daily notes remain in local-notes/ and are locally excluded via .git/info/exclude. .vs, bin and obj are ignored. Upstream SQLite remains byte-preserved with tree 9e69364cf105a1d38e1d17ee66290967f640f78d matching pristine import cc0dd4a/tag sqlite/upstream-3.54.1.
+The scoped .gitattributes -text rule preserves QA originals byte-for-byte through Git checkout despite the machine's core.autocrlf=true; no assertions or original QA file bytes were changed.
+
+Only QA-Tester, coordinated with PM/Owner, may recommend formal Step 1 QA acceptance. This note requests no implementation while the Owner is away; it records the next work for return.

@@ -1,0 +1,58 @@
+DEV-003 independent QA integration and execution report — 2026-11-10 (America/Chicago)
+Status: integrated; reference verification PASS; candidate ordinary-terminal execution PASS (Owner-run receipt inspected). Full fault-matrix qualification remains outstanding. Formal Step 1 acceptance NOT DECLARED.
+Closeout qualification: Architect commit b636f0b later advances specifications to incompatible protocol 1.02/manifest Version 2, while these results apply only to the tested 1.01 candidate. See RESUME_20261110.txt. NATIVE_QA_EVIDENCE_20261110.zip preserves selected native receipts/command logs and earlier failures without generated signing keys or runtime instances.
+
+PLACEMENT AND SCOPE
+Owner explicitly approved tests/IndependentQA and isolated per-run subdirectories under .git/dev-003-work. All eight supplied files are extracted together, including DEV003-Native-Acceptance(1).zip next to its Python verifier. All eight extraction hashes match ORIGINALS.manifest.json; the first seven also match the earlier incomplete ZIP byte-for-byte.
+Source archive: C:\AnthonyO\Downloads\QA_DEV003_COMPLETE_FRESH_INSTANT_20261110.zip
+Archive SHA-256: 52948d60517882f5a45c4a5399b7870f1ce0382201f49171242628251f50ee23
+Nested Developer acceptance ZIP SHA-256: 87388886a10b5dd92068b0f82f0e0df3b0881fae3feffb07c8cd3623cbfa2bf6
+Fixture SHA-256: 1738ef9ba75c6c6aebbf6c0305fc11f8288eeab20ba57a7c94913b7b2f160f08
+
+Candidate HEAD and origin/main both observed at 5c585cefa59509f9fad8cba55000e374768685b7.
+Existing compiled ledgerctl SHA-256: 721caa6f896d0712eb591bfd81af36c812325705f8221dbcf617df3320405343
+Generated candidate assembly metadata records 1.0.0+5c585cefa59509f9fad8cba55000e374768685b7.
+Host: Microsoft Windows NT 10.0.26300.0, fixed local NTFS, .NET SDK 10.0.403; PowerShell 7.6.9; existing Python 3.12.14 and cryptography 50.0.2. Full dotnet --info output/exit status is retained, including sandbox Service Control Manager access failures. No software installation or antivirus configuration change.
+
+FRESH REFERENCE VERIFICATION
+Executed the original Python file unchanged with its original same-directory Developer ZIP dependency present. Exit 0. PASS: 26 signed fixture vectors, Ed25519 verification, SHA-512, exact 149-byte consent, 88-byte AES-GCM AAD, DDLB framing, raw LZMA2 and expected semantic-negative classifications. Historical Developer ZIP CRC and 57 reported regression passes also checked; those remain Developer supporting evidence, not independent candidate execution.
+The original verifier prints a fixed historical BLOCKED environment message. It is preserved, but does not describe the current Windows host. Reference-results.json continues to state candidate_binary_executed=false, which correctly describes that Python verifier's own scope.
+
+CANDIDATE SANDBOX PREFLIGHT
+Executed original QA_DEV003_WINDOWS_INDEPENDENT_CLI.ps1 unchanged with the existing PowerShell 7 runtime.
+Evidence: C:\AnthonyO\32GB_HOME\Development\UserDimensions.DatabaseDistributedLedger\.git\dev-003-work\independent-qa-20261110-103238-0da80ede
+Run/runner exit 0; FINAL=PASS; 46 non-FINAL PASS events, 0 FAIL events, 35 numbered candidate CLI stdout/stderr pairs. These are event/command counts, not 46 independent test methods or all possible Step 1 cases.
+Covered: explicit identity init/status; defaults; external genesis import/join; exact raw genesis get and one-block DDLB export; grant/event; late two-signature revoke; regrant; same-ID distinct-signer variants; inclusive counters/quarantine/disputes; duplicate idempotence; five bad imports; config set/get/corruption/restoration; missing-key recovery gate/export denial; original-key file restoration. No Developer regression runner executed in this integration.
+Context recorded explicitly as CodexSandboxPreflight. This is NOT the required ordinary-terminal filesystem/locking acceptance run. All stdout, stderr, exit codes, individual results, candidate/dependency hashes, Windows/filesystem metadata and Git errors are retained in that folder.
+The exact handoff launcher was additionally checked using Windows PowerShell 5.1 as outer host with automatic machine-local runtime hints and PowerShell 7 as the unchanged QA script's host: reference PASS, candidate PASS, exit 0. This second preflight receipt is .git/dev-003-work/independent-qa-20261110-104119-fa9b16c6 and remains explicitly sandbox-labeled.
+
+ORDINARY-TERMINAL EXECUTION — COMPLETED BY OWNER, RECEIPT INSPECTED
+Owner ran the supplied command in a normal Windows PowerShell window and returned its output. Evidence folder:
+C:\AnthonyO\32GB_HOME\Development\UserDimensions.DatabaseDistributedLedger\.git\dev-003-work\independent-qa-20261110-104255-ed324b81
+Saved launcher exit-code.txt=0; reference exit 0/PASS; candidate runner exit 0/FINAL PASS; 46 non-FINAL PASS events, 0 FAIL events and 35 CLI stdout/stderr pairs. OrdinaryWindowsPowerShell is recorded as the operator-reported context; the launcher deliberately does not claim it independently proves the security context.
+UTC execution window: 2026-11-10T16:42:55.9737908Z through 16:43:04.4731865Z (10:42:55–10:43:04 America/Chicago).
+Windows 10.0.26300.0, fixed NTFS; outer Windows PowerShell 5.1.26100.9711; unchanged QA script hosted by existing PowerShell 7.6.9. dotnet --info succeeds here with exit 0, SDK 10.0.403 and runtime 10.0.14. Candidate SHA-256 matches the recorded 721caa6f896d0712eb591bfd81af36c812325705f8221dbcf617df3320405343.
+Native Git status succeeds with exit 0 and reports only ?? tests/IndependentQA/; HEAD=origin/main=5c585cefa59509f9fad8cba55000e374768685b7. All eight original QA files and the 36 protected tracked files were rehashed after the run: zero changes. New integration files remain uncommitted. No production instance, signing key, Developer regression or QA-owned plan was changed.
+Actual antivirus state was not supplied in this invocation and is truthfully recorded as not recorded; the launcher does not change antivirus settings. This run satisfies the requested ordinary-terminal suite execution, not the unexecuted FI matrix or formal Step 1 acceptance.
+
+PRESERVED FAILURES AND TRIAGE (nothing relabeled as a product PASS)
+1. Initial extraction was denied by filesystem sandbox parent-directory permissions. No original QA file was created by that attempt; granting the approved existing tests parent resolved creation. The following Python missing-file error from that failed extraction was an infrastructure failure, not a verifier result.
+2. A candidate rebuild attempt failed MSB3202 while resolving ../UserDimensions.Ledger/UserDimensions.Ledger.csproj, although that referenced file exists. The sandbox also denies Git -C access to the repository root. Build output is preserved at .git/dev-003-work/qa-candidate-build-20261110.log. No successful rebuild is claimed; candidate execution used the existing 5c585ce-tagged binary and records its exact SHA-256. No production source was changed to address access restrictions.
+3. independent-qa-20261110-102904-828ba40a: integration launcher command-discovery bug combined two Git executable paths. No QA test executed. Fixed only the integration-owned launcher by selecting one application; original QA files unchanged.
+4. independent-qa-20261110-102940-055d9099: Windows PowerShell script policy prevented loading the QA script; zero candidate commands. Launcher now uses QA's own documented process-scoped -ExecutionPolicy Bypass invocation. No Set-ExecutionPolicy/persistent policy or antivirus change.
+5. independent-qa-20261110-103102-241cb6ed: Windows PowerShell 5.1 parser failed before executing any candidate command. The preserved QA script is UTF-8 without BOM with non-ASCII punctuation. Diagnostic on PowerShell 5.1.26100.9711/code page 1252 gives 4 ParseFile errors, but 0 ParseInput errors when the same bytes are decoded explicitly as UTF-8; PowerShell 7 parses and executes unchanged bytes. Diagnostic retained as .git/dev-003-work/qa-parser-diagnostic.log. Classification: QA harness/host encoding compatibility, not production behavior. Proposed QA-owned correction: add a UTF-8 BOM or use ASCII punctuation for a real 5.1-compatible script, subject to explicit QA/Owner approval. No original modified. PowerShell 7 is the selected supported execution host.
+6. Successful sandbox run still records Git status exit 128; empty stdout is not claimed to mean clean. A separate 36-file raw SHA-256 comparison confirms preexisting tracked non-SQLite files (including production, Developer tests, Architect documents and QA_TEST_PLAN.md) unchanged. Upstream SQLite Git tree remains 9e69364cf105a1d38e1d17ee66290967f640f78d. Integration additions remain uncommitted; no Git history operation/push performed.
+
+OUTSTANDING COVERAGE / CORRECTIONS
+The provided candidate script does not execute all positive numeric/REAL/TEXT/BLOB/schema/LZMA2/out-of-range fixtures against the candidate. Those vectors were independently reference-verified only. Do not infer complete candidate codec coverage from that result. New QA cases/expectation changes belong to QA approval.
+FI-01..FI-20 were reviewed, not independently executed. FAULT_HOOK_REVIEW.txt maps each boundary to existing callbacks/worker capabilities, missing positive handshakes and coordination needs. In particular FI-07 and FI-15 cannot observe a distinct rename-before-directory-confirmation inside the single MoveFileExW(WRITE_THROUGH) call; FI-09 has no dedicated completed-DDLB-item barrier. No new production hook or new durability claim was introduced.
+Missing-key/config cases in the supplied script cover only subsets of FI-18/FI-19. No process-termination result proves physical power-loss/controller-cache/media durability. O-20 through O-23 remain QA/Architect/Owner specification questions.
+No production defect was demonstrated by the executed candidate preflight, and no production correction was applied. The harness encoding finding and unexecuted coverage/durability gaps remain visible; this is not proof that the implementation has no defects.
+
+ORDINARY-TERMINAL HANDOFF
+See INTEGRATION_README.txt for the exact command. Run Invoke-IndependentQA.ps1 from a normal Windows terminal with -RunContext OrdinaryWindowsPowerShell and actual antivirus state. It uses optional local runtime-path hints in .git/dev-003-work/independent-qa-runtimes.json, or explicit -PythonExe/-PowerShellExe. It creates a fresh run folder, never reuses an old instance and does not invoke Developer tests. Return its Evidence path and exit code for inspection.
+Native execution was not automated through the computer-use plugin: its SKILL.md references guidance explicitly stating, "Do not automate terminal applications such as Windows Terminal, Command Prompt, or Windows PowerShell." Available shell tools remain sandboxed. The Owner completed the required ordinary-terminal handoff and its successful receipt is inspected above; no sandbox run is presented as satisfying that requirement. No further user action is required to finish this integration/execution assignment.
+Skill: C:\Users\Tony\.codex\plugins\cache\openai-bundled\computer-use\26.1103.60933\skills\computer-use\SKILL.md
+Guidance: C:\Users\Tony\.codex\plugins\cache\openai-bundled\computer-use\26.1103.60933\docs\guidance.md
+
+Only QA-Tester, coordinated through PM/Owner, may recommend formal Step 1 QA acceptance. No Steps 2–4 work was begun.

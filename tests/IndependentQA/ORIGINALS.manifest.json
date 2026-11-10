@@ -1,0 +1,49 @@
+{
+  "format": "UDDL-INDEPENDENT-QA-IMPORT",
+  "version": 1,
+  "archive_name": "QA_DEV003_COMPLETE_FRESH_INSTANT_20261110.zip",
+  "archive_sha256": "52948d60517882f5a45c4a5399b7870f1ce0382201f49171242628251f50ee23",
+  "original_count": 8,
+  "files": [
+    {
+      "name": "QA_DEV003_WINDOWS_INDEPENDENT_CLI.ps1",
+      "bytes": 10884,
+      "sha256": "16f5db9ba5535b1e42853e918d4c829d6de5eb631b6fc828d8fcceb4fe01c15d"
+    },
+    {
+      "name": "QA_PHASE1_REFERENCE_FIXTURES.json",
+      "bytes": 29757,
+      "sha256": "1738ef9ba75c6c6aebbf6c0305fc11f8288eeab20ba57a7c94913b7b2f160f08"
+    },
+    {
+      "name": "QA_DEV003_OFFLINE_INDEPENDENT_CHECK.py",
+      "bytes": 10352,
+      "sha256": "7cebc94a8e9603dd612d11955e24d709a84bb3e40fa4e2cb037bfa2ac46a80c4"
+    },
+    {
+      "name": "QA_DEV003_OFFLINE_CHECK_RESULTS_RERUN_20261110.json",
+      "bytes": 2259,
+      "sha256": "0acd3ef7d216a858658e5c2df2e9449c9a373615275500db95205c61494e06dc"
+    },
+    {
+      "name": "QA_PHASE1_FAULT_MATRIX_DEV003.md",
+      "bytes": 10271,
+      "sha256": "4ede895c668f459b93cda355541016fccecdfa13f3c8418f7cfaf6e1aaeedde1"
+    },
+    {
+      "name": "QA_DEV003_EXECUTION_STATUS_20261110.md",
+      "bytes": 4004,
+      "sha256": "659662fa74cd60aa0cd6fde4be5b441731397e30860b947d505a6d5b40f783dd"
+    },
+    {
+      "name": "QA_DEV003_NATIVE_QA_README.txt",
+      "bytes": 1891,
+      "sha256": "ae0cb358e326086b6a397016a6f4bee35d84e49dde01eae52d0ea0cfb66de7e9"
+    },
+    {
+      "name": "DEV003-Native-Acceptance(1).zip",
+      "bytes": 2713,
+      "sha256": "87388886a10b5dd92068b0f82f0e0df3b0881fae3feffb07c8cd3623cbfa2bf6"
+    }
+  ]
+}
