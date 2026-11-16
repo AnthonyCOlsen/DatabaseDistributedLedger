@@ -22,7 +22,7 @@ internal static partial class Tests
         });
         Check("manifest strict fields, public identity and binding",()=>
         {
-            var manifest=new InstanceManifest(Guid.NewGuid(),new string('1',64),new(Guid.NewGuid(),new string('2',128)));
+            var manifest=new InstanceManifest(Guid.NewGuid(),new string('1',64),new(new string('3',64),new string('2',128)));
             Assert(InstanceManifest.Decode(manifest.Encode())==manifest);
             Throws("IDENTITY_MISMATCH",()=>InstanceManifest.Decode(Binary.Utf8.GetBytes(Binary.Utf8.GetString(manifest.Encode()).Replace("signing-key.v1.json","../signing-key.v1.json"))));
         });

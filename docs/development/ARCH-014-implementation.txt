@@ -1,0 +1,115 @@
+ARCH-014 / Protocol 1.03 -- Step 1 production implementation
+Date: 2026-11-16
+Documentation baseline: 86e425b7b8e6d752c5fc774a651a31fc86f6fafa
+
+Scope and precedence
+Read the four current root Markdown design documents. Implement the active
+ARCH-014 requirements and Protocol 1.03, superseding historical 1.01/1.02
+contracts. No SQLite, SQL interception, projector, STAT manager or peer service
+changes. This record is a Developer handoff, not an architectural amendment
+or independent QA acceptance.
+
+Previous implementation gaps and resulting production behavior
+
+1. Protocol / ledger identity
+   Replaced the 16-byte UUID ledger ID with the full 32-byte original genesis
+   Ed25519 public key. Signed version is 0x0103, header 163 bytes and empty
+   genesis 227 bytes. Decoder verifies genesis ledger ID equals its signer,
+   payload SHA-512 and Ed25519 signature. Historical signed versions fail
+   UNSUPPORTED_VERSION; no implicit translation or re-signing. Ordinary five
+   value classes, exact REAL bits, raw LZMA2 and DDLB version 1 are preserved.
+
+2. Manifest and stable identity
+   Writes/reads strict instance.identity.json version 2 with ledger_id_hex and
+   the complete signed-genesis SHA-512. Legacy version 1 manifests fail closed;
+   no automatic migration, replacement seed, or altered wrapping key/AAD.
+   Key JSON v1/AAD 88 and config v1 are unchanged. Config raw/in-flight minima
+   are 227. Missing pinned genesis blocks ordinary processing and preserves
+   safely readable binding fields in diagnostic status.
+
+3. Join and interrupted genesis recovery
+   ledger join requires --ledger-id HEX64 --genesis-sha512 HEX128
+   --genesis-file ABS. It verifies raw signed genesis and both independently
+   supplied identifiers in memory before publication, then durably saves the
+   original BLK before atomically binding the existing manifest.
+   recover-genesis accepts the same two trusted identifiers for interrupted
+   creation OR replica join. Local creation derives its ledger ID from its
+   own persisted public key; replica recovery permits a different local key.
+   Matching retries preserve instance GUID, public key, encrypted key record
+   and existing trust pin. Conflicts fail without replacing trust or genesis.
+
+4. Authoring and retry
+   Public Publish and consent APIs expose no caller-supplied time. Ordinary
+   publication takes current UTC internally; explicit GUID retry first verifies
+   retained local signer, ledger and exact event bytes, returning original
+   timestamp/hash/path. Differing bytes return BLOCK_GUID_CONFLICT without
+   archival or overwrite. Temporary/uncertain original publication requires
+   diagnosis before signing another variant. Deterministic authoring helpers
+   and raw block creation are internal to the Developer regression assembly.
+
+5. Two-master revocation
+   A generates GUID and consent UTC, validates both masters, and signs exact
+   165-byte DDL-REVOKE-v3 intent. Output is 229-byte message-plus-signature.
+   B validates that package, creates its own current UTC block with A's GUID,
+   and signs the 137-byte event containing A's consent UTC. Decoder/replay
+   verify both signatures, roles, canonical authorization and checked signed
+   interval 0..900000 ms. Receipt/flush completion time is not an expiry input.
+   Matching already durable B publication returns its original result even
+   after consent expiry. Generic event-file publication rejects revocations.
+
+6. Receive gate, archive and status
+   New unauthorized/unresolved inputs fail before any incoming temporary file,
+   BLK or XBLK write. AUTHORITY_UNRESOLVED is retryable; NOT_AUTHORIZED is not
+   immediately retryable. An unauthorized GUID copy cannot quarantine retained
+   history. Nonidentical authorized GUID reuse also fails without overwrite.
+   Previously accepted history is still canonically reconsidered and moved
+   BLK <-> XBLK when late authority changes applicability. Archive remains
+   excluded from get/export. Counts include retained genesis and historical
+   archives, with disjoint pending/quarantined and reserved disputed/opaque=0.
+   An unexpected archive destination collision preserves both records and
+   requires diagnosis rather than deleting a surviving copy.
+
+7. Bounded batch import and CLI contract
+   Validates bounded volatile batches, sorts candidate processing canonically
+   independent of DDLB order, and durably commits grants before dependent
+   items. Failed prerequisites cannot authorize a persisted dependent. I/O or
+   uncertain durability halts remaining candidate writes pending diagnosis.
+   Results remain in input order with final classifications and retryable
+   fields. Partial failures retain complete per-item results and counts in
+   error.details. JSON/flags now use ledger_id_hex / --ledger-id; former UUID
+   ledger flags and authoring timestamp flags fail before mutation.
+
+Validation
+Command (from PowerShell):
+  & 'C:\AnthonyO\32GB_HOME\Development\UserDimensions.DatabaseDistributedLedger\scripts\build.ps1' -Test
+Environment: Windows NT 10.0.26300.0, PowerShell 7.6.9, .NET SDK 10.0.403.
+Release solution build: 0 warnings, 0 errors.
+Developer regressions: 66 PASS, 0 FAIL; exit code 0.
+Full final output retained locally at:
+  .git/dev-003-work/arch-014-build-regressions-20261116-final.log
+First migration run: 56 PASS / 1 FAIL (local-publication error-code mismatch);
+the production local-authority diagnostic was corrected before final success.
+
+Developer-owned regressions were updated for the explicitly superseding wire,
+CLI and no-incoming-archive requirements. Nine focused ARCH-014 cases add join
+crash/identity preservation, wrong pins, version separation, signed-time bounds,
+ordinary/revocation retry, inverted batch dependencies including failed grant,
+invalid public flags, temporary-publication uncertainty and missing genesis.
+Existing Developer process-interruption, configuration and compression cases
+remain covered. QA-owned suites, fixtures and QA_TEST_PLAN.md were not changed
+or run against rewritten expectations. Native SQLite source was not changed.
+
+Outstanding qualification / operational limits
+- Independent Protocol 1.03 QA and ordinary Windows fault/locking acceptance
+  remain pending QA instructions. Prior 1.01 fixture passes do not certify 1.03.
+- Developer regressions here ran under Codex; they do not establish physical
+  power-loss durability or replace native Windows acceptance outside Codex.
+- Existing durability support remains local Windows fixed NTFS only. Other
+  filesystems/platforms fail DURABILITY_UNCERTAIN pending qualification.
+- Buffered history/batch processing uses conservative configured memory
+  reservations and may require smaller batches or increased limits; it is not
+  an unbounded streaming implementation. Cooperative processing deadlines are
+  not hard real-time preemption of OS I/O or cryptographic calls.
+- Legacy trial manifests/ledgers remain intact and unsupported; deliberate
+  migration is not authorized by this change.
+- Steps 2-4 remain unimplemented. No Step 1 QA acceptance is declared.

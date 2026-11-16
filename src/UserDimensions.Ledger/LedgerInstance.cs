@@ -74,7 +74,7 @@ public sealed class LedgerInstance : IDisposable
     }
     private static void ValidateLimits(ResourceLimits l)
     {
-        Errors.Require(l.MaxRawBlockBytes>=211 && l.MaxDecompressedEventBytes>=1 && l.MaxInflightImportBytes>=211 && l.PerBlockTimeoutSeconds>=1,"INVALID_ARGUMENT",2,"Invalid positive resource limit.");
+        Errors.Require(l.MaxRawBlockBytes>=227 && l.MaxDecompressedEventBytes>=1 && l.MaxInflightImportBytes>=227 && l.PerBlockTimeoutSeconds>=1,"INVALID_ARGUMENT",2,"Invalid positive resource limit.");
         Errors.Require(l.MaxRawBlockBytes<=int.MaxValue && l.MaxDecompressedEventBytes<=int.MaxValue && l.MaxInflightImportBytes<=int.MaxValue && l.PerBlockTimeoutSeconds<=long.MaxValue/1000,"RESOURCE_LIMIT",5,"Requested limit exceeds this buffered implementation's enforceable platform bounds.");
     }
     public object LimitFields() => new { max_raw_block_bytes=Limits.MaxRawBlockBytes, max_decompressed_event_bytes=Limits.MaxDecompressedEventBytes, max_inflight_import_bytes=Limits.MaxInflightImportBytes, per_block_timeout_seconds=Limits.PerBlockTimeoutSeconds };
@@ -92,7 +92,11 @@ public sealed class LedgerInstance : IDisposable
     private List<(SignedBlock Block,string Path)> Inventory()
     {
         EnsureConfig(); var result=new List<(SignedBlock,string)>(); var directory=Path.Combine(Root,"BLK"); long resident=0;
-        if (!Directory.Exists(directory)) return result;
+        if (!Directory.Exists(directory))
+        {
+            Errors.Require(Manifest.Binding==null,"RECOVERY_REQUIRED",4,"Pinned signed genesis storage is missing.");
+            return result;
+        }
         foreach (var path in SafeInventoryFiles(directory))
         {
             var length=new FileInfo(path).Length; Limits.CheckRaw(length);
@@ -105,6 +109,9 @@ public sealed class LedgerInstance : IDisposable
             Errors.Require(resident<=Limits.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Decoded history exceeds configured memory.");
             result.Add((block,path));
         }
+        if(Manifest.Binding is {} binding)
+            Errors.Require(result.Any(x=>x.Item1.IsGenesis && x.Item1.LedgerId==binding.LedgerId && x.Item1.Hash==binding.GenesisHash),
+                "RECOVERY_REQUIRED",4,"The exact pinned signed genesis is missing; preserve the original identity and trust binding.");
         return result;
     }
     private static IEnumerable<string> SafeInventoryFiles(string root)
@@ -141,9 +148,7 @@ public sealed class LedgerInstance : IDisposable
                 if (item.Path==destination) continue;
                 if (File.Exists(destination))
                 {
-                    Errors.Require(Paths.ReadBounded(destination,Limits.MaxRawBlockBytes).AsSpan().SequenceEqual(item.Block.Raw),"OUTPUT_EXISTS",4,"Archive transition conflicts with an existing distinct signed variant.");
-                    // Both complete copies are present and equal. The destination was already durably published.
-                    File.Delete(item.Path);
+                    throw new LedgerException("OUTPUT_EXISTS",4,"Archive transition destination already exists; preserve both records for diagnosis.",new { path=destination });
                 }
                 else files.Move(item.Path,destination);
             }
@@ -157,10 +162,22 @@ public sealed class LedgerInstance : IDisposable
         EnsureConfig(); var block=BlockCodec.Parse(raw,Limits);
         Errors.Require(Manifest.Binding==null || block.LedgerId==Manifest.Binding.LedgerId,"LEDGER_IDENTITY_MISMATCH",4,"Imported block belongs to another ledger.");
         var inventory=Inventory(); duplicate=inventory.Any(x=>x.Block.Hash==block.Hash);
+        if (block.IsGenesis)
+        {
+            Errors.Require(Manifest.Binding==null || Manifest.Binding.GenesisHash==block.Hash,"GENESIS_CONFLICT",4,"Incoming genesis differs from the pinned signed genesis.");
+            Errors.Require(!inventory.Any(x=>x.Block.IsGenesis && x.Block.LedgerId==block.LedgerId && x.Block.Hash!=block.Hash),"GENESIS_CONFLICT",4,"Another signed genesis already exists for this ledger.");
+        }
+        if (duplicate) return Reclassify(inventory).Blocks.Single(x=>x.Block.Hash==block.Hash);
+        // Do not allow an untrusted GUID copy to change the authorization of retained history.
+        var prefix=inventory.Select(x=>x.Block).Where(x=>x.LedgerId==block.LedgerId && x.Id!=block.Id).Append(block);
+        var preflight=AuthorizationReplay.Evaluate(prefix,Manifest.Binding).Blocks.Single(x=>x.Block.Hash==block.Hash);
+        RequireIncomingAuthority(preflight);
+        Errors.Require(!inventory.Any(x=>x.Block.LedgerId==block.LedgerId && x.Block.Id==block.Id),"BLOCK_GUID_CONFLICT",4,"Retained GUID already identifies different signed bytes.");
         var classified=AuthorizationReplay.Evaluate(inventory.Select(x=>x.Block).Append(block),Manifest.Binding).Blocks.Single(x=>x.Block.Hash==block.Hash);
+        RequireIncomingAuthority(classified);
         if (!duplicate)
         {
-            var path=BlockPath(block,classified.Status!="retained"); files.Publish(path,block.Raw); inventory.Add((block,path));
+            var path=BlockPath(block,false); files.Publish(path,block.Raw); inventory.Add((block,path));
         }
         try { return Reclassify(inventory).Blocks.Single(x=>x.Block.Hash==block.Hash); }
         catch(Exception e) when(e is LedgerException or IOException or UnauthorizedAccessException)
@@ -169,6 +186,19 @@ public sealed class LedgerInstance : IDisposable
                 new ImportInterruption(classified,!duplicate,e is LedgerException le?le.Code:"IO_ERROR"));
         }
     }
+    internal BlockDisposition ImportBuffered(byte[] raw,out bool duplicate,long reservedMemory)
+    {
+        var original=Limits;
+        Errors.Require(reservedMemory>=0 && reservedMemory<original.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Batch working memory exhausted.");
+        try { Limits=original with { MaxInflightImportBytes=original.MaxInflightImportBytes-reservedMemory }; return Import(raw,out duplicate); }
+        finally { Limits=original; }
+    }
+    private static void RequireIncomingAuthority(BlockDisposition state)
+    {
+        if(state.Status=="retained" && state.Authorization=="authorized") return;
+        throw new LedgerException(state.Authorization=="pending"?"AUTHORITY_UNRESOLVED":"NOT_AUTHORIZED",4,
+            "Historical authority must be established before any incoming bytes are written.");
+    }
     private void Bind(SignedBlock genesis)
     {
         var next=Manifest with { Binding=new(genesis.LedgerId,genesis.Hash) }; files.Publish(ManifestPath,next.Encode(),true); Manifest=next;
@@ -176,73 +206,134 @@ public sealed class LedgerInstance : IDisposable
     public SignedBlock InitializeLedger()
     {
         EnsureConfig(); Errors.Require(Manifest.Binding==null,"ALREADY_BOUND",4,"Instance already bound.");
-        var inventory=Inventory(); Errors.Require(!inventory.Any(x=>x.Block.IsGenesis && Binary.Hex(x.Block.Signer)==PublicKey),"GENESIS_BINDING_INCOMPLETE",4,"Existing original genesis requires explicit recovery.");
+        var inventory=Inventory(); Errors.Require(!inventory.Any(x=>x.Block.IsGenesis),"GENESIS_BINDING_INCOMPLETE",4,"Existing durable genesis requires explicit creation/join recovery.");
         var priorBlockRoot=Path.Combine(Root,"BLK");
         Errors.Require(!Directory.Exists(priorBlockRoot) || !Directory.EnumerateFileSystemEntries(priorBlockRoot,".uddl-*",SearchOption.AllDirectories).Any(),"RECOVERY_REQUIRED",4,"Unfinished ledger publication artifacts require explicit recovery.");
-        var raw=identity.CreateBlock(Guid.NewGuid(),Guid.NewGuid(),DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),null);
+        var raw=identity.CreateBlock(PublicKey,Guid.NewGuid(),DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),null);
         var genesis=Import(raw,out _).Block; files.Checkpoint("genesis-durable-before-binding"); Bind(genesis); return genesis;
     }
-    public SignedBlock RecoverGenesis(Guid ledger,string hash)
+    public SignedBlock RecoverGenesis(string ledger,string hash)
     {
-        EnsureConfig(); var inventory=Inventory();
+        EnsureConfig(); StrictJson.Hex(ledger,32,"INVALID_ARGUMENT"); StrictJson.Hex(hash,64,"INVALID_ARGUMENT");
+        Errors.Require(Manifest.Binding==null || Manifest.Binding==new LedgerBinding(ledger,hash),"GENESIS_CONFLICT",4,"Existing binding differs; recovery cannot replace trust.");
+        var inventory=Inventory();
+        var selected=inventory.Select(x=>x.Block).Where(b=>b.IsGenesis && b.LedgerId==ledger).DistinctBy(b=>b.Hash).ToList();
+        Errors.Require(selected.Count<=1 && selected.All(b=>b.Hash==hash),"GENESIS_CONFLICT",4,"Retained genesis conflicts with the supplied trust pin.");
         // A fully flushed original genesis temporary file can be explicitly finished, never silently replaced.
         var blockRoot=Path.Combine(Root,"BLK");
         if (Directory.Exists(blockRoot)) foreach (var temporary in Directory.EnumerateFiles(blockRoot,".uddl-*.tmp",SearchOption.AllDirectories))
         {
             SignedBlock candidate;
             try { candidate=BlockCodec.Parse(Paths.ReadBounded(temporary,Limits.MaxRawBlockBytes),Limits); } catch(LedgerException) { continue; }
-            if(!candidate.IsGenesis || candidate.LedgerId!=ledger || candidate.Hash!=hash || Binary.Hex(candidate.Signer)!=PublicKey) continue;
+            if(!candidate.IsGenesis || candidate.LedgerId!=ledger || candidate.Hash!=hash) continue;
             var destination=BlockPath(candidate,false);
             if(!File.Exists(destination)) files.Move(temporary,destination);
         }
         inventory=Inventory();
-        Errors.Require(Manifest.Binding==null || Manifest.Binding==new LedgerBinding(ledger,hash),"GENESIS_MISMATCH",4,"Existing binding differs.");
-        var own=inventory.Select(x=>x.Block).Where(b=>b.IsGenesis && Binary.Hex(b.Signer)==PublicKey).DistinctBy(b=>b.Hash).ToList();
+        var own=inventory.Select(x=>x.Block).Where(b=>b.IsGenesis && b.LedgerId==ledger).DistinctBy(b=>b.Hash).ToList();
         Errors.Require(own.Count<=1,"GENESIS_CONFLICT",4,"Multiple original genesis candidates.");
         var genesis=own.SingleOrDefault(b=>b.LedgerId==ledger && b.Hash==hash);
-        Errors.Require(genesis!=null,"GENESIS_MISMATCH",4,"Matching original signed genesis not found."); Bind(genesis!); return genesis!;
+        Errors.Require(genesis!=null,"GENESIS_MISMATCH",4,"Matching exact signed genesis not found.");
+        if(Manifest.Binding==null) Bind(genesis!); return genesis!;
     }
-    public SignedBlock Join(Guid ledger,string hash)
+    public SignedBlock Join(string ledger,string hash,byte[] rawGenesis)
     {
-        EnsureConfig(); Errors.Require(Manifest.Binding==null || Manifest.Binding==new LedgerBinding(ledger,hash),"ALREADY_BOUND",4,"Instance bound to another ledger/genesis.");
-        var geneses=Inventory().Select(x=>x.Block).Where(b=>b.LedgerId==ledger && b.IsGenesis).DistinctBy(b=>b.Hash).ToList();
-        Errors.Require(geneses.Count==1 && geneses[0].Hash==hash,"GENESIS_MISMATCH",4,"Trusted unique signed genesis is unavailable.");
-        Bind(geneses[0]); Snapshot(); return geneses[0];
+        EnsureConfig(); StrictJson.Hex(ledger,32,"INVALID_ARGUMENT"); StrictJson.Hex(hash,64,"INVALID_ARGUMENT");
+        Errors.Require(Manifest.Binding==null || Manifest.Binding.LedgerId==ledger,"LEDGER_IDENTITY_MISMATCH",4,"Instance is bound to another ledger.");
+        Errors.Require(Manifest.Binding==null || Manifest.Binding.GenesisHash==hash,"GENESIS_CONFLICT",4,"Existing genesis trust pin cannot be replaced.");
+        var genesis=BlockCodec.Parse(rawGenesis,Limits);
+        Errors.Require(genesis.IsGenesis && rawGenesis.Length==227,"BAD_FRAME",2,"Join requires one raw 227-byte genesis.");
+        Errors.Require(genesis.LedgerId==ledger,"LEDGER_IDENTITY_MISMATCH",4,"Supplied ledger ID differs from signed genesis.");
+        Errors.Require(genesis.Hash==hash,"GENESIS_CONFLICT",4,"Supplied full signed-genesis SHA-512 differs.");
+        Import(rawGenesis,out _); files.Checkpoint("genesis-durable-before-binding");
+        if(Manifest.Binding==null) Bind(genesis); Snapshot(); return genesis;
     }
     private LedgerBinding Bound()
     { EnsureConfig(); return Manifest.Binding ?? throw new LedgerException("ALREADY_BOUND",4,"A trusted ledger binding is required."); }
-    public BlockDisposition Publish(byte[] eventBytes, Guid? blockId=null,long? timestamp=null,bool compress=false)
+    public BlockDisposition Publish(byte[] eventBytes, Guid? blockId=null,bool compress=false)
     {
-        var binding=Bound(); var e=EventCodec.Decode(eventBytes);
-        Errors.Require(e.Kind!=0x21 || (blockId!=null && timestamp!=null),"INVALID_ARGUMENT",2,"Revocation requires fixed block GUID and timestamp.");
-        var raw=identity.CreateBlock(binding.LedgerId,blockId ?? Guid.NewGuid(),timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),eventBytes,compress);
-        var candidate=BlockCodec.Parse(raw,Limits); var inventory=Inventory();
-        Errors.Require(!inventory.Any(x=>x.Block.Id==candidate.Id && x.Block.Hash!=candidate.Hash),"BLOCK_ID_DISPUTED",4,"Block GUID conflicts with retained bytes.");
-        var state=AuthorizationReplay.Evaluate(inventory.Select(x=>x.Block).Append(candidate),binding).Blocks.Single(x=>x.Block.Hash==candidate.Hash);
-        Errors.Require(state.Authorization=="authorized" && state.Status=="retained","NOT_AUTHORIZED",4,"Local signer is not authorized at the proposed canonical position.");
+        Bound(); CheckPublicationSize(eventBytes);
+        Errors.Require(EventCodec.Decode(eventBytes).Kind!=0x21,"BAD_EVENT",2,"Revocation requires a signed consent package.");
+        return PublishCore(eventBytes,blockId,DateTimeOffset.UtcNow.ToUnixTimeMilliseconds,compress);
+    }
+    private void CheckPublicationSize(byte[] bytes) => Errors.Require(bytes.LongLength<=Limits.MaxDecompressedEventBytes && bytes.LongLength<=Limits.MaxInflightImportBytes/8,
+        "RESOURCE_LIMIT",5,"Event exceeds configured buffered publication bounds.");
+    private BlockDisposition? ExistingPublication(Guid id,byte[] body)
+    {
+        var binding=Bound();
+        var matches=Inventory().Where(x=>x.Block.LedgerId==binding.LedgerId && x.Block.Id==id).ToList();
+        if(matches.Count==0)
+        {
+            var root=Path.Combine(Root,"BLK");
+            if(Directory.Exists(root)) foreach(var path in Directory.EnumerateFiles(root,".uddl-*.tmp",SearchOption.AllDirectories))
+            {
+                SignedBlock temporary;
+                try { temporary=BlockCodec.Parse(Paths.ReadBounded(path,Limits.MaxRawBlockBytes),Limits); }
+                catch(LedgerException) { throw new LedgerException("RECOVERY_REQUIRED",4,"Incomplete publication evidence requires diagnosis before retry.",new { path }); }
+                Errors.Require(temporary.LedgerId!=binding.LedgerId || temporary.Id!=id,"DURABILITY_UNCERTAIN",6,"Original publication has only temporary bytes; diagnose before signing another variant.");
+            }
+            return null;
+        }
+        Errors.Require(matches.Select(x=>x.Block.Hash).Distinct().Count()==1,"BLOCK_GUID_CONFLICT",4,"Conflicting retained GUID.");
+        var original=matches[0].Block;
+        Errors.Require(Binary.Hex(original.Signer)==PublicKey && !original.IsGenesis && original.EventBytes.AsSpan().SequenceEqual(body),"BLOCK_GUID_CONFLICT",4,"GUID identifies different signed content or signer.");
+        var state=AuthorizationReplay.Evaluate(Inventory().Select(x=>x.Block),binding).Blocks.Single(x=>x.Block.Hash==original.Hash);
+        Errors.Require(state.Status=="retained" && state.Authorization=="authorized","NOT_AUTHORIZED",4,"Previously published block is no longer historically authorized.");
+        // Only a final active file, not an interrupted temporary publication, proves completion.
+        Errors.Require(matches.All(x=>x.Path==BlockPath(original,false)),"RECOVERY_REQUIRED",4,"Publication requires archive/durability reconciliation.");
+        return state;
+    }
+    private BlockDisposition PublishCore(byte[] body,Guid? id,Func<long> utc,bool compress=false)
+    {
+        var binding=Bound(); CheckPublicationSize(body);
+        if(id!=null && ExistingPublication(id.Value,body) is {} original) return original;
+        var raw=identity.CreateBlock(binding.LedgerId,id ?? Guid.NewGuid(),utc(),body,compress);
+        var candidate=BlockCodec.Parse(raw,Limits);
+        var state=AuthorizationReplay.Evaluate(Inventory().Select(x=>x.Block).Where(x=>x.Id!=candidate.Id).Append(candidate),binding).Blocks.Single(x=>x.Block.Hash==candidate.Hash);
+        Errors.Require(state.Status=="retained" && state.Authorization=="authorized","NOT_AUTHORIZED",4,"Local publication requires historically authorized signers.");
         return Import(raw,out _);
     }
-    public (byte[] Signature,byte[] Intent) Countersign(Guid block,long timestamp,byte[] outer,byte[] target)
+    // Deterministic authoring is restricted to the Developer regression assembly.
+    internal BlockDisposition PublishForTesting(byte[] body,Guid? blockId=null,long? timestamp=null,bool compress=false) =>
+        PublishCore(body,blockId,()=>timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),compress);
+
+    public RevocationConsent CreateRevocationConsent(byte[] outer,byte[] target) =>
+        CreateConsent(Guid.NewGuid(),DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),outer,target);
+    private RevocationConsent CreateConsent(Guid id,long time,byte[] outer,byte[] target)
     {
         var binding=Bound(); var local=identity.PublicKey;
-        Errors.Require(!local.AsSpan().SequenceEqual(outer) && (target.AsSpan().SequenceEqual(local) || target.AsSpan().SequenceEqual(outer)),"NOT_AUTHORIZED",4,"Invalid signer/target roles.");
-        var all=Inventory().Select(x=>x.Block).ToList();
-        var disputes=all.GroupBy(x=>x.Id).Where(g=>g.Select(x=>x.Hash).Distinct().Count()>1).Select(g=>g.Key).ToHashSet();
-        Errors.Require(all.Where(x=>x.IsGenesis).DistinctBy(x=>x.Hash).Count()==1,"AUTHORITY_UNRESOLVED",4,"Unique trusted genesis is required.");
-        var prefix=all.Where(x=>!disputes.Contains(x.Id) && (x.Timestamp<timestamp || (x.Timestamp==timestamp && (Binary.CompareGuid(x.Id,block)<0 || (x.Id==block && x.Signer.AsSpan().SequenceCompareTo(outer)<0)))));
+        Errors.Require(outer.Length==32 && target.Length==32 && !local.AsSpan().SequenceEqual(outer) &&
+            (target.AsSpan().SequenceEqual(local) || target.AsSpan().SequenceEqual(outer)),"BAD_EVENT",2,"Invalid signer/target roles.");
+        var prefix=Inventory().Select(x=>x.Block).Where(x=>x.Timestamp<time ||
+            (x.Timestamp==time && (Binary.CompareGuid(x.Id,id)<0 || (x.Id==id && x.Signer.AsSpan().SequenceCompareTo(outer)<0))));
         var snapshot=AuthorizationReplay.Evaluate(prefix,binding);
         Errors.Require(snapshot.AuthorizedKeys.Contains(PublicKey) && snapshot.AuthorizedKeys.Contains(Binary.Hex(outer)),
-            all.Any(x=>Binary.Hex(x.Signer)==Binary.Hex(outer))?"NOT_AUTHORIZED":"AUTHORITY_UNRESOLVED",4,"Both distinct signers must be authorized at the proposed position.");
-        var intent=Signing.RevocationIntent(binding.LedgerId,block,timestamp,outer,target,local); return (identity.Sign(intent),intent);
+            "NOT_AUTHORIZED",4,"Both distinct signers must be currently authorized to prepare consent.");
+        var intent=Signing.RevocationIntent(binding.LedgerId,id,time,outer,target,local);
+        return new(binding.LedgerId,id,time,outer.ToArray(),target.ToArray(),local,identity.Sign(intent));
     }
-    private Guid SelectLedger(Guid? requested, IReadOnlyList<BlockDisposition> all)
+    internal RevocationConsent CreateConsentForTesting(Guid id,long time,byte[] outer,byte[] target) => CreateConsent(id,time,outer,target);
+    public BlockDisposition PublishRevocationConsent(byte[] package) => PublishConsent(package,DateTimeOffset.UtcNow.ToUnixTimeMilliseconds);
+    internal BlockDisposition PublishConsentForTesting(byte[] package,long time) => PublishConsent(package,()=>time);
+    private BlockDisposition PublishConsent(byte[] package,Func<long> utc)
+    {
+        var binding=Bound(); var consent=RevocationConsent.Parse(package);
+        Errors.Require(consent.LedgerId==binding.LedgerId,"LEDGER_IDENTITY_MISMATCH",4,"Consent names another ledger.");
+        Errors.Require(Binary.Hex(consent.OuterSigner)==PublicKey,"BAD_EVENT",2,"Consent names another outer signer.");
+        var body=EventCodec.Encode(new(0x21,PublicKey:consent.Target,Countersigner:consent.Countersigner,
+            Countersignature:consent.Signature,ConsentTimestamp:consent.Timestamp));
+        if(ExistingPublication(consent.BlockId,body) is {} original) return original;
+        var time=utc(); RevocationConsent.CheckInterval(time,consent.Timestamp);
+        return PublishCore(body,consent.BlockId,()=>time);
+    }
+    private string SelectLedger(string? requested, IReadOnlyList<BlockDisposition> all)
     {
         if (Manifest.Binding!=null)
         { Errors.Require(requested==null || requested==Manifest.Binding.LedgerId,"LEDGER_IDENTITY_MISMATCH",4,"Requested ledger differs from binding."); return Manifest.Binding.LedgerId; }
-        if (requested!=null) return requested.Value;
-        var ids=all.Select(x=>x.Block.LedgerId).Distinct().ToList(); Errors.Require(ids.Count==1,"AMBIGUOUS_LEDGER",4,"Select an explicit ledger GUID."); return ids[0];
+        if (requested!=null) { StrictJson.Hex(requested,32,"INVALID_ARGUMENT"); return requested; }
+        var ids=all.Select(x=>x.Block.LedgerId).Distinct().ToList(); Errors.Require(ids.Count==1,"AMBIGUOUS_LEDGER",4,"Select an explicit ledger ID."); return ids[0];
     }
-    public SignedBlock Get(Guid id,Guid? ledger=null,string? hash=null)
+    public SignedBlock Get(Guid id,string? ledger=null,string? hash=null)
     {
         var snapshot=Snapshot(); var selected=SelectLedger(ledger,snapshot.Blocks); var matching=snapshot.Blocks.Where(x=>x.Block.LedgerId==selected && x.Block.Id==id).ToList();
         if (hash!=null)
@@ -254,7 +345,7 @@ public sealed class LedgerInstance : IDisposable
         var b=matching.SingleOrDefault(x=>x.Status=="retained" && (hash==null || x.Block.Hash==hash));
         Errors.Require(b!=null,"BLOCK_NOT_FOUND",4,"Active block not found."); return b!.Block;
     }
-    public (Guid LedgerId,List<SignedBlock> Blocks) SelectExport(Guid? ledger=null,Guid? id=null,string? hash=null,long? from=null,long? to=null)
+    public (string LedgerId,List<SignedBlock> Blocks) SelectExport(string? ledger=null,Guid? id=null,string? hash=null,long? from=null,long? to=null)
     {
         Errors.Require((hash==null || id!=null) && (id==null || (from==null && to==null)) && (from==null || to==null || from<=to),"INVALID_ARGUMENT",2,"Incompatible export filters.");
         var snapshot=Snapshot(); var selected=SelectLedger(ledger,snapshot.Blocks);

@@ -80,7 +80,7 @@ public sealed record ColumnDefinition(Guid Id, string Name, string DeclaredType,
 public sealed record RowField(Guid ColumnId, LedgerValue Value);
 public sealed record LedgerEvent(byte Kind, Guid TableId = default, Guid EntityId = default, string? Name = null,
     IReadOnlyList<RowField>? Fields = null, IReadOnlyList<ColumnDefinition>? Columns = null,
-    byte[]? PublicKey = null, byte[]? Countersigner = null, byte[]? Countersignature = null);
+    byte[]? PublicKey = null, byte[]? Countersigner = null, byte[]? Countersignature = null, long ConsentTimestamp = 0);
 
 public static class EventCodec
 {
@@ -108,7 +108,9 @@ public static class EventCodec
             case 0x14: e = new(kind, c.Guid(), c.Guid()); break;
             case 0x15: e = new(kind, c.Guid(), c.Guid(), c.Text()); break;
             case 0x20: e = new(kind, PublicKey: c.Bytes(32)); break;
-            case 0x21: e = new(kind, PublicKey: c.Bytes(32), Countersigner: c.Bytes(32), Countersignature: c.Bytes(64)); break;
+            case 0x21:
+                var target = c.Bytes(32); var counter = c.Bytes(32); var consentTime = BinaryPrimitives.ReadInt64BigEndian(c.Bytes(8));
+                e = new(kind, PublicKey: target, Countersigner: counter, Countersignature: c.Bytes(64), ConsentTimestamp: consentTime); break;
             default: throw new LedgerException("BAD_EVENT", 2, "Unsupported event kind.");
         }
         c.End(); return e;
@@ -122,7 +124,7 @@ public static class EventCodec
             case 1: var v = c.Var(); return LedgerValue.Integer(unchecked((long)(v >> 1) ^ -((long)v & 1)));
             case 2:
                 var bits = BinaryPrimitives.ReadInt64BigEndian(c.Bytes(8)); var d = BitConverter.Int64BitsToDouble(bits);
-                Errors.Require(!double.IsNaN(d), "BAD_EVENT", 2, "REAL NaN is invalid in protocol 1.01."); return LedgerValue.Real(d);
+                Errors.Require(!double.IsNaN(d), "BAD_EVENT", 2, "REAL NaN is invalid in protocol 1.03."); return LedgerValue.Real(d);
             case 3: return LedgerValue.Text(c.Text());
             case 4: return LedgerValue.Blob(c.Bytes(c.Count()));
             default: throw new LedgerException("BAD_EVENT", 2, "Unsupported value tag.");
@@ -154,7 +156,7 @@ public static class EventCodec
                 Id(e.TableId); Errors.Require(e.Columns?.Count == 1, "BAD_EVENT", 2, "One column definition required."); WriteColumn(s, e.Columns![0]); break;
             case 0x15: Id(e.TableId); Id(e.EntityId); Binary.WriteText(s, e.Name ?? ""); break;
             case 0x20: s.Write(e.PublicKey ?? []); break;
-            case 0x21: s.Write(e.PublicKey ?? []); s.Write(e.Countersigner ?? []); s.Write(e.Countersignature ?? []); break;
+            case 0x21: s.Write(e.PublicKey ?? []); s.Write(e.Countersigner ?? []); Binary.WriteI64(s, e.ConsentTimestamp); s.Write(e.Countersignature ?? []); break;
             default: throw new LedgerException("BAD_EVENT", 2, "Unsupported event kind.");
         }
         var bytes = s.ToArray(); Decode(bytes); return bytes;
@@ -185,14 +187,14 @@ public static class Signing
     public static byte[] Sign(byte[] seed, byte[] message) { var sig = new byte[64]; Ed25519.Sign(seed, 0, message, 0, message.Length, sig, 0); return sig; }
     public static bool Verify(byte[] key, byte[] message, byte[] signature)
     { try { return key.Length == 32 && signature.Length == 64 && Ed25519.Verify(signature, 0, key, 0, message, 0, message.Length); } catch (ArgumentException) { return false; } }
-    public static byte[] RevocationIntent(Guid ledger, Guid block, long time, byte[] outer, byte[] target, byte[] counter)
+    public static byte[] RevocationIntent(string ledger, Guid block, long time, byte[] outer, byte[] target, byte[] counter)
     {
         Errors.Require(outer.Length == 32 && target.Length == 32 && counter.Length == 32, "BAD_EVENT", 2, "Revocation key length.");
-        using var s = new MemoryStream(); s.Write("DDL-REVOKE-v1"u8); s.Write(Binary.GuidBytes(ledger)); s.Write(Binary.GuidBytes(block)); Binary.WriteI64(s, time); s.Write(outer); s.Write(target); s.Write(counter); return s.ToArray();
+        using var s = new MemoryStream(); s.Write("DDL-REVOKE-v3"u8); s.Write(StrictJson.Hex(ledger,32,"INVALID_ARGUMENT")); s.Write(Binary.GuidBytes(block)); Binary.WriteI64(s, time); s.Write(outer); s.Write(target); s.Write(counter); return s.ToArray();
     }
 }
 
-public sealed record SignedBlock(Guid LedgerId, Guid Id, long Timestamp, byte[] Signer, byte Compression,
+public sealed record SignedBlock(string LedgerId, Guid Id, long Timestamp, byte[] Signer, byte Compression,
     LedgerEvent? Event, byte[] EventBytes, byte[] Raw)
 {
     public string Hash => Binary.Sha512(Raw);
@@ -203,12 +205,14 @@ public sealed record SignedBlock(Guid LedgerId, Guid Id, long Timestamp, byte[] 
 
 public static class BlockCodec
 {
-    public static byte[] Create(Guid ledger, Guid block, long timestamp, byte[] seed, byte[]? eventBytes, bool compress = false)
+    // Deterministic serialization/signing is internal; normal publication APIs choose their own UTC time.
+    internal static byte[] Create(string ledger, Guid block, long timestamp, byte[] seed, byte[]? eventBytes, bool compress = false)
     {
-        Errors.Require(ledger != Guid.Empty && block != Guid.Empty, "BAD_FRAME", 2, "Zero block/ledger identity.");
+        var ledgerBytes = StrictJson.Hex(ledger,32,"INVALID_ARGUMENT");
+        Errors.Require(block != Guid.Empty, "BAD_FRAME", 2, "Zero block identity.");
         if (eventBytes != null) EventCodec.Decode(eventBytes);
         var payload = eventBytes == null ? [] : compress ? Lzma2.Encode(eventBytes) : eventBytes;
-        using var s = new MemoryStream(); s.Write([1, 1]); s.Write(Binary.GuidBytes(ledger)); s.Write(Binary.GuidBytes(block)); Binary.WriteI64(s, timestamp);
+        using var s = new MemoryStream(); s.Write([1, 3]); s.Write(ledgerBytes); s.Write(Binary.GuidBytes(block)); Binary.WriteI64(s, timestamp);
         s.Write(Signing.PublicKey(seed)); s.Write(SHA512.HashData(payload)); Binary.WriteU64(s, (ulong)payload.Length); s.WriteByte(eventBytes != null && compress ? (byte)1 : (byte)0); s.Write(payload);
         var message = s.ToArray(); s.Write(Signing.Sign(seed, message)); return s.ToArray();
     }
@@ -216,25 +220,27 @@ public static class BlockCodec
     {
         limits ??= new(); limits.CheckRaw(raw.Length); var watch = Stopwatch.StartNew();
         Errors.Require(raw.Length >= 2, "BAD_FRAME", 2, "Truncated version.");
-        Errors.Require(raw[0] == 1 && raw[1] == 1, "UNSUPPORTED_VERSION", 2, "Only signed protocol 1.01 is supported.");
-        Errors.Require(raw.Length >= 211, "BAD_FRAME", 2, "Truncated envelope.");
-        var length = BinaryPrimitives.ReadUInt64BigEndian(raw.AsSpan(138, 8));
-        Errors.Require(length == (ulong)(raw.Length - 211), "BAD_FRAME", 2, "Payload length mismatch.");
-        var ledger = new Guid(raw.AsSpan(2, 16), true); var id = new Guid(raw.AsSpan(18, 16), true);
-        Errors.Require(ledger != Guid.Empty && id != Guid.Empty, "BAD_FRAME", 2, "Zero ledger/block GUID.");
-        var timestamp = BinaryPrimitives.ReadInt64BigEndian(raw.AsSpan(34, 8)); var key = raw.AsSpan(42, 32).ToArray(); var payload = raw.AsSpan(147, (int)length).ToArray();
-        Errors.Require(CryptographicOperations.FixedTimeEquals(SHA512.HashData(payload), raw.AsSpan(74, 64)), "HASH_MISMATCH", 2, "Transmitted payload hash mismatch.");
+        Errors.Require(raw[0] == 1 && raw[1] == 3, "UNSUPPORTED_VERSION", 2, "Only signed protocol 1.03 is supported.");
+        Errors.Require(raw.Length >= 227, "BAD_FRAME", 2, "Truncated envelope.");
+        var length = BinaryPrimitives.ReadUInt64BigEndian(raw.AsSpan(154, 8));
+        Errors.Require(length == (ulong)(raw.Length - 227), "BAD_FRAME", 2, "Payload length mismatch.");
+        var ledger = Binary.Hex(raw.AsSpan(2, 32)); var id = new Guid(raw.AsSpan(34, 16), true);
+        Errors.Require(id != Guid.Empty, "BAD_FRAME", 2, "Zero block GUID.");
+        var timestamp = BinaryPrimitives.ReadInt64BigEndian(raw.AsSpan(50, 8)); var key = raw.AsSpan(58, 32).ToArray(); var payload = raw.AsSpan(163, (int)length).ToArray();
+        Errors.Require(CryptographicOperations.FixedTimeEquals(SHA512.HashData(payload), raw.AsSpan(90, 64)), "HASH_MISMATCH", 2, "Transmitted payload hash mismatch.");
         Errors.Require(Signing.Verify(key, raw.AsSpan(0, raw.Length - 64).ToArray(), raw[^64..]), "BAD_SIGNATURE", 2, "Invalid Ed25519 block signature.");
-        var compression = raw[146]; Errors.Require(compression <= 1 && (length != 0 || compression == 0), "BAD_FRAME", 2, "Unsupported compression/genesis.");
+        var compression = raw[162]; Errors.Require(compression <= 1 && (length != 0 || compression == 0), "BAD_FRAME", 2, "Unsupported compression/genesis.");
         var bytes = compression == 1 ? Lzma2.Decode(payload, limits, watch) : payload;
         Errors.Require(bytes.LongLength <= limits.MaxDecompressedEventBytes, "RESOURCE_LIMIT", 5, "Decoded event exceeds limit.");
         Errors.Require(watch.Elapsed.TotalSeconds <= limits.PerBlockTimeoutSeconds, "PROCESSING_TIMEOUT", 5, "Block processing deadline exceeded.");
         var e = length == 0 ? null : EventCodec.Decode(bytes);
+        if (e == null) Errors.Require(ledger == Binary.Hex(key), "LEDGER_IDENTITY_MISMATCH", 4, "Genesis signer must equal the full ledger ID.");
         Errors.Require(watch.Elapsed.TotalSeconds <= limits.PerBlockTimeoutSeconds, "PROCESSING_TIMEOUT", 5, "Event processing deadline exceeded.");
         if (e?.Kind == 0x21)
         {
             Errors.Require(!key.AsSpan().SequenceEqual(e.Countersigner) && (key.AsSpan().SequenceEqual(e.PublicKey) || e.Countersigner!.AsSpan().SequenceEqual(e.PublicKey)), "BAD_EVENT", 2, "Invalid revocation signer roles.");
-            Errors.Require(Signing.Verify(e.Countersigner!, Signing.RevocationIntent(ledger, id, timestamp, key, e.PublicKey!, e.Countersigner!), e.Countersignature!), "BAD_SIGNATURE", 2, "Invalid revocation consent.");
+            RevocationConsent.CheckInterval(timestamp, e.ConsentTimestamp);
+            Errors.Require(Signing.Verify(e.Countersigner!, Signing.RevocationIntent(ledger, id, e.ConsentTimestamp, key, e.PublicKey!, e.Countersigner!), e.Countersignature!), "BAD_SIGNATURE", 2, "Invalid revocation consent.");
         }
         return new(ledger, id, timestamp, key, compression, e, bytes, raw.ToArray());
     }

@@ -133,19 +133,19 @@ public static class StrictJson
     public static byte[] Write(object value) => Binary.Utf8.GetBytes(JsonSerializer.Serialize(value) + "\n");
 }
 
-public sealed record LedgerBinding(Guid LedgerId, string GenesisHash);
+public sealed record LedgerBinding(string LedgerId, string GenesisHash);
 public sealed record InstanceManifest(Guid InstanceId, string PublicKey, LedgerBinding? Binding)
 {
-    public byte[] Encode() => StrictJson.Write(new { format = "UDDL-INSTANCE-IDENTITY", version = 1, instance_guid = InstanceId.ToString("D"), public_key_hex = PublicKey,
-        key_file = "signing-key.v1.json", ledger_binding = Binding == null ? null : new { ledger_guid = Binding.LedgerId.ToString("D"), genesis_sha512 = Binding.GenesisHash } });
+    public byte[] Encode() => StrictJson.Write(new { format = "UDDL-INSTANCE-IDENTITY", version = 2, instance_guid = InstanceId.ToString("D"), public_key_hex = PublicKey,
+        key_file = "signing-key.v1.json", ledger_binding = Binding == null ? null : new { ledger_id_hex = Binding.LedgerId, genesis_sha512 = Binding.GenesisHash } });
     public static InstanceManifest Decode(byte[] bytes)
     {
         using var doc = StrictJson.Parse(bytes); var r = doc.RootElement;
         StrictJson.Fields(r, "format", "version", "instance_guid", "public_key_hex", "key_file", "ledger_binding");
-        Errors.Require(StrictJson.Text(r,"format") == "UDDL-INSTANCE-IDENTITY" && StrictJson.Integer(r,"version") == 1 && StrictJson.Text(r,"key_file") == "signing-key.v1.json", "IDENTITY_MISMATCH", 4, "Unsupported manifest format.");
+        Errors.Require(StrictJson.Text(r,"format") == "UDDL-INSTANCE-IDENTITY" && StrictJson.Integer(r,"version") == 2 && StrictJson.Text(r,"key_file") == "signing-key.v1.json", "IDENTITY_MISMATCH", 4, "Unsupported manifest format; legacy identities require explicit coordination, never automatic migration.");
         var id = StrictJson.Uuid(StrictJson.Text(r,"instance_guid")); var key = StrictJson.Text(r,"public_key_hex"); StrictJson.Hex(key,32);
         var b = r.GetProperty("ledger_binding"); LedgerBinding? binding = null;
-        if (b.ValueKind != JsonValueKind.Null) { StrictJson.Fields(b,"ledger_guid","genesis_sha512"); var hash = StrictJson.Text(b,"genesis_sha512"); StrictJson.Hex(hash,64); binding = new(StrictJson.Uuid(StrictJson.Text(b,"ledger_guid")), hash); }
+        if (b.ValueKind != JsonValueKind.Null) { StrictJson.Fields(b,"ledger_id_hex","genesis_sha512"); var hash = StrictJson.Text(b,"genesis_sha512"); StrictJson.Hex(hash,64); var ledger=StrictJson.Text(b,"ledger_id_hex"); StrictJson.Hex(ledger,32); binding = new(ledger, hash); }
         return new(id,key,binding);
     }
 }
@@ -157,7 +157,7 @@ public sealed class SigningIdentity(Guid instanceId, byte[] seed) : IDisposable
     public Guid InstanceId { get; } = instanceId;
     public byte[] PublicKey => Signing.PublicKey(seed);
     public byte[] Sign(byte[] message) => Signing.Sign(seed, message);
-    internal byte[] CreateBlock(Guid ledger, Guid block, long timestamp, byte[]? body, bool compress = false) => BlockCodec.Create(ledger, block, timestamp, seed, body, compress);
+    internal byte[] CreateBlock(string ledger, Guid block, long timestamp, byte[]? body, bool compress = false) => BlockCodec.Create(ledger, block, timestamp, seed, body, compress);
     public void Dispose() => CryptographicOperations.ZeroMemory(seed);
     public static byte[] Aad(Guid id, byte[] key)
     {

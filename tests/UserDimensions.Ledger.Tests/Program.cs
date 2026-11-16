@@ -6,6 +6,7 @@ Tests.RunIntegration();
 Tests.RunProcesses();
 Tests.RunAdversarial();
 Tests.RunCompressionInterop();
+Tests.RunArch014();
 return Tests.Finish();
 
 internal static partial class Tests
@@ -33,13 +34,13 @@ internal static partial class Tests
             Assert(Binary.Hex(sig) == "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b");
             Assert(Signing.Verify(Signing.PublicKey(seed), [], sig));
         });
-        var ledger = Guid.NewGuid(); var id = Guid.NewGuid();
-        Check("211-byte genesis offsets and timestamp extremes", () =>
+        var ledger = Binary.Hex(Signing.PublicKey(seed)); var id = Guid.NewGuid();
+        Check("227-byte genesis offsets and timestamp extremes", () =>
         {
             foreach (var timestamp in new[] { long.MinValue, -1L, 0L, long.MaxValue })
             {
                 var raw = BlockCodec.Create(ledger, id, timestamp, seed, null); var b = BlockCodec.Parse(raw);
-                Assert(raw.Length == 211 && raw[0] == 1 && raw[1] == 1 && raw[146] == 0);
+                Assert(raw.Length == 227 && raw[0] == 1 && raw[1] == 3 && raw[162] == 0);
                 Assert(b.IsGenesis && b.Timestamp == timestamp && b.LedgerId == ledger && b.Id == id);
                 var bad = raw.ToArray(); bad[0] = 0; Throws("UNSUPPORTED_VERSION", () => BlockCodec.Parse(bad));
                 bad = raw.ToArray(); bad[^1] ^= 1; Throws("BAD_SIGNATURE", () => BlockCodec.Parse(bad));
@@ -80,13 +81,13 @@ internal static partial class Tests
             Throws("BAD_EVENT", () => Lzma2.Decode(packed.Concat(new byte[]{0}).ToArray(),new()));
             Throws("RESOURCE_LIMIT", () => Lzma2.Decode(packed,new(MaxDecompressedEventBytes:100)));
         });
-        Check("149-byte countersigning binds all intent fields", () =>
+        Check("165-byte countersigning binds all intent fields", () =>
         {
             var other = Enumerable.Repeat((byte)7,32).ToArray(); var outer = Signing.PublicKey(seed); var counter = Signing.PublicKey(other);
-            var intent = Signing.RevocationIntent(ledger,id,33,outer,counter,counter); Assert(intent.Length == 149);
-            var e = new LedgerEvent(0x21,PublicKey:counter,Countersigner:counter,Countersignature:Signing.Sign(other,intent));
+            var intent = Signing.RevocationIntent(ledger,id,33,outer,counter,counter); Assert(intent.Length == 165);
+            var e = new LedgerEvent(0x21,PublicKey:counter,Countersigner:counter,Countersignature:Signing.Sign(other,intent),ConsentTimestamp:33);
             var raw = BlockCodec.Create(ledger,id,33,seed,EventCodec.Encode(e)); Assert(BlockCodec.Parse(raw).Event!.Kind == 0x21);
-            Throws("BAD_SIGNATURE", () => BlockCodec.Parse(BlockCodec.Create(ledger,id,34,seed,EventCodec.Encode(e))));
+            Throws("BAD_SIGNATURE", () => BlockCodec.Parse(BlockCodec.Create(ledger,Guid.NewGuid(),34,seed,EventCodec.Encode(e))));
         });
     }
 }

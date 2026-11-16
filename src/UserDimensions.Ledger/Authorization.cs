@@ -11,9 +11,9 @@ public static class AuthorizationReplay
         foreach (var ledger in input.DistinctBy(b => b.Hash).GroupBy(b => b.LedgerId))
         {
             var blocks = SignedBlock.Ordered(ledger).ToList();
-            var disputes = blocks.GroupBy(b => b.Id).Where(g => g.Count() > 1).Select(g => g.Key).ToHashSet();
+            Errors.Require(!blocks.GroupBy(b => b.Id).Any(g => g.Count() > 1),"BLOCK_GUID_CONFLICT",4,"Retained GUID has conflicting signed bytes; preserve records for explicit diagnosis.");
             var geneses = blocks.Where(b => b.IsGenesis).ToList();
-            var genesis = geneses.Count == 1 && !disputes.Contains(geneses[0].Id) ? geneses[0] : null;
+            var genesis = geneses.Count == 1 ? geneses[0] : null;
             if (binding != null && (binding.LedgerId != ledger.Key || genesis?.Hash != binding.GenesisHash)) genesis = null;
             var authorized = new HashSet<string>(StringComparer.Ordinal); var everAuthorized = new HashSet<string>(StringComparer.Ordinal);
             var provisional = new List<(SignedBlock Block, bool Valid, bool HistoricallyAuthorized, string[] Required)>();
@@ -21,7 +21,7 @@ public static class AuthorizationReplay
             {
                 var signer = Binary.Hex(block.Signer); var required = block.Event?.Kind == 0x21 ? new[] { signer, Binary.Hex(block.Event.Countersigner!) } : new[] { signer };
                 var historicallyAuthorized = block == genesis || (!block.IsGenesis && required.All(authorized.Contains));
-                var valid = !disputes.Contains(block.Id) && historicallyAuthorized;
+                var valid = historicallyAuthorized;
                 provisional.Add((block, valid, historicallyAuthorized, required));
                 if (!valid) continue;
                 if (block == genesis) { authorized.Add(signer); everAuthorized.Add(signer); }
@@ -31,7 +31,7 @@ public static class AuthorizationReplay
             foreach (var (block, valid, historicallyAuthorized, required) in provisional)
             {
                 var auth = historicallyAuthorized ? "authorized" : required.All(everAuthorized.Contains) ? "unauthorized" : "pending";
-                if (disputes.Contains(block.Id) || (block.IsGenesis && block != genesis)) result.Add(new(block,"quarantined",auth,disputes.Contains(block.Id)?"BLOCK_ID_DISPUTED":"GENESIS_CONFLICT"));
+                if (block.IsGenesis && block != genesis) result.Add(new(block,"quarantined",auth,"GENESIS_CONFLICT"));
                 else if (valid) result.Add(new(block,"retained","authorized","AUTHORIZED_RETAINED"));
                 else if (auth == "pending") result.Add(new(block,"pending","pending","PENDING_AUTHORITY"));
                 else result.Add(new(block,"quarantined","unauthorized","UNAUTHORIZED_AT_POSITION"));

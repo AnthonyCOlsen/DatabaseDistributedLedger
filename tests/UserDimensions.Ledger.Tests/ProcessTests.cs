@@ -19,7 +19,7 @@ internal static partial class Tests
             using var instance=LedgerInstance.Open(args[1],fault);
             if(args[0]=="genesis") instance.InitializeLedger();
             if(args[0]=="config") instance.Configure("max_raw_block_bytes",8000);
-            if(args[0]=="publish") instance.Publish(File.ReadAllBytes(args[3]),Guid.Parse(args[4]),long.Parse(args[5],System.Globalization.CultureInfo.InvariantCulture));
+            if(args[0]=="publish") instance.PublishForTesting(File.ReadAllBytes(args[3]),Guid.Parse(args[4]),long.Parse(args[5],System.Globalization.CultureInfo.InvariantCulture));
         }
         return 0;
     }
@@ -80,10 +80,10 @@ internal static partial class Tests
             using(var instance=LedgerInstance.Open(root))
             {
                 var g=instance.InitializeLedger(); time=g.Timestamp+200;
-                instance.Publish(EventCodec.Encode(new(0x20,PublicKey:Signing.PublicKey(seed))),timestamp:g.Timestamp+100);
+                instance.PublishForTesting(EventCodec.Encode(new(0x20,PublicKey:Signing.PublicKey(seed))),timestamp:g.Timestamp+100);
                 data=BlockCodec.Parse(BlockCodec.Create(g.LedgerId,Guid.NewGuid(),g.Timestamp+300,seed,EventCodec.Encode(new(0x11,Guid.NewGuid())))); instance.Import(data.Raw,out _);
                 var counter=Signing.PublicKey(seed); var intent=Signing.RevocationIntent(g.LedgerId,revId,time,Convert.FromHexString(instance.PublicKey),counter,counter);
-                eventBytes=EventCodec.Encode(new(0x21,PublicKey:counter,Countersigner:counter,Countersignature:Signing.Sign(seed,intent)));
+                eventBytes=EventCodec.Encode(new(0x21,PublicKey:counter,Countersigner:counter,Countersignature:Signing.Sign(seed,intent),ConsentTimestamp:time));
             }
             var input=Path.Combine(Scratch,"process-revoke.event"); File.WriteAllBytes(input,eventBytes);
             ExpectCrash("publish",root,"archive",input,revId.ToString("D"),time.ToString(System.Globalization.CultureInfo.InvariantCulture));
