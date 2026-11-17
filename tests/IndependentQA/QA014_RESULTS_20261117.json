@@ -1,0 +1,479 @@
+{
+  "format": "UDDL-QA014-CHECKPOINT",
+  "selected_repository_commit": "00b54475aef34181ce9f9290c0080aa9974d45de",
+  "production_revision": "8bc96f0f513faac57c1db23a8189288479d8a992",
+  "candidate_sha256": "a7b9c642bdb3939d7a705692778457dab4c12ecc22bb18cb397f487046905cf8",
+  "ledger_sha256": "71b5fadbd96a1dfed90e2290c2f2c9b62484cb017645419456535bcd13d55aa3",
+  "preflight_evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa014-20261117-131118-36f5684b",
+  "preflight_selection": "NewOnly",
+  "preflight_counts": {
+    "PASS": 4,
+    "FAIL": 4,
+    "BLOCKED": 0,
+    "NOT-RUN": 30
+  },
+  "preflight_exit_code": 1,
+  "reference_counts": {
+    "PASS": 76,
+    "FAIL": 0
+  },
+  "native_status": "COMPLETED_RECEIPTS_VERIFIED",
+  "native_evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa014-20261117-132749-e11315c1",
+  "native_counts": {
+    "PASS": 34,
+    "FAIL": 4,
+    "BLOCKED": 0,
+    "NOT-RUN": 0
+  },
+  "planned_targeted_cases": 38,
+  "existing_reused_assertions": 30,
+  "new_contract_cases": 8,
+  "preflight_cases": [
+    {
+      "id": "ARCH-RETRY-quarantined",
+      "status": "FAIL",
+      "detail": "Expected BLOCK_ARCHIVED, exit 4, retryable:false; Required error.details schema absent/different; Original historical publication metadata absent/different; Required current classification schema absent/different; Current archived classification/path/retention reason absent/different; Required no-new-publication/no-mutation flags absent/different"
+    },
+    {
+      "id": "ARCH-RESTORE-quarantined",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "ARCH-RETRY-pending",
+      "status": "FAIL",
+      "detail": "Expected BLOCK_ARCHIVED, exit 4, retryable:false; Required error.details schema absent/different; Original historical publication metadata absent/different; Required current classification schema absent/different; Current archived classification/path/retention reason absent/different; Required no-new-publication/no-mutation flags absent/different"
+    },
+    {
+      "id": "ARCH-RESTORE-pending",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "ARCH-RETRY-revocation",
+      "status": "FAIL",
+      "detail": "Expected BLOCK_ARCHIVED, exit 4, retryable:false; Required error.details schema absent/different; Original historical publication metadata absent/different; Required current classification schema absent/different; Current archived classification/path/retention reason absent/different; Required no-new-publication/no-mutation flags absent/different"
+    },
+    {
+      "id": "ARCH-RESTORE-revocation",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "JOIN-LEGACY-GENESIS",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "INTEGRITY-STATE-CONTRACT",
+      "status": "FAIL",
+      "detail": "block get: expected RECOVERY_REQUIRED/4, details.reason LEDGER_HISTORY_CORRUPT; block export: expected RECOVERY_REQUIRED/4, details.reason LEDGER_HISTORY_CORRUPT; block publish: expected RECOVERY_REQUIRED/4, details.reason LEDGER_HISTORY_CORRUPT; block import: expected RECOVERY_REQUIRED/4, details.reason LEDGER_HISTORY_CORRUPT"
+    },
+    {
+      "id": "JOIN-01",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "JOIN-SUBSTITUTION",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "JOIN-NEG-wrong-id",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "JOIN-NEG-wrong-pin",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "JOIN-NEG-bad-signature",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "JOIN-NEG-truncated",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "JOIN-NEG-ddlb",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "WIRE-NEG-legacy_0001",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "WIRE-NEG-legacy_0101",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "WIRE-NEG-legacy_0102",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "ORDER-01",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "AUTH-NO-WRITE-CALLBACKS",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "AUTH-01",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "AUTH-02",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "AUTH-03",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "PUB-01",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "PUB-02",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "REV-EXPIRED-RETRY",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "BATCH-ORDER-False",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "BATCH-ORDER-True",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "BATCH-FAILED-GRANT",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "BATCH-MIXED",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "DDLB-truncated",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "DDLB-trailing",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "DDLB-overflow",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "DDLB-zero",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "EXPORT-01",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "EXPORT-02",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "IDENTITY-missing",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    },
+    {
+      "id": "IDENTITY-corrupt",
+      "status": "NOT-RUN",
+      "detail": "Not selected in NewOnly preflight"
+    }
+  ],
+  "implementation_findings": [
+    {
+      "id": "QA014-D01",
+      "cases": [
+        "ARCH-RETRY-quarantined",
+        "ARCH-RETRY-pending",
+        "ARCH-RETRY-revocation"
+      ],
+      "expected": "BLOCK_ARCHIVED/4 with Management 13.3.1 details",
+      "observed": "NOT_AUTHORIZED/4; required details absent",
+      "production_fix_applied": false
+    },
+    {
+      "id": "QA014-D02",
+      "cases": [
+        "INTEGRITY-STATE-CONTRACT"
+      ],
+      "expected": "RECOVERY_REQUIRED/4; reason LEDGER_HISTORY_CORRUPT for retained-history fault",
+      "observed": "HASH_MISMATCH/2 for get/export/publish/import",
+      "production_fix_applied": false
+    }
+  ],
+  "qa_plan_archive": "QA_TEST_PLAN_PRE_QA014_20261109.md",
+  "qa_plan_archive_sha256": "4bdc5d76e30d7bbd4acd3d6bbda3c23ee369c0d2686e41540880a6a13d4fa367",
+  "historical_counts_rewritten": false,
+  "FI07_original": "REPLACED/NOT EXECUTED",
+  "FI07_replacement": "PASS (QA-012 historical software evidence)",
+  "FI15_original": "REPLACED/NOT EXECUTED",
+  "FI15_replacement": "PASS (QA-012 historical software evidence)",
+  "FI09_live_result": "NOT OBSERVED; Owner-approved paired evidence",
+  "QA013_automatic_peer_repair": "DEFERRED TO STEP 4 / NOT RUN",
+  "production_modified": false,
+  "developer_regressions_modified": false,
+  "architect_documents_modified": false,
+  "physical_power_loss_proven": false,
+  "formal_step1_acceptance": "NOT_DECLARED",
+  "native_context": "OrdinaryWindowsPowerShell",
+  "native_reference_counts": {
+    "PASS": 76,
+    "FAIL": 0
+  },
+  "native_exit_code": 1,
+  "native_cases": [
+    {
+      "id": "JOIN-01",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "JOIN-SUBSTITUTION",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "JOIN-NEG-wrong-id",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "JOIN-NEG-wrong-pin",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "JOIN-NEG-bad-signature",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "JOIN-NEG-truncated",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "JOIN-NEG-ddlb",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "WIRE-NEG-legacy_0001",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "WIRE-NEG-legacy_0101",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "WIRE-NEG-legacy_0102",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "ORDER-01",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "AUTH-NO-WRITE-CALLBACKS",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "AUTH-01",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "AUTH-02",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "AUTH-03",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "PUB-01",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "PUB-02",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "REV-EXPIRED-RETRY",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "BATCH-ORDER-False",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "BATCH-ORDER-True",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "BATCH-FAILED-GRANT",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "BATCH-MIXED",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "DDLB-truncated",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "DDLB-trailing",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "DDLB-overflow",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "DDLB-zero",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "EXPORT-01",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "EXPORT-02",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "IDENTITY-missing",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "IDENTITY-corrupt",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "ARCH-RETRY-quarantined",
+      "status": "FAIL",
+      "detail": "Expected BLOCK_ARCHIVED, exit 4, retryable:false; Required error.details schema absent/different; Original historical publication metadata absent/different; Required current classification schema absent/different; Current archived classification/path/retention reason absent/different; Required no-new-publication/no-mutation flags absent/different"
+    },
+    {
+      "id": "ARCH-RESTORE-quarantined",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "ARCH-RETRY-pending",
+      "status": "FAIL",
+      "detail": "Expected BLOCK_ARCHIVED, exit 4, retryable:false; Required error.details schema absent/different; Original historical publication metadata absent/different; Required current classification schema absent/different; Current archived classification/path/retention reason absent/different; Required no-new-publication/no-mutation flags absent/different"
+    },
+    {
+      "id": "ARCH-RESTORE-pending",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "ARCH-RETRY-revocation",
+      "status": "FAIL",
+      "detail": "Expected BLOCK_ARCHIVED, exit 4, retryable:false; Required error.details schema absent/different; Original historical publication metadata absent/different; Required current classification schema absent/different; Current archived classification/path/retention reason absent/different; Required no-new-publication/no-mutation flags absent/different"
+    },
+    {
+      "id": "ARCH-RESTORE-revocation",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "JOIN-LEGACY-GENESIS",
+      "status": "PASS",
+      "detail": "Assertions satisfied"
+    },
+    {
+      "id": "INTEGRITY-STATE-CONTRACT",
+      "status": "FAIL",
+      "detail": "block get: expected RECOVERY_REQUIRED/4, details.reason LEDGER_HISTORY_CORRUPT; block export: expected RECOVERY_REQUIRED/4, details.reason LEDGER_HISTORY_CORRUPT; block publish: expected RECOVERY_REQUIRED/4, details.reason LEDGER_HISTORY_CORRUPT; block import: expected RECOVERY_REQUIRED/4, details.reason LEDGER_HISTORY_CORRUPT"
+    }
+  ],
+  "native_failed_cases": [
+    "ARCH-RETRY-quarantined",
+    "ARCH-RETRY-pending",
+    "ARCH-RETRY-revocation",
+    "INTEGRITY-STATE-CONTRACT"
+  ],
+  "native_validation_receipt": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa014-20261117-132749-e11315c1\\QA014-receipt-validation.json",
+  "native_command_receipts_verified": 198,
+  "native_environment": {
+    "os": "Microsoft Windows NT 10.0.26300.0",
+    "powershell": "7.6.9",
+    "filesystem": {
+      "format": "NTFS",
+      "drive_type": "Fixed"
+    },
+    "antivirus_changed": false
+  },
+  "unresolved_specification": [
+    "Stale OPEN archived-retry paragraph is superseded by approved 13.3.1",
+    "Exact history recovery_codes/key-availability display choices are not fully enumerated; no invented extra mapping asserted"
+  ],
+  "security_acceptance_documentation": "QA-Tester/PM verify required Windows backend and Owner/Security qualification records; no new hardware certification requirement or formal acceptance is inferred"
+}

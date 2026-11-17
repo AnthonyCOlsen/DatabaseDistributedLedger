@@ -13,6 +13,7 @@ formal Step 1 acceptance or of support on an untested platform.
 | QA-011 | Invoke-QA011.ps1; QA011_REPORT.md | Focused verification on 8bc96f0: 10 PASS, 0 FAIL, 3 BLOCKED, including the corrected DDLB join error and actual batch callbacks. |
 | QA-012 | Invoke-QA012.ps1; QA012_REPORT.md; QA012_PORTABILITY.md | Observable publication/configuration qualification: 11 PASS, 0 FAIL. Original inside-OS checkpoints NOT EXECUTED. Includes a read-only portability assessment. |
 | QA-013 | Invoke-QA013.ps1; QA013_REPORT.md; QA013_COVERAGE.md | File-content corruption: reference 12 PASS; Windows candidate 22 PASS, 0 FAIL, 2 policy checks BLOCKED. This is not physical-storage/power-loss certification. |
+| QA-014 | Invoke-QA014.ps1; QA014_REPORT.md; root QA_TEST_PLAN.md | Final affected Step 1 regression: reference 76 PASS; Windows candidate 34 PASS, 4 FAIL, 0 BLOCKED, 0 NOT-RUN. Two current implementation defects remain. Owner-authorized plan consolidation preserves historical counts. |
 
 The eight originals in ORIGINALS.manifest.json, Invoke-IndependentQA.ps1 and the
 20261110 integration/evidence files are **historical Protocol 1.01** artifacts.
@@ -64,7 +65,9 @@ No Linux/macOS support or formal acceptance is claimed by this directory.
   tests. They must never be used for real ledgers. Live/generated identity, key and
   configuration files are excluded from Git.
 
-QA013_TEST_PLAN_PROPOSAL.md is an **unapproved proposal for QA review**, not a change
-to the root QA_TEST_PLAN.md or to approved acceptance expectations. BLOCKED and
-SPEC-PENDING findings remain visible rather than being recast as PASS. QA-Tester,
-coordinated through PM/Owner, retains formal acceptance authority.
+QA013_TEST_PLAN_PROPOSAL.md preserves the original QA-013 proposal. The Owner later
+authorized consolidation through QA-014 into the root QA_TEST_PLAN.md, including
+current integrity phase boundaries and approved fault-evidence dispositions. The
+complete prior plan is archived as QA_TEST_PLAN_PRE_QA014_20261109.md. Earlier blocked
+or failed outcomes are retained; updated acceptance dispositions are recorded
+separately. QA-Tester, coordinated through PM/Owner, retains formal acceptance authority.
