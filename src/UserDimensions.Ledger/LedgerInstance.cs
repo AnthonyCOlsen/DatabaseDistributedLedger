@@ -241,6 +241,7 @@ public sealed class LedgerInstance : IDisposable
         EnsureConfig(); StrictJson.Hex(ledger,32,"INVALID_ARGUMENT"); StrictJson.Hex(hash,64,"INVALID_ARGUMENT");
         Errors.Require(Manifest.Binding==null || Manifest.Binding.LedgerId==ledger,"LEDGER_IDENTITY_MISMATCH",4,"Instance is bound to another ledger.");
         Errors.Require(Manifest.Binding==null || Manifest.Binding.GenesisHash==hash,"GENESIS_CONFLICT",4,"Existing genesis trust pin cannot be replaced.");
+        Errors.Require(!rawGenesis.AsSpan().StartsWith("DDLB"u8),"BAD_FRAME",2,"Join requires raw signed genesis bytes, not a DDLB transport wrapper.");
         var genesis=BlockCodec.Parse(rawGenesis,Limits);
         Errors.Require(genesis.IsGenesis && rawGenesis.Length==227,"BAD_FRAME",2,"Join requires one raw 227-byte genesis.");
         Errors.Require(genesis.LedgerId==ledger,"LEDGER_IDENTITY_MISMATCH",4,"Supplied ledger ID differs from signed genesis.");

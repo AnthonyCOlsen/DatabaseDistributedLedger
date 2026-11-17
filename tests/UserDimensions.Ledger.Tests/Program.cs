@@ -7,6 +7,7 @@ Tests.RunProcesses();
 Tests.RunAdversarial();
 Tests.RunCompressionInterop();
 Tests.RunArch014();
+Tests.RunQa010Resolution();
 return Tests.Finish();
 
 internal static partial class Tests

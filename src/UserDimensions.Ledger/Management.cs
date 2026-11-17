@@ -7,9 +7,12 @@ namespace UserDimensions.Ledger;
 /// <summary>The finite Phase 1 CLI contract; also callable in-process without starting SQLite.</summary>
 public static class Management
 {
-    public static int Run(string[] args, TextWriter stdout, TextWriter stderr)
+    public static int Run(string[] args, TextWriter stdout, TextWriter stderr) => Run(args,stdout,stderr,null);
+
+    /// <summary>Explicit dependency injection for test-only fault observation. The CLI uses the three-argument overload with no callbacks.</summary>
+    public static int Run(string[] args, TextWriter stdout, TextWriter stderr, DurableFiles? files)
     {
-        try { var data=Execute(args); stdout.Write(JsonSerializer.Serialize(new { ok=true,data,error=(object?)null })+"\n"); return 0; }
+        try { var data=Execute(args,files); stdout.Write(JsonSerializer.Serialize(new { ok=true,data,error=(object?)null })+"\n"); return 0; }
         catch(Exception exception)
         {
             var e=exception as LedgerException ?? (exception is IOException or UnauthorizedAccessException
@@ -75,18 +78,18 @@ public static class Management
             return long.Parse(text,CultureInfo.InvariantCulture);
         }
     }
-    private static object Execute(string[] rawArgs)
+    private static object Execute(string[] rawArgs,DurableFiles? files)
     {
         var a=new Arguments(rawArgs); var op=a.Command;
-        if(op=="instance.init") { var m=LedgerInstance.Initialize(a.Root); return new { operation=op,instance_guid=m.InstanceId,public_key_hex=m.PublicKey,instance_root=a.Root,durable=true }; }
+        if(op=="instance.init") { var m=LedgerInstance.Initialize(a.Root,files); return new { operation=op,instance_guid=m.InstanceId,public_key_hex=m.PublicKey,instance_root=a.Root,durable=true }; }
         if(op=="instance.recover" || op=="key.restore")
         {
-            var keyOnly=a.Get("confirm-unbound-initialization")!=null; var m=LedgerInstance.Recover(a.Root,a.Need(op=="instance.recover"?"from":"directory"),keyOnly);
+            var keyOnly=a.Get("confirm-unbound-initialization")!=null; var m=LedgerInstance.Recover(a.Root,a.Need(op=="instance.recover"?"from":"directory"),keyOnly,files);
             if(op=="key.restore") return new { operation=op,instance_guid=m.InstanceId,public_key_hex=m.PublicKey,restored=true,state=m.Binding==null?"unbound":"bound" };
             return new { operation=op,instance_guid=m.InstanceId,public_key_hex=m.PublicKey,recovered=true,state=m.Binding==null?"unbound":"bound",recovery_kind=keyOnly?"key_only_unbound":"original_backup" };
         }
         if(op is "instance.status" or "status") return Status(a.Root,op);
-        using var instance=OpenForOperation(a.Root); instance.EnsureConfig();
+        using var instance=OpenForOperation(a.Root,files); instance.EnsureConfig();
         switch(op)
         {
             case "ledger.init": var genesis=instance.InitializeLedger(); return new { operation=op,ledger_id_hex=genesis.LedgerId,genesis_sha512=genesis.Hash,genesis_block_guid=genesis.Id,durable=true,binding_durable=true };
@@ -114,22 +117,22 @@ public static class Management
                 Errors.Require(length<=instance.Limits.MaxInflightImportBytes/2,"RESOURCE_LIMIT",5,"Buffered export exceeds configured memory.");
                 var bytes=Ddlb.Encode(selection.Blocks); instance.WriteOutput(a.Need("output"),bytes);
                 return new { operation=op,ledger_id_hex=selection.LedgerId,path=Paths.Absolute(a.Need("output")),bytes=bytes.Length,sha512=Binary.Sha512(bytes),block_count=selection.Blocks.Count,durable=true };
-            case "block.import": return Import(instance,a.Need("input"));
+            case "block.import": return Import(instance,a.Need("input"),files);
             default: throw new LedgerException("INVALID_ARGUMENT",2,"Unknown operation.");
         }
     }
-    private static LedgerInstance OpenForOperation(string root)
+    private static LedgerInstance OpenForOperation(string root,DurableFiles? files)
     {
-        try { return LedgerInstance.Open(root); }
+        try { return LedgerInstance.Open(root,files); }
         catch(LedgerException e) when(e.Code is "IDENTITY_MISMATCH" or "SIGNING_IDENTITY_UNAVAILABLE")
         { throw new LedgerException("RECOVERY_REQUIRED",4,"Original identity must be restored before ordinary processing.",new {reason=e.Code}); }
     }
     private sealed record ImportResult(int index,string? ledger_id_hex,Guid? block_guid,string? sha512,string status,string reason,string authorization,bool duplicate,bool durable,bool retryable);
-    private static object Import(LedgerInstance instance,string path)
+    private static object Import(LedgerInstance instance,string path,DurableFiles? files)
     {
         Paths.Safe(path); using var input=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read);
         var results=new List<ImportResult>(); var errors=new SortedDictionary<int,LedgerException>();
-        var candidates=new List<(int Index,SignedBlock Block)>(); long total=1, resident=0; var committed=0; var duplicates=0;
+        var candidates=new List<(int Index,SignedBlock Block)>(); long total=1, resident=0; var committed=0; var duplicates=0; var isBatch=false;
         ImportResult Rejected(int index,SignedBlock? block,LedgerException e) => new(index,block?.LedgerId,block?.Id,block?.Hash,"rejected",e.Code,
             e.Code=="AUTHORITY_UNRESOLVED"?"pending":e.Code=="NOT_AUTHORIZED"?"unauthorized":e.Code=="BLOCK_GUID_CONFLICT"?"authorized":"not_evaluated",false,false,e.Code=="AUTHORITY_UNRESOLVED" || e.Code=="IO_ERROR");
         void ReadItem(int index,long size)
@@ -151,6 +154,7 @@ public static class Management
             var magic=new byte[4]; var count=input.Read(magic); input.Position=0;
             if(count==4 && magic.AsSpan().SequenceEqual("DDLB"u8))
             {
+                isBatch=true;
                 var header=new byte[14]; input.ReadExactly(header); Errors.Require(header[4]==0 && header[5]==1,"BAD_FRAME",2,"Unsupported DDLB container version.");
                 var announced=BinaryPrimitives.ReadUInt64BigEndian(header.AsSpan(6));
                 Errors.Require(announced<=(ulong)Math.Min(int.MaxValue,instance.Limits.MaxInflightImportBytes/2048),"RESOURCE_LIMIT",5,"DDLB result-count memory limit."); total=(long)announced;
@@ -200,6 +204,25 @@ public static class Management
                     if(receipt.NewlyPersisted) committed++; else duplicates++;
                 }
                 else results[item.Index]=Rejected(item.Index,block,e);
+            }
+            if(isBatch && files!=null)
+            {
+                // ImportBuffered has returned and the result/counts are complete. No next
+                // candidate is processed while a test observer holds either boundary.
+                // A new grant has met the existing durability procedure before its signal.
+                try
+                {
+                    if(results[item.Index].durable && !results[item.Index].duplicate && block.Event?.Kind==0x20)
+                        files.Checkpoint("batch-grant-durable:"+item.Index.ToString(CultureInfo.InvariantCulture)+":"+block.Hash);
+                    files.Checkpoint("batch-item-completed:"+item.Index.ToString(CultureInfo.InvariantCulture)+":"+block.Hash);
+                }
+                catch(Exception e) when(e is LedgerException or IOException or UnauthorizedAccessException)
+                {
+                    // An injected observer failure cannot erase the already durable receipt
+                    // or allow subsequent writes to proceed under an uncertain test outcome.
+                    errors.TryAdd(item.Index,new LedgerException("DURABILITY_UNCERTAIN",6,"Batch checkpoint observer interrupted after item completion.",new { reason=e is LedgerException le?le.Code:"IO_ERROR" }));
+                    durabilityInterrupted=true;
+                }
             }
         }
         if(committed+duplicates>0)

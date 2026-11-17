@@ -1,0 +1,106 @@
+DEV-003 -- Resolve QA-010 findings against ARCH-014
+Date: 2026-11-17
+Starting candidate: 6328bbc3a289b969b33dc365f6d8639cc005793f
+
+Production changes
+1. LedgerInstance.Join rejects input beginning with ASCII DDLB as BAD_FRAME,
+   exit 2, before signed-version parsing or any instance write. Raw incompatible
+   signed versions retain UNSUPPORTED_VERSION. Normal raw-genesis verification,
+   independently supplied ID/hash and replica identity/trust preservation remain.
+
+2. Management now preserves its existing three-argument Run entry point and adds:
+     Management.Run(string[] args, TextWriter stdout, TextWriter stderr,
+                    DurableFiles? files)
+   The ordinary CLI uses the original entry point, which supplies null. QA can
+   explicitly inject the existing DurableFiles callback adapter into actual
+   Management/DDLB execution. There is no environment-variable switch, CLI test
+   flag, public authoring clock override or altered filesystem procedure.
+
+QA coordination / exact checkpoint contract
+
+Location: src/UserDimensions.Ledger/Management.cs, Import's canonical candidate loop,
+after ImportBuffered returns and its result/durable counts have been recorded,
+before processing the next candidate.
+
+  batch-grant-durable:<input-index>:<full-signed-block-sha512>
+    Fires for a newly durably accepted GRANT_MASTER in a DDLB import. It does not
+    fire for a duplicate grant. The grant has completed the existing durability
+    procedure and reclassification; no next dependent candidate has begun.
+
+  batch-item-completed:<input-index>:<full-signed-block-sha512>
+    Fires after a parsed candidate is processed, including duplicates or rejected
+    candidates. It does not fire for unparsed/malformed framing items, unprocessed
+    items after an interrupted operation, or ordinary raw single-block imports.
+    Its result/counts are complete, but the final CLI response is not yet emitted.
+
+Indices are zero-based ORIGINAL TRANSPORT indices, not canonical processing ordinals.
+For an inverted [dependent, grant] DDLB, the grant is processed at input index 1;
+the checkpoint carries index 1 even though it is reached first. Callback order for
+two newly durable valid items is grant-durable:1, item-completed:1, item-completed:0.
+Signed-block SHA-512 is over exact signed bytes, not the DDLB wrapper.
+
+QA adapter usage (no production/QA-owned file was edited for this handoff):
+  var files = new DurableFiles(name => {
+      // On the requested exact name/prefix: publish a positive QA ready/PID receipt,
+      // then wait for the QA parent's release or process termination.
+  });
+  return Management.Run(
+      ["--instance-root", isolatedRoot, "block", "import", "--input", isolatedDdlb],
+      Console.Out, Console.Error, files);
+
+No lock, validation, write, flush or durability step is skipped. A callback can pause
+the operation or terminate the QA worker. If an injected observer instead throws a
+handled I/O/Ledger exception, completed durable receipts are retained, remaining
+candidate writes stop, and partial-import counts remain truthful. Default null
+injection leaves normal runtime behavior unchanged. Explicitly injected callbacks
+are test-only dependencies, compiled but inactive in ordinary CLI operation.
+
+FI-07 and FI-15 -- remaining blockers, deliberately not simulated
+
+Location: src/UserDimensions.Ledger/Persistence.cs, DurableFiles.Move, the existing
+MoveFileExW call with flags 8 (MOVEFILE_WRITE_THROUGH) and optional 1 (replacement).
+The existing after-rename callback is after successful return. It cannot observe
+an internal final-rename/pre-directory-durability interval. Configuration replacement
+uses the same operation. The Win32 call has no managed intermediate callback at
+these exact requested boundaries. Adding a callback after return would mislabel
+the observation, and removing WRITE_THROUGH or inventing an unqualified separate
+flush would change the persistence procedure. No such change is made here.
+
+FI-07 and FI-15 remain BLOCKED pending Developer/QA/Owner coordination on a safe,
+observable qualification approach. No new durability guarantee or physical power-loss
+claim is made. Existing before-rename, after-rename, after-flush and after-publish
+checkpoints remain unchanged. FI-09 and FI-09-GRANT now have executable actual-batch
+observation points; independent QA must adapt its own driver and rerun them.
+
+Primary Windows API reference:
+https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw
+
+Developer validation
+Command:
+  & 'C:\AnthonyO\32GB_HOME\Development\UserDimensions.DatabaseDistributedLedger\scripts\build.ps1' -Test
+Release solution build: 0 warnings / 0 errors.
+Developer regressions: 71 PASS / 0 FAIL; exit 0.
+Full output: .git/dev-003-work/dev003-qa010-resolution-20261117.log
+
+The five added Developer cases verify: DDLB BAD_FRAME and unchanged file/directory
+inventories; process interruption at each actual inverted-DDLB checkpoint; callback
+ordering and original result indices; duplicate grants not re-emitting grant-durable;
+and observer failure preserving durable counts while preventing dependent writes.
+Existing 66 Developer cases remain passing. These are Developer regressions in Codex,
+not a replacement for independent QA or ordinary Windows durability acceptance.
+
+Changed files for this task:
+  src/UserDimensions.Ledger/LedgerInstance.cs
+  src/UserDimensions.Ledger/Management.cs
+  tests/UserDimensions.Ledger.Tests/Program.cs
+  tests/UserDimensions.Ledger.Tests/ProcessTests.cs
+  tests/UserDimensions.Ledger.Tests/Qa010ResolutionTests.cs
+  docs/development/DEV-003-QA010-resolution.txt
+
+Preservation
+No QA-owned test, assertion, fixture, historical evidence or QA_TEST_PLAN.md changes.
+The ten preexisting uncommitted QA-010 additions remain outside this commit.
+No architecture/design, SQLite source, native durability flags, dependency or
+Steps 2-4 changes. Git history is preserved. QA independently determines affected
+case reruns and whether broader regression testing is required. No Step 1 acceptance
+is declared by this development handoff.

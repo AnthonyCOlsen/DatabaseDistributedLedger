@@ -13,6 +13,7 @@ internal static partial class Tests
             return File.Exists(args[3])?0:90;
         }
         var fault=new DurableFiles(name=> { if(name==args[2] || (args[2]=="archive" && name.StartsWith("after-rename:",StringComparison.Ordinal) && name.EndsWith(".XBLK",StringComparison.Ordinal))) Environment.Exit(77); });
+        if(args[0]=="batch") return Management.Run(["--instance-root",args[1],"block","import","--input",args[3]],Console.Out,Console.Error,fault);
         if(args[0]=="init") LedgerInstance.Initialize(args[1],fault);
         else
         {
