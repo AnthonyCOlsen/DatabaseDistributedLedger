@@ -1,0 +1,227 @@
+{
+  "format": "UDDL-QA013-CHECKPOINT",
+  "candidate_commit": "8bc96f0f513faac57c1db23a8189288479d8a992",
+  "candidate_sha256": "a7b9c642bdb3939d7a705692778457dab4c12ecc22bb18cb397f487046905cf8",
+  "ledger_sha256": "71b5fadbd96a1dfed90e2290c2f2c9b62484cb017645419456535bcd13d55aa3",
+  "focused_evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa013-20261117-101228-b0895114",
+  "focused_context": "CodexSandboxPreflight",
+  "focused_counts": {
+    "PASS": 6,
+    "FAIL": 0,
+    "BLOCKED": 2,
+    "NOT-RUN": 16
+  },
+  "focused_exit_code": 2,
+  "reference_counts": {
+    "PASS": 12,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "NOT_RUN": 0
+  },
+  "native_evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa013-20261117-101908-0dbd780d",
+  "native_counts": {
+    "PASS": 22,
+    "FAIL": 0,
+    "BLOCKED": 2,
+    "NOT-RUN": 0
+  },
+  "native_status": "COMPLETED_RECEIPTS_VERIFIED",
+  "planned_full_candidate_cases": 22,
+  "policy_checks": [
+    {
+      "id": "POLICY-ACCEPTED-STATE",
+      "status": "BLOCKED",
+      "detail": "SPEC-PENDING: Required state, diagnostic precedence, counters and gating/serving unrelated valid history after accepted-file damage are not fully specified. Observed behavior is recorded, not invented as an acceptance contract."
+    },
+    {
+      "id": "POLICY-ACCEPTED-REPAIR",
+      "status": "BLOCKED",
+      "detail": "SPEC-PENDING: Approved explicit repair/re-fetch/restore procedure, preservation/quarantine policy and conditions for resuming operations are not specified. No restoration/deletion/re-signing performed."
+    }
+  ],
+  "protected_hashes_verified": 36,
+  "authorized_coverage_change": "Append-only QA010_COVERAGE.md addendum; original bytes retained in prior immutable snapshot",
+  "production_modified": false,
+  "developer_regressions_modified": false,
+  "architect_documents_modified": false,
+  "qa_test_plan_modified": false,
+  "committed": false,
+  "pushed": false,
+  "physical_power_loss_proven": false,
+  "os_or_storage_certified": false,
+  "platforms_not_run": [
+    "Linux",
+    "macOS"
+  ],
+  "formal_step1_acceptance": "NOT_DECLARED",
+  "native_context": "OrdinaryWindowsPowerShell",
+  "native_exit_code": 2,
+  "native_reference_counts": {
+    "PASS": 12,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "NOT_RUN": 0
+  },
+  "native_case_results": [
+    {
+      "id": "CORRUPT-TEMP-truncate-1",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-truncate-7",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-truncate-64",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-truncate-into-header",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-zero-length",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-flip-header",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-flip-payload",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-flip-hash",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-flip-signature",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-append-1",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-TEMP-append-8",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-truncate-1",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-truncate-7",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-truncate-64",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-truncate-into-header",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-zero-length",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-flip-header",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-flip-payload",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-flip-hash",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-flip-signature",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-append-1",
+      "status": "PASS"
+    },
+    {
+      "id": "CORRUPT-ACCEPTED-append-8",
+      "status": "PASS"
+    },
+    {
+      "id": "POLICY-ACCEPTED-STATE",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "POLICY-ACCEPTED-REPAIR",
+      "status": "BLOCKED"
+    }
+  ],
+  "native_verification_receipt": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa013-20261117-101908-0dbd780d\\QA013-receipt-validation.json",
+  "observed_candidate_parser_rejections": {
+    "BAD_FRAME": 14,
+    "HASH_MISMATCH": 4,
+    "BAD_SIGNATURE": 4
+  },
+  "native_dotnet_info_exit_code": 0,
+  "native_environment": {
+    "os": "Microsoft Windows NT 10.0.26300.0",
+    "powershell": "7.6.9",
+    "filesystem": {
+      "format": "NTFS",
+      "drive_type": "Fixed"
+    },
+    "antivirus_changed": false
+  },
+  "current_repository_head": "cae7fe3d09e49ee17162bcf56bfe19113f29e6e6",
+  "concurrent_documentation_update": {
+    "format": "QA013-CONCURRENT-DOCUMENTATION-UPDATE",
+    "utc_observed": "2026-11-17T16:25:59.528256+00:00",
+    "executed_candidate_commit": "8bc96f0f513faac57c1db23a8189288479d8a992",
+    "current_repository_head": "cae7fe3d09e49ee17162bcf56bfe19113f29e6e6",
+    "documentation_changes": {
+      "README.md": {
+        "before_sha256": "79e4b479a39f1ea1e67fc0871fe6d33e21b6e742a6d8d794eaee5799c689bd82",
+        "current_sha256": "f34bb2fae64fb08ce0ad8b77aef36621008e76bc33df6c6a2f7198fa8a87a4cc"
+      },
+      "Database_Distributed_Ledger_Technical_Design.md": {
+        "before_sha256": "a8995b6cc2c7734d7b7cf3aea687968d35a0aa989d543ce5dac2f7319b0fc8fe",
+        "current_sha256": "1e43edff6bddd13c9585143d816d0b2c2e67260f2af066c0086e064eb029acfd"
+      },
+      "Distributed_Ledger_Management_API_Specification.md": {
+        "before_sha256": "242c3ed446bfd2503377b254a6f5e1df7d76f6bfa697483bf9addccb1d6d9b2c",
+        "current_sha256": "0079547da2551b641d9274f2bd7cfb3ad746a3199eb01d377b9a207c231feb72"
+      },
+      "SQLite_Architecture_and_Implementation_Plan.md": {
+        "before_sha256": "d74718318c4527430a9366a533f4d952b7fc67f9736d1937dffaac2ebb68c43b",
+        "current_sha256": "4fb4bd3e52cdc7ed374db0cfea12cb14d1ae8af73da44bd752de40b1b016bb9b"
+      }
+    },
+    "native_run_doc_hashes_match_original_baseline": true,
+    "source_tree_unchanged": "aa671a5664071e1ea381ee69af9d62ff86528eb2",
+    "sqlite_tree_unchanged": "9e69364cf105a1d38e1d17ee66290967f640f78d",
+    "candidate_binaries_unchanged": true,
+    "production_or_test_assertions_changed": false,
+    "merge_performed_by_this_qa_assignment": false,
+    "merge_reverted": false,
+    "existing_evidence_preserved": true,
+    "disposition": "Documentation changed after run; executed candidate remains 8bc96f0. New portability/BLOCK_ARCHIVED documentation reviewed; no corruption-repair policy supplied. No new production behavior is qualified by this note."
+  },
+  "changes_by_this_assignment": "New QA013 suite and append-only QA010 coverage addendum; no production, original tests, plan, Architect documents or Git history edits by this assignment.",
+  "subsequent_not_run_attempt": {
+    "evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa013-20261117-102758-5e43bebd",
+    "exit_code": 1,
+    "reference": "NOT-RUN",
+    "candidate": "NOT-RUN",
+    "reason": "System.Management.Automation.RuntimeException: HEAD differs from the explicitly selected candidate commit",
+    "expected_commit": "8bc96f0f513faac57c1db23a8189288479d8a992",
+    "actual_commit": "cae7fe3d09e49ee17162bcf56bfe19113f29e6e6",
+    "candidate_tests_executed": false,
+    "prior_success_preserved": true
+  },
+  "current_launcher_default_commit": "cae7fe3d09e49ee17162bcf56bfe19113f29e6e6",
+  "launcher_default_update": "Reviewed docs-only commit explicitly pinned after verifying source/binary equivalence; no test assertion or HEAD guard removed."
+}

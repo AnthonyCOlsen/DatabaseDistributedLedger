@@ -1,0 +1,114 @@
+{
+  "format": "UDDL-QA012-CHECKPOINT",
+  "candidate_commit": "8bc96f0f513faac57c1db23a8189288479d8a992",
+  "candidate_sha256": "a7b9c642bdb3939d7a705692778457dab4c12ecc22bb18cb397f487046905cf8",
+  "ledger_sha256": "71b5fadbd96a1dfed90e2290c2f2c9b62484cb017645419456535bcd13d55aa3",
+  "native_evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa012-20261117-082002-d2581f93",
+  "native_context": "OrdinaryWindowsPowerShell",
+  "native_counts": {
+    "PASS": 11,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "native_exit_code": 0,
+  "native_cases": [
+    {
+      "id": "FI07-SW-BEFORE-KILL",
+      "status": "PASS"
+    },
+    {
+      "id": "FI07-SW-AFTER-KILL",
+      "status": "PASS"
+    },
+    {
+      "id": "FI07-SW-AFTER-RELEASE",
+      "status": "PASS"
+    },
+    {
+      "id": "FI07-SW-HELD-SOURCE",
+      "status": "PASS"
+    },
+    {
+      "id": "FI07-SW-NO-OVERWRITE",
+      "status": "PASS"
+    },
+    {
+      "id": "FI07-SW-POST-CALL-ERROR",
+      "status": "PASS"
+    },
+    {
+      "id": "FI15-SW-BEFORE-KILL",
+      "status": "PASS"
+    },
+    {
+      "id": "FI15-SW-AFTER-KILL",
+      "status": "PASS"
+    },
+    {
+      "id": "FI15-SW-AFTER-RELEASE",
+      "status": "PASS"
+    },
+    {
+      "id": "FI15-SW-HELD-TARGET",
+      "status": "PASS"
+    },
+    {
+      "id": "FI15-SW-POST-CALL-ERROR",
+      "status": "PASS"
+    }
+  ],
+  "sandbox_evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa012-20261117-081305-6d4377b0",
+  "sandbox_counts": {
+    "PASS": 11,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "historical_harness_error_evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa012-20261117-081048-1479bca4",
+  "historical_harness_error_counts": {
+    "PASS": 1,
+    "FAIL": 2,
+    "BLOCKED": 8
+  },
+  "historical_harness_error": "New QA management operation omitted injection; QA dispatch corrected without changing assertions or production.",
+  "qa011_carried_forward": {
+    "evidence_root": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa011-20261117-073333-c359b240",
+    "candidate_commit": "8bc96f0f513faac57c1db23a8189288479d8a992",
+    "candidate_sha256": "a7b9c642bdb3939d7a705692778457dab4c12ecc22bb18cb397f487046905cf8",
+    "ledger_sha256": "71b5fadbd96a1dfed90e2290c2f2c9b62484cb017645419456535bcd13d55aa3",
+    "case_results": {
+      "JOIN-01": "PASS",
+      "JOIN-NEG-ddlb": "PASS",
+      "FI09-READY-RELEASE-RESULT": "PASS",
+      "FI-09": "PASS",
+      "FI-09-GRANT": "PASS"
+    },
+    "reexecuted": false,
+    "live_result_limitation": "QA-011 paired completed result evidence remains separate from unavailable live-result object"
+  },
+  "reference_reexecuted": false,
+  "original_os_internal_checkpoints": [
+    {
+      "id": "FI-07",
+      "status": "NOT_EXECUTED",
+      "reason": "Replaced for this assignment by approved observable software qualification; no callback inserted inside OS"
+    },
+    {
+      "id": "FI-15",
+      "status": "NOT_EXECUTED",
+      "reason": "Replaced for this assignment by approved observable software qualification; no callback inserted inside OS"
+    }
+  ],
+  "remaining_qa011_limitation": "Private live ImportResult not exposed at READY; completed result and killed-worker storage evidence remain separate.",
+  "portability_assessment": "QA012_PORTABILITY.md",
+  "platforms_unqualified": [
+    "Linux",
+    "macOS",
+    "other operating systems",
+    "additional CPU architectures"
+  ],
+  "production_modified": false,
+  "committed": false,
+  "pushed": false,
+  "physical_power_loss_proven": false,
+  "formal_step1_acceptance": "NOT_DECLARED"
+}

@@ -1,0 +1,5722 @@
+{
+  "format": "UDDL-QA010-CHECKPOINT",
+  "candidate_commit": "6328bbc3a289b969b33dc365f6d8639cc005793f",
+  "evidence_root": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa010-20261116-181514-0b01a91b",
+  "reference_counts": {
+    "PASS": 76,
+    "FAIL": 0
+  },
+  "candidate_counts": {
+    "PASS": 130,
+    "FAIL": 1,
+    "BLOCKED": 4
+  },
+  "candidate_cases": [
+    {
+      "id": "LIFE-01",
+      "requirements": [
+        "initialization",
+        "key-AAD88",
+        "manifest-v2",
+        "current-UTC"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:18.540967+00:00",
+      "utc_finish": "2026-11-17T00:15:19.402561+00:00",
+      "commands": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "JOIN-01",
+      "requirements": [
+        "join",
+        "replica-identity",
+        "recovery-idempotence"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:19.403561+00:00",
+      "utc_finish": "2026-11-17T00:15:20.244563+00:00",
+      "commands": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "JOIN-SUBSTITUTION",
+      "requirements": [
+        "genesis-trust-pin",
+        "same-key-genesis-substitution"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:20.246090+00:00",
+      "utc_finish": "2026-11-17T00:15:21.052149+00:00",
+      "commands": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "JOIN-NEG-wrong-id",
+      "requirements": [
+        "join-in-memory-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:21.053151+00:00",
+      "utc_finish": "2026-11-17T00:15:21.380351+00:00",
+      "commands": [
+        14,
+        15
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "JOIN-NEG-wrong-pin",
+      "requirements": [
+        "join-in-memory-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:21.381364+00:00",
+      "utc_finish": "2026-11-17T00:15:21.715912+00:00",
+      "commands": [
+        16,
+        17
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "JOIN-NEG-bad-signature",
+      "requirements": [
+        "join-in-memory-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:21.715912+00:00",
+      "utc_finish": "2026-11-17T00:15:22.041641+00:00",
+      "commands": [
+        18,
+        19
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "JOIN-NEG-truncated",
+      "requirements": [
+        "join-in-memory-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:22.041641+00:00",
+      "utc_finish": "2026-11-17T00:15:22.369282+00:00",
+      "commands": [
+        20,
+        21
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "JOIN-NEG-ddlb",
+      "requirements": [
+        "join-in-memory-validation",
+        "no-write-on-reject"
+      ],
+      "status": "FAIL",
+      "detail": "Expected BAD_FRAME, got UNSUPPORTED_VERSION",
+      "category": "candidate_or_specification",
+      "utc_start": "2026-11-17T00:15:22.369282+00:00",
+      "utc_finish": "2026-11-17T00:15:22.684770+00:00",
+      "commands": [
+        22,
+        23
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-real_plus_zero",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:23.133360+00:00",
+      "utc_finish": "2026-11-17T00:15:23.422584+00:00",
+      "commands": [
+        26
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-real_minus_zero",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:23.423709+00:00",
+      "utc_finish": "2026-11-17T00:15:23.718352+00:00",
+      "commands": [
+        27
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-real_plus_inf",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:23.718352+00:00",
+      "utc_finish": "2026-11-17T00:15:24.001170+00:00",
+      "commands": [
+        28
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-real_minus_inf",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:24.001170+00:00",
+      "utc_finish": "2026-11-17T00:15:24.315415+00:00",
+      "commands": [
+        29
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-real_subnormal",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:24.315415+00:00",
+      "utc_finish": "2026-11-17T00:15:24.634052+00:00",
+      "commands": [
+        30
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-real_minus_subnormal",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:24.635061+00:00",
+      "utc_finish": "2026-11-17T00:15:24.969611+00:00",
+      "commands": [
+        31
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-real_max_finite",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:24.970212+00:00",
+      "utc_finish": "2026-11-17T00:15:25.323545+00:00",
+      "commands": [
+        32
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-integer_minimum",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:25.323545+00:00",
+      "utc_finish": "2026-11-17T00:15:25.690866+00:00",
+      "commands": [
+        33
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-integer_maximum",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:25.691774+00:00",
+      "utc_finish": "2026-11-17T00:15:26.070772+00:00",
+      "commands": [
+        34
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-integer_negative",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:26.071773+00:00",
+      "utc_finish": "2026-11-17T00:15:26.474087+00:00",
+      "commands": [
+        35
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-integer_zero",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:26.475602+00:00",
+      "utc_finish": "2026-11-17T00:15:26.939928+00:00",
+      "commands": [
+        36
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-text_utf8",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:26.939928+00:00",
+      "utc_finish": "2026-11-17T00:15:27.370015+00:00",
+      "commands": [
+        37
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-blob",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:27.370529+00:00",
+      "utc_finish": "2026-11-17T00:15:27.807268+00:00",
+      "commands": [
+        38
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-update_null",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:27.808401+00:00",
+      "utc_finish": "2026-11-17T00:15:28.249861+00:00",
+      "commands": [
+        39
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-update_omitted",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:28.250962+00:00",
+      "utc_finish": "2026-11-17T00:15:28.721134+00:00",
+      "commands": [
+        40
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-insert_omitted_null",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:28.721134+00:00",
+      "utc_finish": "2026-11-17T00:15:29.187268+00:00",
+      "commands": [
+        41
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-create_table",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:29.187268+00:00",
+      "utc_finish": "2026-11-17T00:15:29.664746+00:00",
+      "commands": [
+        42
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-delete",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:29.665779+00:00",
+      "utc_finish": "2026-11-17T00:15:30.156149+00:00",
+      "commands": [
+        43
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-drop_table",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:30.156149+00:00",
+      "utc_finish": "2026-11-17T00:15:30.689949+00:00",
+      "commands": [
+        44
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-rename_table",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:30.689949+00:00",
+      "utc_finish": "2026-11-17T00:15:31.219952+00:00",
+      "commands": [
+        45
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-add_column",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:31.221247+00:00",
+      "utc_finish": "2026-11-17T00:15:31.764979+00:00",
+      "commands": [
+        46
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-drop_column",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:31.764979+00:00",
+      "utc_finish": "2026-11-17T00:15:32.336932+00:00",
+      "commands": [
+        47
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-rename_column",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:32.336932+00:00",
+      "utc_finish": "2026-11-17T00:15:32.930113+00:00",
+      "commands": [
+        48
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-alter_column",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:32.930113+00:00",
+      "utc_finish": "2026-11-17T00:15:33.518366+00:00",
+      "commands": [
+        49
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-compressed_text",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:33.519386+00:00",
+      "utc_finish": "2026-11-17T00:15:34.138066+00:00",
+      "commands": [
+        50
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-POS-compressed_grant_C",
+      "requirements": [
+        "wire-103",
+        "values-schema",
+        "LZMA2",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:34.138066+00:00",
+      "utc_finish": "2026-11-17T00:15:34.773619+00:00",
+      "commands": [
+        51
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-real_quiet_nan",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:34.773619+00:00",
+      "utc_finish": "2026-11-17T00:15:35.020854+00:00",
+      "commands": [
+        52
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-real_signal_nan",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:35.020854+00:00",
+      "utc_finish": "2026-11-17T00:15:35.286050+00:00",
+      "commands": [
+        53
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-real_negative_nan",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:35.286050+00:00",
+      "utc_finish": "2026-11-17T00:15:35.547786+00:00",
+      "commands": [
+        54
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-insert_explicit_null",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:35.549296+00:00",
+      "utc_finish": "2026-11-17T00:15:35.831487+00:00",
+      "commands": [
+        55
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-unknown_kind",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:35.832497+00:00",
+      "utc_finish": "2026-11-17T00:15:36.096854+00:00",
+      "commands": [
+        56
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-bad_value",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:36.097848+00:00",
+      "utc_finish": "2026-11-17T00:15:36.327597+00:00",
+      "commands": [
+        57
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-nonminimal",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:36.329260+00:00",
+      "utc_finish": "2026-11-17T00:15:36.566235+00:00",
+      "commands": [
+        58
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-overflow_integer",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:36.566235+00:00",
+      "utc_finish": "2026-11-17T00:15:36.830040+00:00",
+      "commands": [
+        59
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-invalid_utf8",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:36.831160+00:00",
+      "utc_finish": "2026-11-17T00:15:37.081090+00:00",
+      "commands": [
+        60
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-duplicate_columns",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:37.081090+00:00",
+      "utc_finish": "2026-11-17T00:15:37.337641+00:00",
+      "commands": [
+        61
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-unsorted_columns",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:37.337641+00:00",
+      "utc_finish": "2026-11-17T00:15:37.550823+00:00",
+      "commands": [
+        62
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-bad_column_flags",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:37.550823+00:00",
+      "utc_finish": "2026-11-17T00:15:37.779467+00:00",
+      "commands": [
+        63
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-event_trailing",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:37.779974+00:00",
+      "utc_finish": "2026-11-17T00:15:38.024176+00:00",
+      "commands": [
+        64
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-truncated_real",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:38.024176+00:00",
+      "utc_finish": "2026-11-17T00:15:38.274221+00:00",
+      "commands": [
+        65
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-zero_entity",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:38.274221+00:00",
+      "utc_finish": "2026-11-17T00:15:38.492494+00:00",
+      "commands": [
+        66
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-v2_revocation",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:38.492494+00:00",
+      "utc_finish": "2026-11-17T00:15:38.724907+00:00",
+      "commands": [
+        67
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-lzma_bad_property",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:38.724907+00:00",
+      "utc_finish": "2026-11-17T00:15:38.979471+00:00",
+      "commands": [
+        68
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-lzma_no_eos",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:38.980075+00:00",
+      "utc_finish": "2026-11-17T00:15:39.238037+00:00",
+      "commands": [
+        69
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-lzma_trailing",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:39.238541+00:00",
+      "utc_finish": "2026-11-17T00:15:39.470945+00:00",
+      "commands": [
+        70
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-lzma_malformed",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:39.470945+00:00",
+      "utc_finish": "2026-11-17T00:15:39.707708+00:00",
+      "commands": [
+        71
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-rev_delta_900001",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:39.707708+00:00",
+      "utc_finish": "2026-11-17T00:15:39.949979+00:00",
+      "commands": [
+        72
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-rev_delta_-1",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:39.949979+00:00",
+      "utc_finish": "2026-11-17T00:15:40.243557+00:00",
+      "commands": [
+        73
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-rev_bad_countersignature",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:40.243557+00:00",
+      "utc_finish": "2026-11-17T00:15:40.464342+00:00",
+      "commands": [
+        74
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-rev_same_signers",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:40.464342+00:00",
+      "utc_finish": "2026-11-17T00:15:40.692102+00:00",
+      "commands": [
+        75
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-rev_third_target",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:40.692102+00:00",
+      "utc_finish": "2026-11-17T00:15:40.903763+00:00",
+      "commands": [
+        76
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-rev_interval_overflow",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:40.903763+00:00",
+      "utc_finish": "2026-11-17T00:15:41.112132+00:00",
+      "commands": [
+        77
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-genesis_ledger_mismatch",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:41.112132+00:00",
+      "utc_finish": "2026-11-17T00:15:41.378775+00:00",
+      "commands": [
+        78
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-payload_hash",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:41.380292+00:00",
+      "utc_finish": "2026-11-17T00:15:41.593302+00:00",
+      "commands": [
+        79
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-outer_signature",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:41.593302+00:00",
+      "utc_finish": "2026-11-17T00:15:41.802671+00:00",
+      "commands": [
+        80
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-payload_length",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:41.803690+00:00",
+      "utc_finish": "2026-11-17T00:15:42.004996+00:00",
+      "commands": [
+        81
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-legacy_0001",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:42.006024+00:00",
+      "utc_finish": "2026-11-17T00:15:42.207330+00:00",
+      "commands": [
+        82
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-legacy_0101",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:42.208848+00:00",
+      "utc_finish": "2026-11-17T00:15:42.420072+00:00",
+      "commands": [
+        83
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "WIRE-NEG-legacy_0102",
+      "requirements": [
+        "wire-103",
+        "negative-fixtures",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:42.420072+00:00",
+      "utc_finish": "2026-11-17T00:15:42.640099+00:00",
+      "commands": [
+        84
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "LIMIT-DECODED",
+      "requirements": [
+        "LZMA2",
+        "resource-limits",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:42.641621+00:00",
+      "utc_finish": "2026-11-17T00:15:43.461143+00:00",
+      "commands": [
+        85,
+        86,
+        87,
+        88
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "LZMA2-OUTBOUND",
+      "requirements": [
+        "LZMA2",
+        "independent-encoder-interoperability"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:43.462143+00:00",
+      "utc_finish": "2026-11-17T00:15:44.844102+00:00",
+      "commands": [
+        89,
+        90
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "ORDER-01",
+      "requirements": [
+        "canonical-order",
+        "batch-inverted-order"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:44.844102+00:00",
+      "utc_finish": "2026-11-17T00:15:46.135369+00:00",
+      "commands": [
+        91,
+        92,
+        93,
+        94,
+        95
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "AUTH-NO-WRITE-CALLBACKS",
+      "requirements": [
+        "memory-authorization",
+        "zero-write-checkpoints",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:46.136366+00:00",
+      "utc_finish": "2026-11-17T00:15:47.945890+00:00",
+      "commands": [
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "AUTH-01",
+      "requirements": [
+        "memory-authorization",
+        "retryable",
+        "no-projector-dependency"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:47.946889+00:00",
+      "utc_finish": "2026-11-17T00:15:49.804839+00:00",
+      "commands": [
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "AUTH-02",
+      "requirements": [
+        "historical-authorization",
+        "XBLK",
+        "counts",
+        "known-unauthorized"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:49.805844+00:00",
+      "utc_finish": "2026-11-17T00:15:52.796640+00:00",
+      "commands": [
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "AUTH-03",
+      "requirements": [
+        "historical-authorization",
+        "pending-archive",
+        "counts"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:52.796640+00:00",
+      "utc_finish": "2026-11-17T00:15:54.997053+00:00",
+      "commands": [
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "PATH-OUTOFRANGE",
+      "requirements": [
+        "out-of-range",
+        "canonical-order"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:54.997053+00:00",
+      "utc_finish": "2026-11-17T00:15:55.668361+00:00",
+      "commands": [
+        132,
+        133,
+        134
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "PUB-01",
+      "requirements": [
+        "current-UTC",
+        "idempotent-publication",
+        "exact-byte-preservation"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:55.668361+00:00",
+      "utc_finish": "2026-11-17T00:15:57.090314+00:00",
+      "commands": [
+        135,
+        136,
+        137,
+        138,
+        139
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "PUB-02",
+      "requirements": [
+        "no-public-time-override",
+        "CLI-contract"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:57.090314+00:00",
+      "utc_finish": "2026-11-17T00:15:57.478996+00:00",
+      "commands": [
+        140,
+        141,
+        142,
+        143
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-A-NEG-same-master",
+      "requirements": [
+        "A-consent",
+        "distinct-authorized-masters",
+        "role-authority-validation"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:57.478996+00:00",
+      "utc_finish": "2026-11-17T00:15:58.185449+00:00",
+      "commands": [
+        144,
+        145,
+        146
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-A-NEG-third-target",
+      "requirements": [
+        "A-consent",
+        "distinct-authorized-masters",
+        "role-authority-validation"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:58.185449+00:00",
+      "utc_finish": "2026-11-17T00:15:58.914558+00:00",
+      "commands": [
+        147,
+        148,
+        149
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-A-NEG-ungranted-B",
+      "requirements": [
+        "A-consent",
+        "distinct-authorized-masters",
+        "role-authority-validation"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:58.914558+00:00",
+      "utc_finish": "2026-11-17T00:15:59.390941+00:00",
+      "commands": [
+        150,
+        151
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-A-NEG-ungranted-A",
+      "requirements": [
+        "A-consent",
+        "distinct-authorized-masters",
+        "role-authority-validation"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:59.391904+00:00",
+      "utc_finish": "2026-11-17T00:15:59.867427+00:00",
+      "commands": [
+        152,
+        153
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-DELTA-0",
+      "requirements": [
+        "revocation-v3",
+        "signed-time-boundaries",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:15:59.867427+00:00",
+      "utc_finish": "2026-11-17T00:16:01.099754+00:00",
+      "commands": [
+        154,
+        155,
+        156,
+        157,
+        158
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-DELTA-900000",
+      "requirements": [
+        "revocation-v3",
+        "signed-time-boundaries",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:01.099754+00:00",
+      "utc_finish": "2026-11-17T00:16:02.345289+00:00",
+      "commands": [
+        159,
+        160,
+        161,
+        162,
+        163
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-DELTA-900001",
+      "requirements": [
+        "revocation-v3",
+        "signed-time-boundaries",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:02.345289+00:00",
+      "utc_finish": "2026-11-17T00:16:03.468603+00:00",
+      "commands": [
+        164,
+        165,
+        166,
+        167,
+        168
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-DELTA--1",
+      "requirements": [
+        "revocation-v3",
+        "signed-time-boundaries",
+        "actual-candidate-fixtures"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:03.469695+00:00",
+      "utc_finish": "2026-11-17T00:16:04.594420+00:00",
+      "commands": [
+        169,
+        170,
+        171,
+        172,
+        173
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-LIVE",
+      "requirements": [
+        "A-consent",
+        "B-publication",
+        "current-UTC",
+        "idempotent-revocation"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:04.595433+00:00",
+      "utc_finish": "2026-11-17T00:16:06.569965+00:00",
+      "commands": [
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-EXPIRED-RETRY",
+      "requirements": [
+        "idempotent-revocation",
+        "signed-time-not-receipt-time"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:06.569965+00:00",
+      "utc_finish": "2026-11-17T00:16:07.737763+00:00",
+      "commands": [
+        181,
+        182,
+        183,
+        184
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-NEG-tampered",
+      "requirements": [
+        "revocation-v3",
+        "role-authority-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:07.737763+00:00",
+      "utc_finish": "2026-11-17T00:16:08.481695+00:00",
+      "commands": [
+        185,
+        186,
+        187
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-NEG-short",
+      "requirements": [
+        "revocation-v3",
+        "role-authority-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:08.481695+00:00",
+      "utc_finish": "2026-11-17T00:16:09.191116+00:00",
+      "commands": [
+        188,
+        189,
+        190
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-NEG-v2",
+      "requirements": [
+        "revocation-v3",
+        "role-authority-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:09.192721+00:00",
+      "utc_finish": "2026-11-17T00:16:09.899965+00:00",
+      "commands": [
+        191,
+        192,
+        193
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-NEG-wrong-ledger",
+      "requirements": [
+        "revocation-v3",
+        "role-authority-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:09.900974+00:00",
+      "utc_finish": "2026-11-17T00:16:10.630669+00:00",
+      "commands": [
+        194,
+        195,
+        196
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-NEG-wrong-B",
+      "requirements": [
+        "revocation-v3",
+        "role-authority-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:10.630669+00:00",
+      "utc_finish": "2026-11-17T00:16:11.342409+00:00",
+      "commands": [
+        197,
+        198,
+        199
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-NEG-expired",
+      "requirements": [
+        "revocation-v3",
+        "role-authority-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:11.343402+00:00",
+      "utc_finish": "2026-11-17T00:16:12.104295+00:00",
+      "commands": [
+        200,
+        201,
+        202
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-NEG-unauthorized-A",
+      "requirements": [
+        "revocation-v3",
+        "role-authority-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:12.104295+00:00",
+      "utc_finish": "2026-11-17T00:16:12.940045+00:00",
+      "commands": [
+        203,
+        204,
+        205
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "REV-NEG-revoked-A",
+      "requirements": [
+        "revocation-v3",
+        "role-authority-validation",
+        "no-write-on-reject"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:12.940045+00:00",
+      "utc_finish": "2026-11-17T00:16:14.065416+00:00",
+      "commands": [
+        206,
+        207,
+        208,
+        209
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "BATCH-ORDER-False",
+      "requirements": [
+        "DDLB",
+        "canonical-order",
+        "grant-dependency"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:14.065416+00:00",
+      "utc_finish": "2026-11-17T00:16:15.069857+00:00",
+      "commands": [
+        210,
+        211,
+        212,
+        213
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "BATCH-ORDER-True",
+      "requirements": [
+        "DDLB",
+        "canonical-order",
+        "grant-dependency"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:15.069857+00:00",
+      "utc_finish": "2026-11-17T00:16:16.081790+00:00",
+      "commands": [
+        214,
+        215,
+        216,
+        217
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "BATCH-FAILED-GRANT",
+      "requirements": [
+        "grant-durability",
+        "no-dependent-without-prerequisite"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:16.081790+00:00",
+      "utc_finish": "2026-11-17T00:16:16.813650+00:00",
+      "commands": [
+        218,
+        219,
+        220
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "BATCH-MIXED",
+      "requirements": [
+        "PARTIAL_IMPORT",
+        "ordered-results",
+        "retryable",
+        "DDLB"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:16.813650+00:00",
+      "utc_finish": "2026-11-17T00:16:18.498320+00:00",
+      "commands": [
+        221,
+        222,
+        223,
+        224,
+        225,
+        226
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "DDLB-truncated",
+      "requirements": [
+        "DDLB-framing",
+        "partial-durability"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:18.499896+00:00",
+      "utc_finish": "2026-11-17T00:16:19.208162+00:00",
+      "commands": [
+        227,
+        228,
+        229
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "DDLB-trailing",
+      "requirements": [
+        "DDLB-framing",
+        "partial-durability"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:19.208162+00:00",
+      "utc_finish": "2026-11-17T00:16:19.982026+00:00",
+      "commands": [
+        230,
+        231,
+        232
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "DDLB-overflow",
+      "requirements": [
+        "DDLB-framing",
+        "partial-durability"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:19.983144+00:00",
+      "utc_finish": "2026-11-17T00:16:20.592531+00:00",
+      "commands": [
+        233,
+        234,
+        235
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "DDLB-zero",
+      "requirements": [
+        "DDLB-framing",
+        "partial-durability"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:20.593544+00:00",
+      "utc_finish": "2026-11-17T00:16:21.193314+00:00",
+      "commands": [
+        236,
+        237,
+        238
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "BATCH-MEMORY",
+      "requirements": [
+        "bounded-memory",
+        "no-temporary-spillover"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:21.193314+00:00",
+      "utc_finish": "2026-11-17T00:16:21.975809+00:00",
+      "commands": [
+        239,
+        240,
+        241,
+        242
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "EXPORT-01",
+      "requirements": [
+        "DDLB",
+        "exact-get-export",
+        "no-overwrite"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:21.976910+00:00",
+      "utc_finish": "2026-11-17T00:16:23.814090+00:00",
+      "commands": [
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "EXPORT-02",
+      "requirements": [
+        "unbound-multi-ledger",
+        "explicit-selection"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:23.814090+00:00",
+      "utc_finish": "2026-11-17T00:16:24.918423+00:00",
+      "commands": [
+        251,
+        252,
+        253,
+        254,
+        255
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "IDENTITY-missing",
+      "requirements": [
+        "FI-18",
+        "identity-gate",
+        "original-backup-restore"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:24.918991+00:00",
+      "utc_finish": "2026-11-17T00:16:26.899722+00:00",
+      "commands": [
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "IDENTITY-corrupt",
+      "requirements": [
+        "FI-18",
+        "identity-gate",
+        "original-backup-restore"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:26.900246+00:00",
+      "utc_finish": "2026-11-17T00:16:29.047915+00:00",
+      "commands": [
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "IDENTITY-KEY-ONLY",
+      "requirements": [
+        "key-only-recovery",
+        "manifest-v2"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:29.047915+00:00",
+      "utc_finish": "2026-11-17T00:16:29.441989+00:00",
+      "commands": [
+        284,
+        285,
+        286
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "CONFIG-01",
+      "requirements": [
+        "FI-19",
+        "config-v1",
+        "persistent-limits",
+        "corruption-gate"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:29.443006+00:00",
+      "utc_finish": "2026-11-17T00:16:31.626344+00:00",
+      "commands": [
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "IDENTITY-MANIFEST-STRICT",
+      "requirements": [
+        "manifest-v2",
+        "legacy-rejection",
+        "identity-gate"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:31.626344+00:00",
+      "utc_finish": "2026-11-17T00:16:32.842462+00:00",
+      "commands": [
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "IDENTITY-AAD-TAMPER",
+      "requirements": [
+        "key-AAD88",
+        "AES-GCM-authentication",
+        "identity-gate"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:32.843650+00:00",
+      "utc_finish": "2026-11-17T00:16:33.829076+00:00",
+      "commands": [
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "CONFIG-LIMIT-NEG",
+      "requirements": [
+        "resource-limits",
+        "strict-CLI-integers"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:33.830070+00:00",
+      "utc_finish": "2026-11-17T00:16:35.090750+00:00",
+      "commands": [
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": false
+    },
+    {
+      "id": "FI-01",
+      "requirements": [
+        "FI-01",
+        "key-manifest-crash"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:35.091754+00:00",
+      "utc_finish": "2026-11-17T00:16:35.360585+00:00",
+      "commands": [
+        326,
+        327
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-02",
+      "requirements": [
+        "FI-02",
+        "key-manifest-crash"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:35.360585+00:00",
+      "utc_finish": "2026-11-17T00:16:35.790241+00:00",
+      "commands": [
+        328,
+        329,
+        330
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-03",
+      "requirements": [
+        "FI-03",
+        "key-only-recovery"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:35.790241+00:00",
+      "utc_finish": "2026-11-17T00:16:36.128556+00:00",
+      "commands": [
+        331,
+        332
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-GENESIS-init",
+      "requirements": [
+        "FI-04",
+        "interrupted-genesis",
+        "recovery-idempotence"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:36.128556+00:00",
+      "utc_finish": "2026-11-17T00:16:37.388568+00:00",
+      "commands": [
+        333,
+        334,
+        335,
+        336,
+        337,
+        338
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-GENESIS-join",
+      "requirements": [
+        "FI-04",
+        "interrupted-join",
+        "recovery-idempotence"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:37.388568+00:00",
+      "utc_finish": "2026-11-17T00:16:38.654693+00:00",
+      "commands": [
+        339,
+        340,
+        341,
+        342,
+        343,
+        344
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-GENESIS-manifest",
+      "requirements": [
+        "FI-05",
+        "interrupted-genesis",
+        "recovery-idempotence"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:38.654693+00:00",
+      "utc_finish": "2026-11-17T00:16:39.886331+00:00",
+      "commands": [
+        345,
+        346,
+        347,
+        348,
+        349,
+        350
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-06",
+      "requirements": [
+        "FI-06",
+        "temporary-publication",
+        "retry-durability-diagnosis"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:39.886331+00:00",
+      "utc_finish": "2026-11-17T00:16:40.911545+00:00",
+      "commands": [
+        351,
+        352,
+        353,
+        354
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-07",
+      "requirements": [
+        "FI-07",
+        "missing-fault-hook"
+      ],
+      "status": "BLOCKED",
+      "detail": "MoveFileEx(WRITE_THROUGH) exposes no callback between final rename and directory durability confirmation; production hooks unchanged",
+      "category": "missing_interface_or_prerequisite",
+      "utc_start": "2026-11-17T00:16:40.911545+00:00",
+      "utc_finish": "2026-11-17T00:16:40.911545+00:00",
+      "commands": [],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-09",
+      "requirements": [
+        "FI-09",
+        "missing-fault-hook"
+      ],
+      "status": "BLOCKED",
+      "detail": "Management DDLB has no injectable per-item completed-prefix barrier; production hooks unchanged",
+      "category": "missing_interface_or_prerequisite",
+      "utc_start": "2026-11-17T00:16:40.912558+00:00",
+      "utc_finish": "2026-11-17T00:16:40.912558+00:00",
+      "commands": [],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-09-GRANT",
+      "requirements": [
+        "FI-09-GRANT",
+        "missing-fault-hook"
+      ],
+      "status": "BLOCKED",
+      "detail": "Management DDLB has no observable grant-durable/before-dependent checkpoint; sequential adapter calls would not prove the actual batch boundary; production hooks unchanged",
+      "category": "missing_interface_or_prerequisite",
+      "utc_start": "2026-11-17T00:16:40.912558+00:00",
+      "utc_finish": "2026-11-17T00:16:40.912558+00:00",
+      "commands": [],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-15",
+      "requirements": [
+        "FI-15",
+        "missing-fault-hook"
+      ],
+      "status": "BLOCKED",
+      "detail": "Atomic config replacement and directory durability are one MoveFileEx(WRITE_THROUGH) call; no intermediate hook; production hooks unchanged",
+      "category": "missing_interface_or_prerequisite",
+      "utc_start": "2026-11-17T00:16:40.912558+00:00",
+      "utc_finish": "2026-11-17T00:16:40.912558+00:00",
+      "commands": [],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-08",
+      "requirements": [
+        "FI-08",
+        "durable-before-ack",
+        "idempotent-import"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:40.912558+00:00",
+      "utc_finish": "2026-11-17T00:16:42.050422+00:00",
+      "commands": [
+        355,
+        356,
+        357,
+        358,
+        359
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-10",
+      "requirements": [
+        "FI-10",
+        "archive-crash-recovery"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:42.051427+00:00",
+      "utc_finish": "2026-11-17T00:16:43.786623+00:00",
+      "commands": [
+        360,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-11",
+      "requirements": [
+        "FI-11",
+        "archive-crash-recovery"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:43.786623+00:00",
+      "utc_finish": "2026-11-17T00:16:45.463267+00:00",
+      "commands": [
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-12",
+      "requirements": [
+        "FI-12",
+        "archive-crash-recovery"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:45.463267+00:00",
+      "utc_finish": "2026-11-17T00:16:47.506320+00:00",
+      "commands": [
+        374,
+        375,
+        376,
+        377,
+        378,
+        379,
+        380,
+        381
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-13",
+      "requirements": [
+        "FI-13",
+        "archive-crash-recovery"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:47.506320+00:00",
+      "utc_finish": "2026-11-17T00:16:49.608769+00:00",
+      "commands": [
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-14",
+      "requirements": [
+        "FI-14",
+        "config-atomic-replacement"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:49.608769+00:00",
+      "utc_finish": "2026-11-17T00:16:50.563155+00:00",
+      "commands": [
+        390,
+        391,
+        392,
+        393,
+        394
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-15-POST",
+      "requirements": [
+        "FI-15-post-return-only",
+        "config-atomic-replacement"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:50.564162+00:00",
+      "utc_finish": "2026-11-17T00:16:51.494297+00:00",
+      "commands": [
+        395,
+        396,
+        397,
+        398,
+        399
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-16",
+      "requirements": [
+        "FI-16",
+        "consent-publication"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:51.495588+00:00",
+      "utc_finish": "2026-11-17T00:16:52.517075+00:00",
+      "commands": [
+        400,
+        401,
+        402,
+        403
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-17",
+      "requirements": [
+        "FI-17",
+        "same-host-lock",
+        "process-termination"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:52.517075+00:00",
+      "utc_finish": "2026-11-17T00:16:53.707908+00:00",
+      "commands": [
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-20-HELD-FILE",
+      "requirements": [
+        "FI-20",
+        "external-lock",
+        "no-overwrite"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:53.708922+00:00",
+      "utc_finish": "2026-11-17T00:16:54.874124+00:00",
+      "commands": [
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    },
+    {
+      "id": "FI-REVOCATION-ACK",
+      "requirements": [
+        "revocation-durable-before-ack",
+        "idempotent-revocation"
+      ],
+      "status": "PASS",
+      "detail": "Assertions satisfied",
+      "category": "candidate",
+      "utc_start": "2026-11-17T00:16:54.874124+00:00",
+      "utc_finish": "2026-11-17T00:16:56.090406+00:00",
+      "commands": [
+        418,
+        419,
+        420,
+        421
+      ],
+      "execution_context": "CodexSandboxPreflight",
+      "filesystem_acceptance": "not native acceptance",
+      "fault_case": true
+    }
+  ],
+  "native_acceptance": "NOT_DECLARED: one error-code discrepancy and four blocked checkpoints remain",
+  "formal_step1_acceptance": "NOT_DECLARED",
+  "committed_or_pushed": false,
+  "native_execution": {
+    "operator_reported_context": "OrdinaryWindowsPowerShell",
+    "evidence_root": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa010-20261116-201537-c7555114",
+    "actual_commit": "6328bbc3a289b969b33dc365f6d8639cc005793f",
+    "exit_code": 1,
+    "reference_counts": {
+      "PASS": 76,
+      "FAIL": 0
+    },
+    "candidate_counts": {
+      "PASS": 130,
+      "FAIL": 1,
+      "BLOCKED": 4
+    },
+    "candidate_cases": [
+      {
+        "id": "LIFE-01",
+        "requirements": [
+          "initialization",
+          "key-AAD88",
+          "manifest-v2",
+          "current-UTC"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:45.389008+00:00",
+        "utc_finish": "2026-11-17T02:15:46.246997+00:00",
+        "commands": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "JOIN-01",
+        "requirements": [
+          "join",
+          "replica-identity",
+          "recovery-idempotence"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:46.247995+00:00",
+        "utc_finish": "2026-11-17T02:15:46.871669+00:00",
+        "commands": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "JOIN-SUBSTITUTION",
+        "requirements": [
+          "genesis-trust-pin",
+          "same-key-genesis-substitution"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:46.872679+00:00",
+        "utc_finish": "2026-11-17T02:15:47.444998+00:00",
+        "commands": [
+          10,
+          11,
+          12,
+          13
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "JOIN-NEG-wrong-id",
+        "requirements": [
+          "join-in-memory-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:47.444998+00:00",
+        "utc_finish": "2026-11-17T02:15:47.688902+00:00",
+        "commands": [
+          14,
+          15
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "JOIN-NEG-wrong-pin",
+        "requirements": [
+          "join-in-memory-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:47.688902+00:00",
+        "utc_finish": "2026-11-17T02:15:47.937034+00:00",
+        "commands": [
+          16,
+          17
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "JOIN-NEG-bad-signature",
+        "requirements": [
+          "join-in-memory-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:47.937034+00:00",
+        "utc_finish": "2026-11-17T02:15:48.181032+00:00",
+        "commands": [
+          18,
+          19
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "JOIN-NEG-truncated",
+        "requirements": [
+          "join-in-memory-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:48.181032+00:00",
+        "utc_finish": "2026-11-17T02:15:48.412855+00:00",
+        "commands": [
+          20,
+          21
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "JOIN-NEG-ddlb",
+        "requirements": [
+          "join-in-memory-validation",
+          "no-write-on-reject"
+        ],
+        "status": "FAIL",
+        "detail": "Expected BAD_FRAME, got UNSUPPORTED_VERSION",
+        "category": "candidate_or_specification",
+        "utc_start": "2026-11-17T02:15:48.412855+00:00",
+        "utc_finish": "2026-11-17T02:15:48.656594+00:00",
+        "commands": [
+          22,
+          23
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-real_plus_zero",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:48.958094+00:00",
+        "utc_finish": "2026-11-17T02:15:49.167130+00:00",
+        "commands": [
+          26
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-real_minus_zero",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:49.167130+00:00",
+        "utc_finish": "2026-11-17T02:15:49.379019+00:00",
+        "commands": [
+          27
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-real_plus_inf",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:49.379019+00:00",
+        "utc_finish": "2026-11-17T02:15:49.576634+00:00",
+        "commands": [
+          28
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-real_minus_inf",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:49.576634+00:00",
+        "utc_finish": "2026-11-17T02:15:49.781286+00:00",
+        "commands": [
+          29
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-real_subnormal",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:49.781286+00:00",
+        "utc_finish": "2026-11-17T02:15:49.989838+00:00",
+        "commands": [
+          30
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-real_minus_subnormal",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:49.989838+00:00",
+        "utc_finish": "2026-11-17T02:15:50.197041+00:00",
+        "commands": [
+          31
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-real_max_finite",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:50.197041+00:00",
+        "utc_finish": "2026-11-17T02:15:50.415083+00:00",
+        "commands": [
+          32
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-integer_minimum",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:50.415083+00:00",
+        "utc_finish": "2026-11-17T02:15:50.654412+00:00",
+        "commands": [
+          33
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-integer_maximum",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:50.654412+00:00",
+        "utc_finish": "2026-11-17T02:15:50.895196+00:00",
+        "commands": [
+          34
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-integer_negative",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:50.896198+00:00",
+        "utc_finish": "2026-11-17T02:15:51.143498+00:00",
+        "commands": [
+          35
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-integer_zero",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:51.144858+00:00",
+        "utc_finish": "2026-11-17T02:15:51.375609+00:00",
+        "commands": [
+          36
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-text_utf8",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:51.376604+00:00",
+        "utc_finish": "2026-11-17T02:15:51.616222+00:00",
+        "commands": [
+          37
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-blob",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:51.616222+00:00",
+        "utc_finish": "2026-11-17T02:15:51.889376+00:00",
+        "commands": [
+          38
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-update_null",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:51.890473+00:00",
+        "utc_finish": "2026-11-17T02:15:52.141238+00:00",
+        "commands": [
+          39
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-update_omitted",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:52.141238+00:00",
+        "utc_finish": "2026-11-17T02:15:52.422498+00:00",
+        "commands": [
+          40
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-insert_omitted_null",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:52.422498+00:00",
+        "utc_finish": "2026-11-17T02:15:52.694358+00:00",
+        "commands": [
+          41
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-create_table",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:52.695367+00:00",
+        "utc_finish": "2026-11-17T02:15:52.963413+00:00",
+        "commands": [
+          42
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-delete",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:52.963413+00:00",
+        "utc_finish": "2026-11-17T02:15:53.237739+00:00",
+        "commands": [
+          43
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-drop_table",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:53.237739+00:00",
+        "utc_finish": "2026-11-17T02:15:53.514389+00:00",
+        "commands": [
+          44
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-rename_table",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:53.514389+00:00",
+        "utc_finish": "2026-11-17T02:15:53.816030+00:00",
+        "commands": [
+          45
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-add_column",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:53.816030+00:00",
+        "utc_finish": "2026-11-17T02:15:54.105358+00:00",
+        "commands": [
+          46
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-drop_column",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:54.105358+00:00",
+        "utc_finish": "2026-11-17T02:15:54.431731+00:00",
+        "commands": [
+          47
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-rename_column",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:54.431731+00:00",
+        "utc_finish": "2026-11-17T02:15:54.735408+00:00",
+        "commands": [
+          48
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-alter_column",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:54.735408+00:00",
+        "utc_finish": "2026-11-17T02:15:55.061749+00:00",
+        "commands": [
+          49
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-compressed_text",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:55.061749+00:00",
+        "utc_finish": "2026-11-17T02:15:55.425678+00:00",
+        "commands": [
+          50
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-POS-compressed_grant_C",
+        "requirements": [
+          "wire-103",
+          "values-schema",
+          "LZMA2",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:55.425678+00:00",
+        "utc_finish": "2026-11-17T02:15:55.762792+00:00",
+        "commands": [
+          51
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-real_quiet_nan",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:55.762792+00:00",
+        "utc_finish": "2026-11-17T02:15:55.940919+00:00",
+        "commands": [
+          52
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-real_signal_nan",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:55.940919+00:00",
+        "utc_finish": "2026-11-17T02:15:56.109094+00:00",
+        "commands": [
+          53
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-real_negative_nan",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:56.109094+00:00",
+        "utc_finish": "2026-11-17T02:15:56.266735+00:00",
+        "commands": [
+          54
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-insert_explicit_null",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:56.268683+00:00",
+        "utc_finish": "2026-11-17T02:15:56.433376+00:00",
+        "commands": [
+          55
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-unknown_kind",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:56.433376+00:00",
+        "utc_finish": "2026-11-17T02:15:56.593062+00:00",
+        "commands": [
+          56
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-bad_value",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:56.593062+00:00",
+        "utc_finish": "2026-11-17T02:15:56.758533+00:00",
+        "commands": [
+          57
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-nonminimal",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:56.758533+00:00",
+        "utc_finish": "2026-11-17T02:15:56.928225+00:00",
+        "commands": [
+          58
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-overflow_integer",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:56.929818+00:00",
+        "utc_finish": "2026-11-17T02:15:57.088680+00:00",
+        "commands": [
+          59
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-invalid_utf8",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:57.088680+00:00",
+        "utc_finish": "2026-11-17T02:15:57.268903+00:00",
+        "commands": [
+          60
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-duplicate_columns",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:57.268903+00:00",
+        "utc_finish": "2026-11-17T02:15:57.441460+00:00",
+        "commands": [
+          61
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-unsorted_columns",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:57.441460+00:00",
+        "utc_finish": "2026-11-17T02:15:57.612350+00:00",
+        "commands": [
+          62
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-bad_column_flags",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:57.612350+00:00",
+        "utc_finish": "2026-11-17T02:15:57.792992+00:00",
+        "commands": [
+          63
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-event_trailing",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:57.792992+00:00",
+        "utc_finish": "2026-11-17T02:15:58.064478+00:00",
+        "commands": [
+          64
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-truncated_real",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:58.064478+00:00",
+        "utc_finish": "2026-11-17T02:15:58.337009+00:00",
+        "commands": [
+          65
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-zero_entity",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:58.337009+00:00",
+        "utc_finish": "2026-11-17T02:15:58.540014+00:00",
+        "commands": [
+          66
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-v2_revocation",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:58.540014+00:00",
+        "utc_finish": "2026-11-17T02:15:58.715082+00:00",
+        "commands": [
+          67
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-lzma_bad_property",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:58.715082+00:00",
+        "utc_finish": "2026-11-17T02:15:58.900247+00:00",
+        "commands": [
+          68
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-lzma_no_eos",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:58.900247+00:00",
+        "utc_finish": "2026-11-17T02:15:59.064846+00:00",
+        "commands": [
+          69
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-lzma_trailing",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:59.064846+00:00",
+        "utc_finish": "2026-11-17T02:15:59.267408+00:00",
+        "commands": [
+          70
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-lzma_malformed",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:59.267408+00:00",
+        "utc_finish": "2026-11-17T02:15:59.470482+00:00",
+        "commands": [
+          71
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-rev_delta_900001",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:59.470482+00:00",
+        "utc_finish": "2026-11-17T02:15:59.649878+00:00",
+        "commands": [
+          72
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-rev_delta_-1",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:59.649878+00:00",
+        "utc_finish": "2026-11-17T02:15:59.809167+00:00",
+        "commands": [
+          73
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-rev_bad_countersignature",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:59.809167+00:00",
+        "utc_finish": "2026-11-17T02:15:59.974479+00:00",
+        "commands": [
+          74
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-rev_same_signers",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:15:59.979032+00:00",
+        "utc_finish": "2026-11-17T02:16:00.143806+00:00",
+        "commands": [
+          75
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-rev_third_target",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:00.143806+00:00",
+        "utc_finish": "2026-11-17T02:16:00.318207+00:00",
+        "commands": [
+          76
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-rev_interval_overflow",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:00.318207+00:00",
+        "utc_finish": "2026-11-17T02:16:00.491620+00:00",
+        "commands": [
+          77
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-genesis_ledger_mismatch",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:00.491620+00:00",
+        "utc_finish": "2026-11-17T02:16:00.654573+00:00",
+        "commands": [
+          78
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-payload_hash",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:00.654573+00:00",
+        "utc_finish": "2026-11-17T02:16:00.802439+00:00",
+        "commands": [
+          79
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-outer_signature",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:00.802439+00:00",
+        "utc_finish": "2026-11-17T02:16:00.976468+00:00",
+        "commands": [
+          80
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-payload_length",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:00.976468+00:00",
+        "utc_finish": "2026-11-17T02:16:01.128442+00:00",
+        "commands": [
+          81
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-legacy_0001",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:01.128442+00:00",
+        "utc_finish": "2026-11-17T02:16:01.280107+00:00",
+        "commands": [
+          82
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-legacy_0101",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:01.280107+00:00",
+        "utc_finish": "2026-11-17T02:16:01.439206+00:00",
+        "commands": [
+          83
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "WIRE-NEG-legacy_0102",
+        "requirements": [
+          "wire-103",
+          "negative-fixtures",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:01.439206+00:00",
+        "utc_finish": "2026-11-17T02:16:01.593085+00:00",
+        "commands": [
+          84
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "LIMIT-DECODED",
+        "requirements": [
+          "LZMA2",
+          "resource-limits",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:01.593085+00:00",
+        "utc_finish": "2026-11-17T02:16:02.168387+00:00",
+        "commands": [
+          85,
+          86,
+          87,
+          88
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "LZMA2-OUTBOUND",
+        "requirements": [
+          "LZMA2",
+          "independent-encoder-interoperability"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:02.168899+00:00",
+        "utc_finish": "2026-11-17T02:16:03.147463+00:00",
+        "commands": [
+          89,
+          90
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "ORDER-01",
+        "requirements": [
+          "canonical-order",
+          "batch-inverted-order"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:03.147463+00:00",
+        "utc_finish": "2026-11-17T02:16:04.049128+00:00",
+        "commands": [
+          91,
+          92,
+          93,
+          94,
+          95
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "AUTH-NO-WRITE-CALLBACKS",
+        "requirements": [
+          "memory-authorization",
+          "zero-write-checkpoints",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:04.049128+00:00",
+        "utc_finish": "2026-11-17T02:16:05.301968+00:00",
+        "commands": [
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "AUTH-01",
+        "requirements": [
+          "memory-authorization",
+          "retryable",
+          "no-projector-dependency"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:05.301968+00:00",
+        "utc_finish": "2026-11-17T02:16:06.625893+00:00",
+        "commands": [
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "AUTH-02",
+        "requirements": [
+          "historical-authorization",
+          "XBLK",
+          "counts",
+          "known-unauthorized"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:06.625893+00:00",
+        "utc_finish": "2026-11-17T02:16:08.872050+00:00",
+        "commands": [
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "AUTH-03",
+        "requirements": [
+          "historical-authorization",
+          "pending-archive",
+          "counts"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:08.872050+00:00",
+        "utc_finish": "2026-11-17T02:16:10.639679+00:00",
+        "commands": [
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "PATH-OUTOFRANGE",
+        "requirements": [
+          "out-of-range",
+          "canonical-order"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:10.639679+00:00",
+        "utc_finish": "2026-11-17T02:16:11.169144+00:00",
+        "commands": [
+          132,
+          133,
+          134
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "PUB-01",
+        "requirements": [
+          "current-UTC",
+          "idempotent-publication",
+          "exact-byte-preservation"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:11.169144+00:00",
+        "utc_finish": "2026-11-17T02:16:12.173102+00:00",
+        "commands": [
+          135,
+          136,
+          137,
+          138,
+          139
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "PUB-02",
+        "requirements": [
+          "no-public-time-override",
+          "CLI-contract"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:12.173102+00:00",
+        "utc_finish": "2026-11-17T02:16:12.541199+00:00",
+        "commands": [
+          140,
+          141,
+          142,
+          143
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-A-NEG-same-master",
+        "requirements": [
+          "A-consent",
+          "distinct-authorized-masters",
+          "role-authority-validation"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:12.541199+00:00",
+        "utc_finish": "2026-11-17T02:16:13.151994+00:00",
+        "commands": [
+          144,
+          145,
+          146
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-A-NEG-third-target",
+        "requirements": [
+          "A-consent",
+          "distinct-authorized-masters",
+          "role-authority-validation"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:13.151994+00:00",
+        "utc_finish": "2026-11-17T02:16:13.695301+00:00",
+        "commands": [
+          147,
+          148,
+          149
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-A-NEG-ungranted-B",
+        "requirements": [
+          "A-consent",
+          "distinct-authorized-masters",
+          "role-authority-validation"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:13.695301+00:00",
+        "utc_finish": "2026-11-17T02:16:14.056775+00:00",
+        "commands": [
+          150,
+          151
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-A-NEG-ungranted-A",
+        "requirements": [
+          "A-consent",
+          "distinct-authorized-masters",
+          "role-authority-validation"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:14.058129+00:00",
+        "utc_finish": "2026-11-17T02:16:14.449255+00:00",
+        "commands": [
+          152,
+          153
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-DELTA-0",
+        "requirements": [
+          "revocation-v3",
+          "signed-time-boundaries",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:14.449255+00:00",
+        "utc_finish": "2026-11-17T02:16:15.369228+00:00",
+        "commands": [
+          154,
+          155,
+          156,
+          157,
+          158
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-DELTA-900000",
+        "requirements": [
+          "revocation-v3",
+          "signed-time-boundaries",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:15.369228+00:00",
+        "utc_finish": "2026-11-17T02:16:16.275746+00:00",
+        "commands": [
+          159,
+          160,
+          161,
+          162,
+          163
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-DELTA-900001",
+        "requirements": [
+          "revocation-v3",
+          "signed-time-boundaries",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:16.275746+00:00",
+        "utc_finish": "2026-11-17T02:16:17.224990+00:00",
+        "commands": [
+          164,
+          165,
+          166,
+          167,
+          168
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-DELTA--1",
+        "requirements": [
+          "revocation-v3",
+          "signed-time-boundaries",
+          "actual-candidate-fixtures"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:17.224990+00:00",
+        "utc_finish": "2026-11-17T02:16:18.110045+00:00",
+        "commands": [
+          169,
+          170,
+          171,
+          172,
+          173
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-LIVE",
+        "requirements": [
+          "A-consent",
+          "B-publication",
+          "current-UTC",
+          "idempotent-revocation"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:18.110045+00:00",
+        "utc_finish": "2026-11-17T02:16:19.512475+00:00",
+        "commands": [
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-EXPIRED-RETRY",
+        "requirements": [
+          "idempotent-revocation",
+          "signed-time-not-receipt-time"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:19.512475+00:00",
+        "utc_finish": "2026-11-17T02:16:20.292081+00:00",
+        "commands": [
+          181,
+          182,
+          183,
+          184
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-NEG-tampered",
+        "requirements": [
+          "revocation-v3",
+          "role-authority-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:20.292081+00:00",
+        "utc_finish": "2026-11-17T02:16:20.838742+00:00",
+        "commands": [
+          185,
+          186,
+          187
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-NEG-short",
+        "requirements": [
+          "revocation-v3",
+          "role-authority-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:20.838742+00:00",
+        "utc_finish": "2026-11-17T02:16:21.359995+00:00",
+        "commands": [
+          188,
+          189,
+          190
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-NEG-v2",
+        "requirements": [
+          "revocation-v3",
+          "role-authority-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:21.359995+00:00",
+        "utc_finish": "2026-11-17T02:16:21.871910+00:00",
+        "commands": [
+          191,
+          192,
+          193
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-NEG-wrong-ledger",
+        "requirements": [
+          "revocation-v3",
+          "role-authority-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:21.872465+00:00",
+        "utc_finish": "2026-11-17T02:16:22.391486+00:00",
+        "commands": [
+          194,
+          195,
+          196
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-NEG-wrong-B",
+        "requirements": [
+          "revocation-v3",
+          "role-authority-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:22.391486+00:00",
+        "utc_finish": "2026-11-17T02:16:22.942954+00:00",
+        "commands": [
+          197,
+          198,
+          199
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-NEG-expired",
+        "requirements": [
+          "revocation-v3",
+          "role-authority-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:22.942954+00:00",
+        "utc_finish": "2026-11-17T02:16:23.545330+00:00",
+        "commands": [
+          200,
+          201,
+          202
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-NEG-unauthorized-A",
+        "requirements": [
+          "revocation-v3",
+          "role-authority-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:23.545330+00:00",
+        "utc_finish": "2026-11-17T02:16:24.154172+00:00",
+        "commands": [
+          203,
+          204,
+          205
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "REV-NEG-revoked-A",
+        "requirements": [
+          "revocation-v3",
+          "role-authority-validation",
+          "no-write-on-reject"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:24.154172+00:00",
+        "utc_finish": "2026-11-17T02:16:24.943933+00:00",
+        "commands": [
+          206,
+          207,
+          208,
+          209
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "BATCH-ORDER-False",
+        "requirements": [
+          "DDLB",
+          "canonical-order",
+          "grant-dependency"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:24.944933+00:00",
+        "utc_finish": "2026-11-17T02:16:25.652379+00:00",
+        "commands": [
+          210,
+          211,
+          212,
+          213
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "BATCH-ORDER-True",
+        "requirements": [
+          "DDLB",
+          "canonical-order",
+          "grant-dependency"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:25.653291+00:00",
+        "utc_finish": "2026-11-17T02:16:26.373628+00:00",
+        "commands": [
+          214,
+          215,
+          216,
+          217
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "BATCH-FAILED-GRANT",
+        "requirements": [
+          "grant-durability",
+          "no-dependent-without-prerequisite"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:26.373628+00:00",
+        "utc_finish": "2026-11-17T02:16:26.902471+00:00",
+        "commands": [
+          218,
+          219,
+          220
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "BATCH-MIXED",
+        "requirements": [
+          "PARTIAL_IMPORT",
+          "ordered-results",
+          "retryable",
+          "DDLB"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:26.902471+00:00",
+        "utc_finish": "2026-11-17T02:16:28.084870+00:00",
+        "commands": [
+          221,
+          222,
+          223,
+          224,
+          225,
+          226
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "DDLB-truncated",
+        "requirements": [
+          "DDLB-framing",
+          "partial-durability"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:28.085394+00:00",
+        "utc_finish": "2026-11-17T02:16:28.611578+00:00",
+        "commands": [
+          227,
+          228,
+          229
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "DDLB-trailing",
+        "requirements": [
+          "DDLB-framing",
+          "partial-durability"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:28.611578+00:00",
+        "utc_finish": "2026-11-17T02:16:29.154570+00:00",
+        "commands": [
+          230,
+          231,
+          232
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "DDLB-overflow",
+        "requirements": [
+          "DDLB-framing",
+          "partial-durability"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:29.155105+00:00",
+        "utc_finish": "2026-11-17T02:16:29.619592+00:00",
+        "commands": [
+          233,
+          234,
+          235
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "DDLB-zero",
+        "requirements": [
+          "DDLB-framing",
+          "partial-durability"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:29.619592+00:00",
+        "utc_finish": "2026-11-17T02:16:30.122548+00:00",
+        "commands": [
+          236,
+          237,
+          238
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "BATCH-MEMORY",
+        "requirements": [
+          "bounded-memory",
+          "no-temporary-spillover"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:30.122548+00:00",
+        "utc_finish": "2026-11-17T02:16:30.727914+00:00",
+        "commands": [
+          239,
+          240,
+          241,
+          242
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "EXPORT-01",
+        "requirements": [
+          "DDLB",
+          "exact-get-export",
+          "no-overwrite"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:30.729421+00:00",
+        "utc_finish": "2026-11-17T02:16:32.094398+00:00",
+        "commands": [
+          243,
+          244,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "EXPORT-02",
+        "requirements": [
+          "unbound-multi-ledger",
+          "explicit-selection"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:32.094985+00:00",
+        "utc_finish": "2026-11-17T02:16:32.950031+00:00",
+        "commands": [
+          251,
+          252,
+          253,
+          254,
+          255
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "IDENTITY-missing",
+        "requirements": [
+          "FI-18",
+          "identity-gate",
+          "original-backup-restore"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:32.950031+00:00",
+        "utc_finish": "2026-11-17T02:16:34.520508+00:00",
+        "commands": [
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265,
+          266,
+          267,
+          268,
+          269
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "IDENTITY-corrupt",
+        "requirements": [
+          "FI-18",
+          "identity-gate",
+          "original-backup-restore"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:34.520508+00:00",
+        "utc_finish": "2026-11-17T02:16:36.084025+00:00",
+        "commands": [
+          270,
+          271,
+          272,
+          273,
+          274,
+          275,
+          276,
+          277,
+          278,
+          279,
+          280,
+          281,
+          282,
+          283
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "IDENTITY-KEY-ONLY",
+        "requirements": [
+          "key-only-recovery",
+          "manifest-v2"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:36.085024+00:00",
+        "utc_finish": "2026-11-17T02:16:36.396747+00:00",
+        "commands": [
+          284,
+          285,
+          286
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "CONFIG-01",
+        "requirements": [
+          "FI-19",
+          "config-v1",
+          "persistent-limits",
+          "corruption-gate"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:36.396747+00:00",
+        "utc_finish": "2026-11-17T02:16:38.115094+00:00",
+        "commands": [
+          287,
+          288,
+          289,
+          290,
+          291,
+          292,
+          293,
+          294,
+          295,
+          296,
+          297,
+          298,
+          299,
+          300
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "IDENTITY-MANIFEST-STRICT",
+        "requirements": [
+          "manifest-v2",
+          "legacy-rejection",
+          "identity-gate"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:38.115094+00:00",
+        "utc_finish": "2026-11-17T02:16:39.068937+00:00",
+        "commands": [
+          301,
+          302,
+          303,
+          304,
+          305,
+          306,
+          307,
+          308,
+          309
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "IDENTITY-AAD-TAMPER",
+        "requirements": [
+          "key-AAD88",
+          "AES-GCM-authentication",
+          "identity-gate"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:39.070930+00:00",
+        "utc_finish": "2026-11-17T02:16:39.902043+00:00",
+        "commands": [
+          310,
+          311,
+          312,
+          313,
+          314,
+          315,
+          316,
+          317
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "CONFIG-LIMIT-NEG",
+        "requirements": [
+          "resource-limits",
+          "strict-CLI-integers"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:39.903056+00:00",
+        "utc_finish": "2026-11-17T02:16:40.835325+00:00",
+        "commands": [
+          318,
+          319,
+          320,
+          321,
+          322,
+          323,
+          324,
+          325
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "not native acceptance",
+        "fault_case": false
+      },
+      {
+        "id": "FI-01",
+        "requirements": [
+          "FI-01",
+          "key-manifest-crash"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:40.836341+00:00",
+        "utc_finish": "2026-11-17T02:16:41.039257+00:00",
+        "commands": [
+          326,
+          327
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-02",
+        "requirements": [
+          "FI-02",
+          "key-manifest-crash"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:41.039257+00:00",
+        "utc_finish": "2026-11-17T02:16:41.391093+00:00",
+        "commands": [
+          328,
+          329,
+          330
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-03",
+        "requirements": [
+          "FI-03",
+          "key-only-recovery"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:41.392102+00:00",
+        "utc_finish": "2026-11-17T02:16:41.637094+00:00",
+        "commands": [
+          331,
+          332
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-GENESIS-init",
+        "requirements": [
+          "FI-04",
+          "interrupted-genesis",
+          "recovery-idempotence"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:41.638114+00:00",
+        "utc_finish": "2026-11-17T02:16:42.540193+00:00",
+        "commands": [
+          333,
+          334,
+          335,
+          336,
+          337,
+          338
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-GENESIS-join",
+        "requirements": [
+          "FI-04",
+          "interrupted-join",
+          "recovery-idempotence"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:42.541306+00:00",
+        "utc_finish": "2026-11-17T02:16:43.493856+00:00",
+        "commands": [
+          339,
+          340,
+          341,
+          342,
+          343,
+          344
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-GENESIS-manifest",
+        "requirements": [
+          "FI-05",
+          "interrupted-genesis",
+          "recovery-idempotence"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:43.495442+00:00",
+        "utc_finish": "2026-11-17T02:16:44.488347+00:00",
+        "commands": [
+          345,
+          346,
+          347,
+          348,
+          349,
+          350
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-06",
+        "requirements": [
+          "FI-06",
+          "temporary-publication",
+          "retry-durability-diagnosis"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:44.488347+00:00",
+        "utc_finish": "2026-11-17T02:16:45.290924+00:00",
+        "commands": [
+          351,
+          352,
+          353,
+          354
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-07",
+        "requirements": [
+          "FI-07",
+          "missing-fault-hook"
+        ],
+        "status": "BLOCKED",
+        "detail": "MoveFileEx(WRITE_THROUGH) exposes no callback between final rename and directory durability confirmation; production hooks unchanged",
+        "category": "missing_interface_or_prerequisite",
+        "utc_start": "2026-11-17T02:16:45.290924+00:00",
+        "utc_finish": "2026-11-17T02:16:45.290924+00:00",
+        "commands": [],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-09",
+        "requirements": [
+          "FI-09",
+          "missing-fault-hook"
+        ],
+        "status": "BLOCKED",
+        "detail": "Management DDLB has no injectable per-item completed-prefix barrier; production hooks unchanged",
+        "category": "missing_interface_or_prerequisite",
+        "utc_start": "2026-11-17T02:16:45.290924+00:00",
+        "utc_finish": "2026-11-17T02:16:45.290924+00:00",
+        "commands": [],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-09-GRANT",
+        "requirements": [
+          "FI-09-GRANT",
+          "missing-fault-hook"
+        ],
+        "status": "BLOCKED",
+        "detail": "Management DDLB has no observable grant-durable/before-dependent checkpoint; sequential adapter calls would not prove the actual batch boundary; production hooks unchanged",
+        "category": "missing_interface_or_prerequisite",
+        "utc_start": "2026-11-17T02:16:45.290924+00:00",
+        "utc_finish": "2026-11-17T02:16:45.290924+00:00",
+        "commands": [],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-15",
+        "requirements": [
+          "FI-15",
+          "missing-fault-hook"
+        ],
+        "status": "BLOCKED",
+        "detail": "Atomic config replacement and directory durability are one MoveFileEx(WRITE_THROUGH) call; no intermediate hook; production hooks unchanged",
+        "category": "missing_interface_or_prerequisite",
+        "utc_start": "2026-11-17T02:16:45.290924+00:00",
+        "utc_finish": "2026-11-17T02:16:45.290924+00:00",
+        "commands": [],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-08",
+        "requirements": [
+          "FI-08",
+          "durable-before-ack",
+          "idempotent-import"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:45.292435+00:00",
+        "utc_finish": "2026-11-17T02:16:46.145397+00:00",
+        "commands": [
+          355,
+          356,
+          357,
+          358,
+          359
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-10",
+        "requirements": [
+          "FI-10",
+          "archive-crash-recovery"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:46.145397+00:00",
+        "utc_finish": "2026-11-17T02:16:47.380701+00:00",
+        "commands": [
+          360,
+          361,
+          362,
+          363,
+          364,
+          365,
+          366
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-11",
+        "requirements": [
+          "FI-11",
+          "archive-crash-recovery"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:47.382236+00:00",
+        "utc_finish": "2026-11-17T02:16:48.653865+00:00",
+        "commands": [
+          367,
+          368,
+          369,
+          370,
+          371,
+          372,
+          373
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-12",
+        "requirements": [
+          "FI-12",
+          "archive-crash-recovery"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:48.653865+00:00",
+        "utc_finish": "2026-11-17T02:16:50.100356+00:00",
+        "commands": [
+          374,
+          375,
+          376,
+          377,
+          378,
+          379,
+          380,
+          381
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-13",
+        "requirements": [
+          "FI-13",
+          "archive-crash-recovery"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:50.100356+00:00",
+        "utc_finish": "2026-11-17T02:16:51.570792+00:00",
+        "commands": [
+          382,
+          383,
+          384,
+          385,
+          386,
+          387,
+          388,
+          389
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-14",
+        "requirements": [
+          "FI-14",
+          "config-atomic-replacement"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:51.570792+00:00",
+        "utc_finish": "2026-11-17T02:16:52.255744+00:00",
+        "commands": [
+          390,
+          391,
+          392,
+          393,
+          394
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-15-POST",
+        "requirements": [
+          "FI-15-post-return-only",
+          "config-atomic-replacement"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:52.255744+00:00",
+        "utc_finish": "2026-11-17T02:16:52.920798+00:00",
+        "commands": [
+          395,
+          396,
+          397,
+          398,
+          399
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-16",
+        "requirements": [
+          "FI-16",
+          "consent-publication"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:52.920798+00:00",
+        "utc_finish": "2026-11-17T02:16:53.599702+00:00",
+        "commands": [
+          400,
+          401,
+          402,
+          403
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-17",
+        "requirements": [
+          "FI-17",
+          "same-host-lock",
+          "process-termination"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:53.599702+00:00",
+        "utc_finish": "2026-11-17T02:16:54.520506+00:00",
+        "commands": [
+          404,
+          405,
+          406,
+          407,
+          408,
+          409,
+          410
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-20-HELD-FILE",
+        "requirements": [
+          "FI-20",
+          "external-lock",
+          "no-overwrite"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:54.520506+00:00",
+        "utc_finish": "2026-11-17T02:16:55.405175+00:00",
+        "commands": [
+          411,
+          412,
+          413,
+          414,
+          415,
+          416,
+          417
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      },
+      {
+        "id": "FI-REVOCATION-ACK",
+        "requirements": [
+          "revocation-durable-before-ack",
+          "idempotent-revocation"
+        ],
+        "status": "PASS",
+        "detail": "Assertions satisfied",
+        "category": "candidate",
+        "utc_start": "2026-11-17T02:16:55.405175+00:00",
+        "utc_finish": "2026-11-17T02:16:56.251742+00:00",
+        "commands": [
+          418,
+          419,
+          420,
+          421
+        ],
+        "execution_context": "OrdinaryWindowsPowerShell",
+        "filesystem_acceptance": "operator-reported native Windows",
+        "fault_case": true
+      }
+    ],
+    "candidate_dll_sha256": "93ef155c1eb86b1a160b1e752b65bfb7afba7f5f8b596de97d3cc8abb55a8a9a",
+    "ledger_library_sha256": "7e2122da422d69522db13a08225df7d850106c2f727dbfc6d0557a04f268e44d",
+    "source_snapshot_hashes_verified": true,
+    "invalid_join_no_filesystem_change_verified": true
+  }
+}

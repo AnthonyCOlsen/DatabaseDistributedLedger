@@ -7,3 +7,9 @@ TestResults/
 **/signing-key.v1.json
 **/instance.identity.json
 **/instance.config.json
+# Python QA runtime caches
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+# Extracted design download; canonical design documents live at the repository root.
+/DDL_ARCH014_BLOCK_ARCHIVED_OwnerApproved_20261117_UNCOMPRESSED/
