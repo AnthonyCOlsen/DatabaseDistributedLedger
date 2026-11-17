@@ -1,10 +1,14 @@
 using System.Buffers.Binary;
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 
 namespace UserDimensions.Ledger;
 
 internal sealed record ImportInterruption(BlockDisposition Disposition,bool NewlyPersisted,string Cause);
+internal sealed record LedgerHistoryFailure(
+    [property:JsonPropertyName("reason")] string Reason,
+    [property:JsonPropertyName("path")] string Path);
 
 public sealed class LedgerInstance : IDisposable
 {
@@ -101,10 +105,20 @@ public sealed class LedgerInstance : IDisposable
         {
             var length=new FileInfo(path).Length; Limits.CheckRaw(length);
             Errors.Require(resident + length*8 <= Limits.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Canonical replay exceeds configured buffered history memory; raise the limit.");
-            var block=BlockCodec.Parse(Paths.ReadBounded(path,Math.Min(Limits.MaxRawBlockBytes,Limits.MaxInflightImportBytes/4)),Limits);
+            SignedBlock block;
+            try { block=BlockCodec.Parse(Paths.ReadBounded(path,Math.Min(Limits.MaxRawBlockBytes,Limits.MaxInflightImportBytes/4)),Limits); }
+            catch(LedgerException e) when(e.Code is "BAD_FRAME" or "HASH_MISMATCH" or "BAD_SIGNATURE" or "BAD_EVENT" or
+                "UNSUPPORTED_VERSION" or "LEDGER_IDENTITY_MISMATCH" or "CONSENT_EXPIRED")
+            {
+                // This boundary reads retained history, not untrusted new input. Resource,
+                // timeout and I/O failures keep their existing, distinct diagnostics.
+                throw new LedgerException("RECOVERY_REQUIRED",4,"Retained signed history failed verification ("+e.Code+").",
+                    new LedgerHistoryFailure("LEDGER_HISTORY_CORRUPT",path));
+            }
             if (Manifest.Binding!=null && Manifest.Binding.LedgerId!=block.LedgerId) continue;
             var expected=BlockPath(block,path.EndsWith(".XBLK",StringComparison.Ordinal));
-            Errors.Require(string.Equals(path,expected,OperatingSystem.IsWindows()?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal),"RECOVERY_REQUIRED",4,"Block filename does not match verified bytes.");
+            if(!string.Equals(path,expected,OperatingSystem.IsWindows()?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal))
+                throw new LedgerException("RECOVERY_REQUIRED",4,"Block filename does not match verified bytes.",new LedgerHistoryFailure("LEDGER_HISTORY_CORRUPT",path));
             resident+=length*8+block.EventBytes.LongLength*4;
             Errors.Require(resident<=Limits.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Decoded history exceeds configured memory.");
             result.Add((block,path));
@@ -262,7 +276,8 @@ public sealed class LedgerInstance : IDisposable
     private BlockDisposition? ExistingPublication(Guid id,byte[] body)
     {
         var binding=Bound();
-        var matches=Inventory().Where(x=>x.Block.LedgerId==binding.LedgerId && x.Block.Id==id).ToList();
+        var inventory=Inventory();
+        var matches=inventory.Where(x=>x.Block.LedgerId==binding.LedgerId && x.Block.Id==id).ToList();
         if(matches.Count==0)
         {
             var root=Path.Combine(Root,"BLK");
@@ -278,11 +293,28 @@ public sealed class LedgerInstance : IDisposable
         Errors.Require(matches.Select(x=>x.Block.Hash).Distinct().Count()==1,"BLOCK_GUID_CONFLICT",4,"Conflicting retained GUID.");
         var original=matches[0].Block;
         Errors.Require(Binary.Hex(original.Signer)==PublicKey && !original.IsGenesis && original.EventBytes.AsSpan().SequenceEqual(body),"BLOCK_GUID_CONFLICT",4,"GUID identifies different signed content or signer.");
-        var state=AuthorizationReplay.Evaluate(Inventory().Select(x=>x.Block),binding).Blocks.Single(x=>x.Block.Hash==original.Hash);
+        var state=AuthorizationReplay.Evaluate(inventory.Select(x=>x.Block),binding).Blocks.Single(x=>x.Block.Hash==original.Hash);
+        if((state.Status is "pending" or "quarantined") && matches.All(x=>x.Path==BlockPath(original,true)))
+            throw new LedgerException("BLOCK_ARCHIVED",4,"The original publication is retained as archived history.",new {
+                original_publication=HistoricalPublicationFields(original),
+                current=new { state="archived",status=state.Status,authorization=state.Authorization,reason=state.Reason,path=matches[0].Path,retained=true },
+                new_publication=false,mutated=false });
         Errors.Require(state.Status=="retained" && state.Authorization=="authorized","NOT_AUTHORIZED",4,"Previously published block is no longer historically authorized.");
         // Only a final active file, not an interrupted temporary publication, proves completion.
         Errors.Require(matches.All(x=>x.Path==BlockPath(original,false)),"RECOVERY_REQUIRED",4,"Publication requires archive/durability reconciliation.");
         return state;
+    }
+    private object HistoricalPublicationFields(SignedBlock block)
+    {
+        // Historical success is separate from present archive eligibility. Derive all
+        // fields from authenticated original bytes, without obtaining a new UTC time.
+        if(block.Event?.Kind==0x21) return new {
+            operation="block.publish",ledger_id_hex=block.LedgerId,block_guid=block.Id,sha512=block.Hash,
+            timestamp_utc_ms=block.Timestamp.ToString(CultureInfo.InvariantCulture),authorization="authorized",durable=true,path=BlockPath(block,false),
+            consent_timestamp_utc_ms=block.Event.ConsentTimestamp.ToString(CultureInfo.InvariantCulture),
+            consent_age_ms=RevocationConsent.CheckInterval(block.Timestamp,block.Event.ConsentTimestamp) };
+        return new { operation="block.publish",ledger_id_hex=block.LedgerId,block_guid=block.Id,sha512=block.Hash,
+            timestamp_utc_ms=block.Timestamp.ToString(CultureInfo.InvariantCulture),authorization="authorized",durable=true,path=BlockPath(block,false) };
     }
     private BlockDisposition PublishCore(byte[] body,Guid? id,Func<long> utc,bool compress=false)
     {

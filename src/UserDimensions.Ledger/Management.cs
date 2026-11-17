@@ -242,13 +242,14 @@ public static class Management
         {
             var first=errors.First().Value;
             throw new LedgerException(committed+duplicates>0?"PARTIAL_IMPORT":first.Code,committed+duplicates>0?3:first.ExitCode,
-                "Import did not complete without errors.",new { counts.results,counts.durable_count,counts.duplicate_count,counts.rejected_count,counts.total_count,reason=first.Code });
+                "Import did not complete without errors.",new { counts.results,counts.durable_count,counts.duplicate_count,counts.rejected_count,counts.total_count,
+                    reason=first.Details is LedgerHistoryFailure history?history.Reason:first.Code });
         }
         return new { operation="block.import",counts.results,counts.durable_count,counts.duplicate_count,counts.rejected_count,counts.total_count };
     }
     private static object Status(string root,string operation)
     {
-        InstanceManifest? manifest=null; var available=false; var authorized=false; var codes=new List<string>(); AuthorizationSnapshot? snapshot=null;
+        InstanceManifest? manifest=null; var available=false; var authorized=false; var historyUnavailable=false; var codes=new List<string>(); AuthorizationSnapshot? snapshot=null;
         var newRoot=(!Directory.Exists(root) || !Directory.EnumerateFileSystemEntries(root).Any()) && (!File.Exists(root+".DLDB") || new FileInfo(root+".DLDB").Length==0);
         try
         {
@@ -261,17 +262,19 @@ public static class Management
         }
         catch(Exception e) when(e is LedgerException or IOException or UnauthorizedAccessException)
         {
-            available=false; snapshot=null; authorized=false;
-            codes.Add(e is LedgerException le?le.Code:"IO_ERROR");
+            snapshot=null; authorized=false;
+            if(e is LedgerException {Details:LedgerHistoryFailure history})
+            { historyUnavailable=true; codes.Add(history.Reason); }
+            else { available=false; codes.Add(e is LedgerException le?le.Code:"IO_ERROR"); }
             try { manifest=InstanceManifest.Decode(Paths.ReadBounded(Path.Combine(root,"instance.identity.json"),4096,"IDENTITY_MISMATCH")); } catch(Exception secondary) when(secondary is LedgerException or IOException or UnauthorizedAccessException) { }
         }
-        var state=newRoot?"uninitialized":!available?"recovery_required":manifest!.Binding==null?"unbound":"bound";
+        var state=newRoot?"uninitialized":(!available || historyUnavailable)?"recovery_required":manifest!.Binding==null?"unbound":"bound";
         var sorted=codes.Order(StringComparer.Ordinal).ToArray();
         if(operation=="instance.status") return new { operation,state,instance_guid=manifest?.InstanceId,public_key_hex=manifest?.PublicKey,signing_available=available,ledger_id_hex=manifest?.Binding?.LedgerId,genesis_sha512=manifest?.Binding?.GenesisHash,recovery_codes=sorted };
         var blocks=snapshot?.Blocks; object? blockFields=blocks==null && !newRoot?null:new {
             retained_count=blocks?.Count ?? 0,pending_count=blocks?.Count(x=>x.Status=="pending") ?? 0,quarantined_count=blocks?.Count(x=>x.Status=="quarantined") ?? 0,disputed_count=0,opaque_count=0 };
         return new { operation,instance=new {state,instance_guid=manifest?.InstanceId,public_key_hex=manifest?.PublicKey,recovery_codes=sorted},
             binding=new {ledger_id_hex=manifest?.Binding?.LedgerId,genesis_sha512=manifest?.Binding?.GenesisHash,state=manifest?.Binding==null?"unbound":"bound"},
-            signing=new {available,authorized},blocks=blockFields,projection=new {state="not_installed",applied_count=(int?)null},peers=!available && !newRoot?null:new {state="not_installed",connected_count=(int?)null} };
+            signing=new {available,authorized},blocks=blockFields,projection=new {state="not_installed",applied_count=(int?)null},peers=(!available || historyUnavailable) && !newRoot?null:new {state="not_installed",connected_count=(int?)null} };
     }
 }
