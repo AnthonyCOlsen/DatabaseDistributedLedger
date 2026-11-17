@@ -273,10 +273,10 @@ public sealed class LedgerInstance : IDisposable
     }
     private void CheckPublicationSize(byte[] bytes) => Errors.Require(bytes.LongLength<=Limits.MaxDecompressedEventBytes && bytes.LongLength<=Limits.MaxInflightImportBytes/8,
         "RESOURCE_LIMIT",5,"Event exceeds configured buffered publication bounds.");
-    private BlockDisposition? ExistingPublication(Guid id,byte[] body)
+    private BlockDisposition? ExistingPublication(Guid id,byte[] body,List<(SignedBlock Block,string Path)>? inventory=null)
     {
         var binding=Bound();
-        var inventory=Inventory();
+        inventory ??= Inventory();
         var matches=inventory.Where(x=>x.Block.LedgerId==binding.LedgerId && x.Block.Id==id).ToList();
         if(matches.Count==0)
         {
@@ -319,10 +319,12 @@ public sealed class LedgerInstance : IDisposable
     private BlockDisposition PublishCore(byte[] body,Guid? id,Func<long> utc,bool compress=false)
     {
         var binding=Bound(); CheckPublicationSize(body);
-        if(id!=null && ExistingPublication(id.Value,body) is {} original) return original;
+        // Verify retained history before acquiring a fresh timestamp or signing.
+        var inventory=Inventory();
+        if(id!=null && ExistingPublication(id.Value,body,inventory) is {} original) return original;
         var raw=identity.CreateBlock(binding.LedgerId,id ?? Guid.NewGuid(),utc(),body,compress);
         var candidate=BlockCodec.Parse(raw,Limits);
-        var state=AuthorizationReplay.Evaluate(Inventory().Select(x=>x.Block).Where(x=>x.Id!=candidate.Id).Append(candidate),binding).Blocks.Single(x=>x.Block.Hash==candidate.Hash);
+        var state=AuthorizationReplay.Evaluate(inventory.Select(x=>x.Block).Where(x=>x.Id!=candidate.Id).Append(candidate),binding).Blocks.Single(x=>x.Block.Hash==candidate.Hash);
         Errors.Require(state.Status=="retained" && state.Authorization=="authorized","NOT_AUTHORIZED",4,"Local publication requires historically authorized signers.");
         return Import(raw,out _);
     }

@@ -1,5 +1,6 @@
 using UserDimensions.Ledger;
 if(args.Length>0 && args[0]=="--worker") return Tests.Worker(args[1..]);
+if(args.Length==1 && args[0]=="--pre-signing") { Tests.RunPreSigningRecovery(); return Tests.Finish(); }
 if(args.Length==1 && args[0]=="--qa014") { Tests.RunQa014Resolution(); return Tests.Finish(); }
 Tests.RunProtocol();
 Tests.RunIdentity();
@@ -10,6 +11,7 @@ Tests.RunCompressionInterop();
 Tests.RunArch014();
 Tests.RunQa010Resolution();
 Tests.RunQa014Resolution();
+Tests.RunPreSigningRecovery();
 return Tests.Finish();
 
 internal static partial class Tests
