@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1740" height="1120" viewBox="0 0 1740 1120">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="context-stroke"/></marker></defs>
+<rect width="1740" height="1120" fill="#FFFFFF"/>
+<rect x="24" y="18" width="1692" height="92" rx="18" fill="#172A4B" stroke="#172A4B" stroke-width="0"/>
+<rect x="36" y="128" width="394" height="50" rx="8" fill="#EFF5FD" stroke="#2865AE" stroke-width="1"/>
+<rect x="443" y="128" width="395" height="50" rx="8" fill="#FFF1EF" stroke="#BA403C" stroke-width="1"/>
+<rect x="851" y="128" width="395" height="50" rx="8" fill="#EDF7F0" stroke="#277C50" stroke-width="1"/>
+<rect x="1261" y="128" width="443" height="50" rx="8" fill="#ECF8FA" stroke="#117B91" stroke-width="1"/>
+<rect x="27" y="207" width="527" height="548" rx="32" fill="#F2F7FD" stroke="#B1CEEA" stroke-width="1.1"/>
+<rect x="574" y="207" width="543" height="548" rx="32" fill="#FCF7FC" stroke="#CDB9E7" stroke-width="1.1"/>
+<rect x="1137" y="207" width="576" height="548" rx="32" fill="#F2F9F9" stroke="#A9D4D8" stroke-width="1.1"/>
+<rect x="27" y="781" width="1686" height="286" rx="26" fill="#F5F8FC" stroke="#B8C9DE" stroke-width="1.3"/>
+<rect x="55" y="988" width="1626" height="57" rx="14" fill="#EAF1FC" stroke="#CCD9E9" stroke-width="1"/>
+<polyline points="161,389 161,452" fill="none" stroke="#277C50" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="259,504 286,504" fill="none" stroke="#BA403C" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<text x="264" y="480" fill="#BA403C" font-family="Arial,sans-serif" font-size="14" font-weight="700">signs</text>
+<polyline points="403,557 403,606" fill="none" stroke="#277C50" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="845,398 845,448" fill="none" stroke="#734AAF" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="634,591 634,640" fill="none" stroke="#BA403C" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1424,366 1424,410" fill="none" stroke="#117B91" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1424,517 1424,574 1289,574 1289,634" fill="none" stroke="#277C50" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<text x="1316" y="566" fill="#277C50" font-family="Arial,sans-serif" font-size="14" font-weight="700">yes</text>
+<polyline points="1424,517 1424,574 1563,574 1563,634" fill="none" stroke="#BA403C" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<text x="1530" y="566" fill="#BA403C" font-family="Arial,sans-serif" font-size="14" font-weight="700">no</text>
+<polyline points="437,915 488,915" fill="none" stroke="#2865AE" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="906,915 957,915" fill="none" stroke="#2865AE" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<text x="870.0" y="66.8" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="700" fill="#ffffff">UDDL  ·  Ledger Authorization Lifecycle</text>
+<text x="870.0" y="97.6" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="400" fill="#E7EFFB">Genesis trust → master grants → two-signature revocation → historical authorization and reclassification</text>
+<text x="233.0" y="162.1" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#2865AE">STEP 1  ·  SIGNED LEDGER — ACCEPTED</text>
+<text x="640.5" y="162.1" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#BA403C">STEP 2  ·  SQL INTERCEPTION — PLANNED</text>
+<text x="1048.5" y="162.1" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#277C50">STEP 3  ·  PROJECTION / REPLAY — PLANNED</text>
+<text x="1482.5" y="162.1" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#117B91">STEP 4  ·  PEER SYNC — PLANNED</text>
+<text x="290.0" y="245.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#2865AE">1  ·  GENESIS &amp; GRANTS</text>
+<text x="844.0" y="244.6" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#734AAF">2  ·  TWO-SIGNATURE REVOCATION</text>
+<text x="1425.0" y="244.6" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#117B91">3  ·  ADMISSION OF NEW BLOCKS</text>
+<rect x="56" y="270" width="468" height="119" rx="15" stroke="#AAC8EA" stroke-width="1.3" fill="#EFF5FD"/>
+<text x="290.0" y="301.5" font-family="Arial,sans-serif" font-weight="700" font-size="19" fill="#2865AE" text-anchor="middle">GENESIS  ·  unique trust anchor</text>
+<text x="290.0" y="332.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">Self-signed by original Master A</text>
+<text x="290.0" y="354.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">Ledger ID = A’s 32-byte public key</text>
+<text x="290.0" y="376.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">All members pin full signed-genesis SHA-512</text>
+<rect x="57" y="452" width="202" height="99" rx="15" stroke="#9DCDAF" stroke-width="1.3" fill="#EDF7F0"/>
+<text x="158.0" y="484.0" font-family="Arial,sans-serif" font-weight="700" font-size="21" fill="#277C50" text-anchor="middle">Master A</text>
+<text x="158.0" y="515.0" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">Initially authorized</text>
+<text x="158.0" y="537.0" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">by valid genesis</text>
+<rect x="286" y="445" width="234" height="112" rx="15" stroke="#CBB4E4" stroke-width="1.3" fill="#F5F0FA"/>
+<text x="403.0" y="473.0" font-family="Arial,sans-serif" font-weight="700" font-size="20" fill="#734AAF" text-anchor="middle">GRANT_MASTER</text>
+<text x="403.0" y="504.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Authorized master signs</text>
+<text x="403.0" y="526.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">grant naming Master B</text>
+<text x="403.0" y="548.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Effective at its canonical position</text>
+<rect x="286" y="606" width="234" height="90" rx="15" stroke="#9DCDAF" stroke-width="1.3" fill="#EDF7F0"/>
+<text x="403.0" y="633.5" font-family="Arial,sans-serif" font-weight="700" font-size="20" fill="#277C50" text-anchor="middle">Master B</text>
+<text x="403.0" y="664.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">Authorized from the</text>
+<text x="403.0" y="686.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">grant’s canonical position</text>
+<text x="288.5" y="729.2" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="400" fill="#53647A">Ledger ID never changes—even if Master A is revoked.</text>
+<rect x="599" y="270" width="492" height="128" rx="15" stroke="#CBB4E4" stroke-width="1.3" fill="#F5F0FA"/>
+<text x="845.0" y="306.0" font-family="Arial,sans-serif" font-weight="700" font-size="19" fill="#734AAF" text-anchor="middle">A creates signed consent</text>
+<text x="845.0" y="337.0" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">A’s current UTC tA; intended block GUID</text>
+<text x="845.0" y="359.0" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">Ledger ID, both keys, revoked target A or B</text>
+<text x="845.0" y="381.0" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">Consent bears A’s Ed25519 signature</text>
+<rect x="599" y="448" width="492" height="143" rx="15" stroke="#CBB4E4" stroke-width="1.3" fill="#F5F0FA"/>
+<text x="845.0" y="491.5" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#734AAF" text-anchor="middle">B creates the final REVOKE_MASTER block</text>
+<text x="845.0" y="522.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">B verifies A’s consent and both authorities</text>
+<text x="845.0" y="544.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">B chooses B’s own current UTC tB</text>
+<text x="845.0" y="566.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">B signs entire block, including A’s consent</text>
+<rect x="599" y="640" width="492" height="84" rx="15" stroke="#E0B0AA" stroke-width="1.3" fill="#FFF1EF"/>
+<text x="845.0" y="664.5" font-family="Arial,sans-serif" font-weight="700" font-size="19" fill="#BA403C" text-anchor="middle">Revocation takes effect</text>
+<text x="845.0" y="695.5" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Target loses master authority at final canonical position</text>
+<text x="845.0" y="717.5" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">A later GRANT can reauthorize, never retroactively</text>
+<text x="873.0" y="620.6" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#734AAF">REQUIRED: 0 ≤ (tB − tA) ≤ 900,000 ms</text>
+<rect x="1162" y="270" width="525" height="96" rx="15" stroke="#9CCDD8" stroke-width="1.3" fill="#ECF8FA"/>
+<text x="1424.5" y="300.5" font-family="Arial,sans-serif" font-weight="700" font-size="20" fill="#117B91" text-anchor="middle">New signed block</text>
+<text x="1424.5" y="331.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">Locally authored: software uses current UTC</text>
+<text x="1424.5" y="353.5" font-family="Arial,sans-serif" font-size="16" fill="#223047" text-anchor="middle">Received late: retain its original signed time</text>
+<rect x="1162" y="410" width="525" height="107" rx="15" stroke="#AAC8EA" stroke-width="1.3" fill="#EFF5FD"/>
+<text x="1424.5" y="435.5" font-family="Arial,sans-serif" font-weight="700" font-size="19" fill="#2865AE" text-anchor="middle">Validate in bounded memory</text>
+<text x="1424.5" y="466.5" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Protocol, hash, Ed25519 signature, ledger/genesis</text>
+<text x="1424.5" y="488.5" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Historical master authorization at canonical position</text>
+<text x="1424.5" y="510.5" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">No new-block filesystem write before validation</text>
+<rect x="1165" y="634" width="248" height="91" rx="15" stroke="#9DCDAF" stroke-width="1.3" fill="#EDF7F0"/>
+<text x="1289.0" y="662.0" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#277C50" text-anchor="middle">AUTHORIZED → .BLK</text>
+<text x="1289.0" y="693.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Durably retain exact</text>
+<text x="1289.0" y="715.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">original signed bytes</text>
+<rect x="1440" y="634" width="247" height="91" rx="15" stroke="#E0B0AA" stroke-width="1.3" fill="#FFF1EF"/>
+<text x="1563.5" y="662.0" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#BA403C" text-anchor="middle">NOT PROVEN → REJECT</text>
+<text x="1563.5" y="693.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Unresolved or false authority:</text>
+<text x="1563.5" y="715.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">no .BLK or .XBLK saved</text>
+<text x="866.5" y="820.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#172A4B">4  ·  LATE-ARRIVING HISTORY &amp; CANONICAL RECLASSIFICATION</text>
+<rect x="51" y="858" width="386" height="109" rx="15" stroke="#9CCDD8" stroke-width="1.3" fill="#ECF8FA"/>
+<text x="244.0" y="895.0" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#117B91" text-anchor="middle">Earlier valid GRANT / REVOKE arrives</text>
+<text x="244.0" y="926.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">A new history block may have an earlier</text>
+<text x="244.0" y="948.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">signed UTC time than already retained blocks</text>
+<rect x="488" y="858" width="418" height="109" rx="15" stroke="#AAC8EA" stroke-width="1.3" fill="#EFF5FD"/>
+<text x="697.0" y="895.0" font-family="Arial,sans-serif" font-weight="700" font-size="17" fill="#2865AE" text-anchor="middle">Replay authority in canonical order</text>
+<text x="697.0" y="926.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">(timestamp_utc_ms, block_guid, signer_public_key)</text>
+<text x="697.0" y="948.0" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Recalculate authority at every signed position</text>
+<rect x="957" y="858" width="718" height="109" rx="15" stroke="#CBB4E4" stroke-width="1.3" fill="#F5F0FA"/>
+<text x="1316.0" y="884.5" font-family="Arial,sans-serif" font-weight="700" font-size="19" fill="#734AAF" text-anchor="middle">Reclassify only previously accepted history</text>
+<text x="1316.0" y="915.5" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Old .BLK can move to local .XBLK if later found unauthorized</text>
+<text x="1316.0" y="937.5" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">An archived .XBLK can return to .BLK if history supports it</text>
+<text x="1316.0" y="959.5" font-family="Arial,sans-serif" font-size="15" fill="#223047" text-anchor="middle">Never re-sign, overwrite, or propagate archived .XBLK files</text>
+<text x="866.5" y="1013.6" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#172A4B">STEP 1: block and authority rules accepted (2026-11-18)     ·     STEP 3: projected SQLite replay planned     ·     STEP 4: peer sync / recovery planned</text>
+<text x="866.5" y="1035.2" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="400" fill="#53647A">New unauthorized/unresolved input is rejected in memory; only previously retained history may be locally archived as .XBLK.</text>
+<text x="870.0" y="1095.8" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="400" fill="#53647A">Diagram is explanatory; signed wire grammar and CLI behavior remain defined in the authoritative Technical Design and Management API.</text>
+</svg>
