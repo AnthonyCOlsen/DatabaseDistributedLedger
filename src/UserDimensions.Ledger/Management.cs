@@ -249,32 +249,79 @@ public static class Management
     }
     private static object Status(string root,string operation)
     {
-        InstanceManifest? manifest=null; var available=false; var authorized=false; var historyUnavailable=false; var codes=new List<string>(); AuthorizationSnapshot? snapshot=null;
-        var newRoot=(!Directory.Exists(root) || !Directory.EnumerateFileSystemEntries(root).Any()) && (!File.Exists(root+".DLDB") || new FileInfo(root+".DLDB").Length==0);
+        InstanceManifest? manifest = null;
+        var available = false;
+        var authorized = false;
+        var historyUnavailable = false;
+        var codes = new List<string>();
+        AuthorizationSnapshot? snapshot = null;
+        var newRoot = (!Directory.Exists(root) || !Directory.EnumerateFileSystemEntries(root).Any()) &&
+            (!File.Exists(root+".DLDB") || new FileInfo(root+".DLDB").Length == 0);
+
         try
         {
-            if(!newRoot)
+            if (!newRoot)
             {
-                using var instance=LedgerInstance.Open(root); manifest=instance.Manifest; available=true;
-                if(instance.ConfigError!=null) codes.Add(instance.ConfigError);
-                else { snapshot=instance.Snapshot(); authorized=manifest.Binding!=null && snapshot.AuthorizedKeys.Contains(manifest.PublicKey); }
+                using var instance = LedgerInstance.Open(root);
+                manifest = instance.Manifest;
+                available = true;
+                if (instance.ConfigError != null) codes.Add(instance.ConfigError);
+                else
+                {
+                    snapshot = instance.Snapshot();
+                    authorized = manifest.Binding != null && snapshot.AuthorizedKeys.Contains(manifest.PublicKey);
+                }
             }
         }
-        catch(Exception e) when(e is LedgerException or IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is LedgerException or IOException or UnauthorizedAccessException)
         {
-            snapshot=null; authorized=false;
-            if(e is LedgerException {Details:LedgerHistoryFailure history})
-            { historyUnavailable=true; codes.Add(history.Reason); }
-            else { available=false; codes.Add(e is LedgerException le?le.Code:"IO_ERROR"); }
-            try { manifest=InstanceManifest.Decode(Paths.ReadBounded(Path.Combine(root,"instance.identity.json"),4096,"IDENTITY_MISMATCH")); } catch(Exception secondary) when(secondary is LedgerException or IOException or UnauthorizedAccessException) { }
+            snapshot = null;
+            authorized = false;
+            if (e is LedgerException {Details:LedgerHistoryFailure history})
+            {
+                // History verification failure does not invalidate a successfully opened signing key.
+                historyUnavailable = true;
+                codes.Add(history.Reason);
+            }
+            else
+            {
+                available = false;
+                codes.Add(e is LedgerException le?le.Code:"IO_ERROR");
+            }
+            try
+            {
+                manifest = InstanceManifest.Decode(Paths.ReadBounded(Path.Combine(root,"instance.identity.json"),4096,"IDENTITY_MISMATCH"));
+            }
+            catch (Exception secondary) when (secondary is LedgerException or IOException or UnauthorizedAccessException) { }
         }
-        var state=newRoot?"uninitialized":(!available || historyUnavailable)?"recovery_required":manifest!.Binding==null?"unbound":"bound";
-        var sorted=codes.Order(StringComparer.Ordinal).ToArray();
-        if(operation=="instance.status") return new { operation,state,instance_guid=manifest?.InstanceId,public_key_hex=manifest?.PublicKey,signing_available=available,ledger_id_hex=manifest?.Binding?.LedgerId,genesis_sha512=manifest?.Binding?.GenesisHash,recovery_codes=sorted };
-        var blocks=snapshot?.Blocks; object? blockFields=blocks==null && !newRoot?null:new {
-            retained_count=blocks?.Count ?? 0,pending_count=blocks?.Count(x=>x.Status=="pending") ?? 0,quarantined_count=blocks?.Count(x=>x.Status=="quarantined") ?? 0,disputed_count=0,opaque_count=0 };
-        return new { operation,instance=new {state,instance_guid=manifest?.InstanceId,public_key_hex=manifest?.PublicKey,recovery_codes=sorted},
+
+        var state = newRoot?"uninitialized":(!available || historyUnavailable)?"recovery_required":manifest!.Binding==null?"unbound":"bound";
+        var sorted = codes.Order(StringComparer.Ordinal).ToArray();
+        if (operation == "instance.status")
+            return new
+            {
+                operation,state,instance_guid=manifest?.InstanceId,public_key_hex=manifest?.PublicKey,
+                signing_available=available,ledger_id_hex=manifest?.Binding?.LedgerId,
+                genesis_sha512=manifest?.Binding?.GenesisHash,recovery_codes=sorted
+            };
+
+        var blocks = snapshot?.Blocks;
+        object? blockFields = blocks==null && !newRoot?null:new
+        {
+            retained_count=blocks?.Count ?? 0,
+            pending_count=blocks?.Count(x=>x.Status=="pending") ?? 0,
+            quarantined_count=blocks?.Count(x=>x.Status=="quarantined") ?? 0,
+            disputed_count=0,opaque_count=0
+        };
+        return new
+        {
+            operation,
+            instance=new {state,instance_guid=manifest?.InstanceId,public_key_hex=manifest?.PublicKey,recovery_codes=sorted},
             binding=new {ledger_id_hex=manifest?.Binding?.LedgerId,genesis_sha512=manifest?.Binding?.GenesisHash,state=manifest?.Binding==null?"unbound":"bound"},
-            signing=new {available,authorized},blocks=blockFields,projection=new {state="not_installed",applied_count=(int?)null},peers=(!available || historyUnavailable) && !newRoot?null:new {state="not_installed",connected_count=(int?)null} };
+            signing=new {available,authorized},
+            blocks=blockFields,
+            projection=new {state="not_installed",applied_count=(int?)null},
+            peers=(!available || historyUnavailable) && !newRoot?null:new {state="not_installed",connected_count=(int?)null}
+        };
     }
 }

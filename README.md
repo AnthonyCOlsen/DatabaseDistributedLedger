@@ -37,6 +37,10 @@ To prevent duplicate or conflicting "latest override" paragraphs, keep **one nor
 
 Existing `.docx` files are **historical and not synchronized** with current Markdown documents.
 
+## Developer implementation guides
+
+- [Step 1 implementation diagrams](docs/development/STEP1_IMPLEMENTATION_DIAGRAMS.md) — source-backed code organization, publication/import, identity/trust, authorization, storage and recovery. Distinguishes accepted baseline `fbb3878` from the reviewed maintenance candidate and separates implemented behavior from later phases; this is not a second protocol specification.
+
 ## Identity and storage
 
 ```text
