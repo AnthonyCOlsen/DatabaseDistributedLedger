@@ -19,6 +19,8 @@ Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Complete_Sy
 
 **Filesystem and identity structure:** [View diagram](docs/diagrams/UDDL_Filesystem_Identity_Structure.png) — same-basename `.DLDB`/support-directory pairing, persistent Ed25519 identity, genesis trust pin, active `.BLK` and local `.XBLK` files, and planned `.STAT`/`TREE.HASH` files. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Filesystem_Identity_Structure.drawio).
 
+**Recovery and database replay:** [View diagram](docs/diagrams/UDDL_Recovery_Database_Replay.png) — Step 1 corruption and diagnostic gates, planned Step 3 canonical full replay with `STAT` → `DELn` rotation and projector-only SQLite writes, and planned Step 4 peer-assisted recovery. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Recovery_Database_Replay.drawio).
+
 ## Project milestone and acceptance record — 2026-11-18
 
 | Field | Accepted record |
