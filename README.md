@@ -12,6 +12,10 @@ An MIT-licensed open-source distributed signed ledger that derives relational st
 
 **Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Database_Write_Read_Lifecycle.drawio).
 
+**Multi-master synchronization (planned Step 4):** [View diagram](docs/diagrams/UDDL_Multi_Master_Synchronization.png) — offline masters, peer block exchange, TREE.HASH comparison, independent validation and eventual convergence.
+
+**Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Multi_Master_Synchronization.drawio).
+
 ## Project milestone and acceptance record — 2026-11-18
 
 | Field | Accepted record |
