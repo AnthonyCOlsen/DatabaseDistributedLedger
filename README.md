@@ -8,21 +8,13 @@ An MIT-licensed open-source distributed signed ledger that derives relational st
 
 ![UDDL Complete System Architecture](docs/diagrams/UDDL_Complete_System_Architecture.png)
 
-**Database write and read lifecycle:** [View the lifecycle diagram](docs/diagrams/UDDL_Database_Write_Read_Lifecycle.png) — how SELECT reads projected SQLite state, SQL mutations become signed ledger events, and the Step 3 projector alone writes `.DLDB`. Steps 2–4 are planned, not implemented.
+**Database write and read lifecycle:** [View the lifecycle diagram](docs/diagrams/UDDL_Database_Write_Read_Lifecycle.png) — how SELECT reads projected SQLite state, SQL mutations become signed ledger events, and the Step 3 projector alone writes `.DLDB`. Steps 2–4 are planned, not implemented. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Database_Write_Read_Lifecycle.drawio).
 
-**Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Database_Write_Read_Lifecycle.drawio).
+**Multi-master synchronization (planned Step 4):** [View diagram](docs/diagrams/UDDL_Multi_Master_Synchronization.png) — offline masters, peer block exchange, TREE.HASH comparison, independent validation and eventual convergence. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Multi_Master_Synchronization.drawio).
 
-**Multi-master synchronization (planned Step 4):** [View diagram](docs/diagrams/UDDL_Multi_Master_Synchronization.png) — offline masters, peer block exchange, TREE.HASH comparison, independent validation and eventual convergence.
+**Ledger authorization lifecycle:** [View diagram](docs/diagrams/UDDL_Ledger_Authorization_Lifecycle.png) — genesis establishes the first master, grants add authority, two-signature revocations remove it, and late-arriving historical blocks can change local authorization classifications. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Ledger_Authorization_Lifecycle.drawio).
 
-**Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Multi_Master_Synchronization.drawio).
-
-**Ledger authorization lifecycle:** [View diagram](docs/diagrams/UDDL_Ledger_Authorization_Lifecycle.png) — genesis establishes the first master, grants add authority, two-signature revocations remove it, and late-arriving historical blocks can change local authorization classifications.
-
-**Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Ledger_Authorization_Lifecycle.drawio).
-
-**Block validation and storage lifecycle:** [View diagram](docs/diagrams/UDDL_Block_Validation_Storage_Lifecycle.png) — in-memory validation, canonical batch admission, durable `.BLK` storage, later `.XBLK` archival, and recovery boundaries.
-
-**Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Block_Validation_Storage_Lifecycle.drawio).
+**Block validation and storage lifecycle:** [View diagram](docs/diagrams/UDDL_Block_Validation_Storage_Lifecycle.png) — in-memory validation, canonical batch admission, durable `.BLK` storage, later `.XBLK` archival, and recovery boundaries. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Block_Validation_Storage_Lifecycle.drawio).
 
 ## Project milestone and acceptance record — 2026-11-18
 
