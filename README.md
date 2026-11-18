@@ -4,6 +4,10 @@ An MIT-licensed open-source distributed signed ledger that derives relational st
 
 **Status (2026-11-18; Step 1 final Security clearance):** **Step 1 — Standalone Signed Ledger: ACCEPTED AND CLOSED** on Windows 11 at the exact production commit recorded below. Step 2 — Native SQLite SQL Interception is **ready for planning and separate implementation authorization**; no Step 2 implementation is authorized by this documentation update. Steps 3–4 remain deferred. This is not a claim that the full SQLite-integrated distributed database has been implemented or released. Baseline: internally maintained **SQLite 3.54.1** fork with official upstream source provenance in the SQLite architecture plan; C#/.NET 10 application components. PostgreSQL/AI-task adapter obligations are historical. **Owner-approved signed-block protocol: 1.03 (`0x0103`)** with the 32-byte genesis-key ledger ID, exact 165-byte `DDL-REVOKE-v3` consent, and Version 2 identity manifest. Historical 1.01 (`0x0101`) and 1.00 (`0x0001`) are incompatible; no released historical ledger migration is required.
 
+## System Architecture
+
+![UDDL Complete System Architecture](docs/diagrams/UDDL_Complete_System_Architecture.png)
+
 ## Project milestone and acceptance record — 2026-11-18
 
 | Field | Accepted record |
