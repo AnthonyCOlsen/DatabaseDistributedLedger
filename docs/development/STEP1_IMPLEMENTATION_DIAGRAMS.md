@@ -6,11 +6,13 @@ the implementation; they do not amend the protocol or approved architecture.
 | Revision | Meaning |
 | --- | --- |
 | `fbb38781faa29eb5cead9de3dcda0e760b63c7a1` | Immutable accepted Step 1 production baseline |
-| `83cbcb5ec7933d1d83cb61a9712353c169ba7788` | Exact code documented here: subsequent readability-only maintenance candidate, pending Owner disposition |
+| `83cbcb5ec7933d1d83cb61a9712353c169ba7788` | Exact code documented here: QA-017-verified, Owner-authorized behavior-preserving maintenance successor |
 
 The [maintenance review](STEP1_MAINTAINABILITY_REVIEW_20261118.md) records the
-candidate's limited changes and verification. Its implementation paths are the
-same as the accepted baseline; it is not declared newly accepted by this guide.
+successor's limited changes and verification. Its implementation paths are the
+same as the accepted baseline; the original accepted milestone remains immutable.
+The [integration record](STEP1_FOLLOWUP_INTEGRATION_20261118.md) records subsequent
+Owner authorization and independent QA-017 verification.
 The diagrams' documentation commit is separate from that code-maintenance commit.
 
 The [Technical Design](../../Database_Distributed_Ledger_Technical_Design.md),
@@ -394,7 +396,9 @@ They use fenced Mermaid flowcharts and sequence diagrams, following
 [GitHub's Mermaid documentation](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams).
 No plugin-specific directives, interactive scripts or generated diagrams are
 required in the repository. All eight diagrams were parsed, rendered and visually
-checked locally with Mermaid 10.9.5 in headless Chrome; the 28 relative document
-links were verified. GitHub's own renderer/theme was not previewed, so its exact
+checked locally with Mermaid 10.9.5 in headless Chrome; the original 28 relative
+document links were verified, along with the later integration-record link.
+GitHub's own renderer/theme was not previewed, so its exact
 appearance remains subject to review. No production rebuild or regression rerun
-was needed for these documentation-only changes. Owner review remains pending.
+was needed for these documentation-only changes. The diagram contents are unchanged
+by the Owner-authorized integration.

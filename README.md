@@ -39,7 +39,8 @@ Existing `.docx` files are **historical and not synchronized** with current Mark
 
 ## Developer implementation guides
 
-- [Step 1 implementation diagrams](docs/development/STEP1_IMPLEMENTATION_DIAGRAMS.md) — source-backed code organization, publication/import, identity/trust, authorization, storage and recovery. Distinguishes accepted baseline `fbb3878` from the reviewed maintenance candidate and separates implemented behavior from later phases; this is not a second protocol specification.
+- [Step 1 implementation diagrams](docs/development/STEP1_IMPLEMENTATION_DIAGRAMS.md) — source-backed code organization, publication/import, identity/trust, authorization, storage and recovery. Distinguishes accepted baseline `fbb3878` from its QA-verified, Owner-authorized maintenance successor `83cbcb5` and separates implemented behavior from later phases; this is not a second protocol specification.
+- [Step 1 follow-up integration record](docs/development/STEP1_FOLLOWUP_INTEGRATION_20261118.md) — maintenance authorization, QA-017 evidence and preservation of the original accepted milestone.
 
 ## Identity and storage
 
