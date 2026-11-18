@@ -21,6 +21,8 @@ Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Complete_Sy
 
 **Recovery and database replay:** [View diagram](docs/diagrams/UDDL_Recovery_Database_Replay.png) — Step 1 corruption and diagnostic gates, planned Step 3 canonical full replay with `STAT` → `DELn` rotation and projector-only SQLite writes, and planned Step 4 peer-assisted recovery. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Recovery_Database_Replay.drawio).
 
+**Signed block binary structure:** [View diagram](docs/diagrams/UDDL_Signed_Block_Binary_Structure.png) — exact Protocol 1.03 header offsets, Genesis, event/value tags, Ed25519 signing, two-timestamp revocation and DDLB transport. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Signed_Block_Binary_Structure.drawio).
+
 ## Project milestone and acceptance record — 2026-11-18
 
 | Field | Accepted record |
