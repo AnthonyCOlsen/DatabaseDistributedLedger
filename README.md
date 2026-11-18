@@ -20,6 +20,10 @@ An MIT-licensed open-source distributed signed ledger that derives relational st
 
 **Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Ledger_Authorization_Lifecycle.drawio).
 
+**Block validation and storage lifecycle:** [View diagram](docs/diagrams/UDDL_Block_Validation_Storage_Lifecycle.png) — in-memory validation, canonical batch admission, durable `.BLK` storage, later `.XBLK` archival, and recovery boundaries.
+
+**Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Block_Validation_Storage_Lifecycle.drawio).
+
 ## Project milestone and acceptance record — 2026-11-18
 
 | Field | Accepted record |
