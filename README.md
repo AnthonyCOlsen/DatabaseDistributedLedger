@@ -2,23 +2,23 @@
 
 An MIT-licensed open-source distributed signed ledger that derives relational state from immutable authenticated history. **The ledger is authoritative; SQLite `.DLDB` is a rebuildable projection.** Independent masters publish offline, and replicas may verify/relay blocks.
 
-**Status (2026-11-18; Step 1 Owner acceptance):** **Step 1 — Standalone Signed Ledger: OWNER ACCEPTED / COMPLETE** on Windows 11 at the exact production commit recorded below. Step 2 — Native SQLite SQL Interception is **ready for planning and separate implementation authorization**; no Step 2 implementation is authorized by this documentation update. Steps 3–4 remain deferred. This is not a claim that the full SQLite-integrated distributed database has been implemented or released. Baseline: internally maintained **SQLite 3.54.1** fork with official upstream source provenance in the SQLite architecture plan; C#/.NET 10 application components. PostgreSQL/AI-task adapter obligations are historical. **Owner-approved signed-block protocol: 1.03 (`0x0103`)** with the 32-byte genesis-key ledger ID, exact 165-byte `DDL-REVOKE-v3` consent, and Version 2 identity manifest. Historical 1.01 (`0x0101`) and 1.00 (`0x0001`) are incompatible; no released historical ledger migration is required.
+**Status (2026-11-18; Step 1 final Security clearance):** **Step 1 — Standalone Signed Ledger: ACCEPTED AND CLOSED** on Windows 11 at the exact production commit recorded below. Step 2 — Native SQLite SQL Interception is **ready for planning and separate implementation authorization**; no Step 2 implementation is authorized by this documentation update. Steps 3–4 remain deferred. This is not a claim that the full SQLite-integrated distributed database has been implemented or released. Baseline: internally maintained **SQLite 3.54.1** fork with official upstream source provenance in the SQLite architecture plan; C#/.NET 10 application components. PostgreSQL/AI-task adapter obligations are historical. **Owner-approved signed-block protocol: 1.03 (`0x0103`)** with the 32-byte genesis-key ledger ID, exact 165-byte `DDL-REVOKE-v3` consent, and Version 2 identity manifest. Historical 1.01 (`0x0101`) and 1.00 (`0x0001`) are incompatible; no released historical ledger migration is required.
 
 ## Project milestone and acceptance record — 2026-11-18
 
 | Field | Accepted record |
 | --- | --- |
-| **Step 1 status** | **OWNER ACCEPTED / COMPLETE** — Standalone Signed Ledger |
+| **Step 1 status** | **ACCEPTED AND CLOSED** — Standalone Signed Ledger |
 | **Accepted production commit** | `fbb38781faa29eb5cead9de3dcda0e760b63c7a1` |
 | **Independent QA evidence commit** | `70d4d77888bdf869925da7193d8ca44e01d93dd7` |
 | **QA-016 final** | **READY** — 52 candidate PASS, 6 source PASS, 76 reference PASS, 0 failures/blockers; 331 validated receipts |
-| **Formal dispositions** | Architect **READY**; Developer **READY**; QA **READY**; Owner **ACCEPTED**; **Security formal final disposition PENDING** (do not imply sign-off) |
+| **Formal dispositions** | Architect **READY**; Developer **READY**; QA **READY**; Owner **ACCEPTED**; Security **READY** (final formal disposition; no outstanding Step 1 Security issues) |
 | **Initial qualification scope** | Windows 11; Linux/macOS portability remains required by design, not yet independently qualified |
 | **Next phase** | **Step 2 — Native SQLite SQL Interception**, ready for planning; implementation **not authorized** until a separate PM/Owner directive |
 
 **Accepted qualifications, not unexecuted blockers:** FI-07/FI-15 use Owner-approved observable pre/post/ERROR replacement checks (11 PASS, 0 FAIL reported in QA-012); their original unobservable OS-internal checkpoints remain **REPLACED/UNEXECUTED**, never retroactively marked PASS. `FI09-LIVE-RESULT-SNAPSHOT` is **NOT OBSERVED — OWNER-APPROVED EQUIVALENT EVIDENCE** using the accepted paired observations; no invented literal-snapshot PASS. These results do not establish actual physical-power-loss durability or qualification of other operating systems. Automatic recovery of missing/corrupted signed history from peers is **Step 4**, not a Step 1 acceptance condition. Preserve all historical QA reports and their limitations; the accepted SHA and QA evidence SHA above are the exact milestone baseline for later regressions.
 
-**Milestone versus security review:** Formal Owner acceptance occurred with Security's final formal disposition still pending. Do not reinterpret pending Security sign-off as received or reopen Owner acceptance without a new recorded decision.
+**Security closure record:** At the time of Owner acceptance, the formal Security disposition was still pending; Security subsequently issued final **READY** for the same accepted production commit. Step 1 is now **ACCEPTED AND CLOSED** with Architect, Developer, QA, Security and Owner responsibilities complete. This does not authorize Step 2 implementation.
 
 ## Documentation ownership and maintenance
 
@@ -57,7 +57,7 @@ The current approved signed block version is two bytes `01 03` for **1.03** with
 
 ## Delivery order
 
-1. **Step 1 — OWNER ACCEPTED (2026-11-18):** Independent ledger, identity, approved Version 1.03 codec, durable `.BLK`, import/export and management.
+1. **Step 1 — ACCEPTED AND CLOSED (2026-11-18):** Independent ledger, identity, approved Version 1.03 codec, durable `.BLK`, import/export and management.
 2. **Step 2 — ready for planning; implementation authorization pending:** Native SQLite SQL interception: master mutations publish signed blocks or fail without touching official `.DLDB`.
 3. Trusted ledger-to-SQLite projector, read consistency, `.STAT`, recovery, full replay.
 4. Best-effort push and periodic `TREE.HASH`-assisted peer reconciliation.
@@ -76,7 +76,7 @@ Normal `.BLK` inventory is independent of local-only historical `.XBLK` archives
 
 **Canonical batch imports:** The Step 1 importer validates a bounded batch in memory, sorts valid candidate blocks by `(timestamp_utc_ms, block_guid, signer_public_key)` **before** evaluating historical signing authority, then durably accepts eligible blocks with grants persisted before their dependents. Results remain in original input order; independently accepted partial results are reported truthfully. This reduces unnecessary future Step 3 full replays without eliminating replays for late earlier batches. See Management API §13.4 for the normative sequence.
 
-**Implementation/acceptance:** **Step 1 has been Owner-accepted at the production/evidence commits above.** Its scope covers identity, signing, standalone ledger durability and the management CLI. Later Phase 2 native SQLite interception, Phase 3 projector/`.STAT` replay, and Phase 4 `TREE.HASH`/peer exchange retain their separate gates. QA independently authors and executes protocol, crash and fault-injection tests; the Developer implements; Security reviews; PM/Owner determine final acceptance. Source-status and portability boundaries are in the [SQLite plan](SQLite_Architecture_and_Implementation_Plan.md). The Owner-approved `BLOCK_ARCHIVED` retry response is specified in Management API §13.3.1.
+**Implementation/acceptance:** **Step 1 is ACCEPTED AND CLOSED at the production/evidence commits above, with final Security READY.** Its scope covers identity, signing, standalone ledger durability and the management CLI. Later Phase 2 native SQLite interception, Phase 3 projector/`.STAT` replay, and Phase 4 `TREE.HASH`/peer exchange retain their separate gates. QA independently authors and executes protocol, crash and fault-injection tests; the Developer implements; Security reviews; PM/Owner determine final acceptance. Source-status and portability boundaries are in the [SQLite plan](SQLite_Architecture_and_Implementation_Plan.md). The Owner-approved `BLOCK_ARCHIVED` retry response is specified in Management API §13.3.1.
 
 ## Signed-block integrity and recovery phase boundaries — QA-013 (2026-11-17)
 
