@@ -1,0 +1,535 @@
+<mxfile host="Electron" agent="UDDL Architecture Editable Reconstruction">
+  <diagram id="uddl-complete-arch" name="Complete System Architecture">
+    <mxGraphModel dx="3334" dy="1921" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1840" pageHeight="1135" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title_bg" parent="1" style="rounded=1;arcSize=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FFFFFF;strokeWidth=0;" value="" vertex="1">
+          <mxGeometry height="77" width="1810" x="15" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="client_bg" parent="1" style="rounded=1;arcSize=18;whiteSpace=wrap;html=1;fillColor=#EEF5FE;strokeColor=#2865AE;strokeWidth=1.6;" value="" vertex="1">
+          <mxGeometry height="519" width="293" x="18" y="103" as="geometry" />
+        </mxCell>
+        <mxCell id="database_bg" parent="1" style="rounded=1;arcSize=18;whiteSpace=wrap;html=1;fillColor=#EAF6EC;strokeColor=#287D52;strokeWidth=1.6;" value="" vertex="1">
+          <mxGeometry height="519" width="629" x="323" y="103" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_bg" parent="1" style="rounded=1;arcSize=18;whiteSpace=wrap;html=1;fillColor=#F3EFFB;strokeColor=#7740A3;strokeWidth=1.6;" value="" vertex="1">
+          <mxGeometry height="519" width="444" x="964" y="103" as="geometry" />
+        </mxCell>
+        <mxCell id="peers_bg" parent="1" style="rounded=1;arcSize=18;whiteSpace=wrap;html=1;fillColor=#EAF7F9;strokeColor=#147E90;strokeWidth=1.6;" value="" vertex="1">
+          <mxGeometry height="519" width="404" x="1420" y="103" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_bg" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#FFF3E7;strokeColor=#C26C20;strokeWidth=1.4;" value="" vertex="1">
+          <mxGeometry height="276" width="710" x="18" y="639" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_bg" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#EAF7F9;strokeColor=#147E90;strokeWidth=1.4;" value="" vertex="1">
+          <mxGeometry height="276" width="668" x="740" y="639" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_bg" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#F2F5F8;strokeColor=#57687B;strokeWidth=1.4;" value="" vertex="1">
+          <mxGeometry height="276" width="404" x="1420" y="639" as="geometry" />
+        </mxCell>
+        <mxCell id="phases_bg" parent="1" style="rounded=1;arcSize=14;whiteSpace=wrap;html=1;fillColor=#EDF4FB;strokeColor=#2865AE;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="188" width="1390" x="18" y="927" as="geometry" />
+        </mxCell>
+        <mxCell id="note_bg" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#57687B;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="188" width="404" x="1420" y="927" as="geometry" />
+        </mxCell>
+        <mxCell id="a_read_client" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2865AE;strokeWidth=3.5;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="298" y="228" as="sourcePoint" />
+            <mxPoint x="347" y="228" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_read_engine" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2865AE;strokeWidth=3.5;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="577" y="253" as="sourcePoint" />
+            <mxPoint x="708" y="253" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_mutation" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#BD413B;strokeWidth=4;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="297" y="365" as="sourcePoint" />
+            <mxPoint x="347" y="365" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_event" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#BD413B;strokeWidth=4;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="608" y="380" as="sourcePoint" />
+            <mxPoint x="660" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_ledger_storage" edge="1" parent="1" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#BD413B;strokeWidth=4;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;entryX=0.001;entryY=0.537;entryDx=0;entryDy=0;entryPerimeter=0;" target="ledger_bg">
+          <mxGeometry relative="1" x="0.625" as="geometry">
+            <mxPoint x="760" y="380" as="sourcePoint" />
+            <mxPoint x="981" y="331" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_history_replay" edge="1" parent="1" source="ledger_bg" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#287D52;strokeWidth=4;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;exitX=-0.001;exitY=0.797;exitDx=0;exitDy=0;exitPerimeter=0;">
+          <mxGeometry relative="1" x="-0.1851" as="geometry">
+            <Array as="points">
+              <mxPoint x="965.8" y="516.6" />
+            </Array>
+            <mxPoint x="983" y="481" as="sourcePoint" />
+            <mxPoint x="922" y="517" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_project_sqlite" edge="1" parent="1" source="projection" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#287D52;strokeWidth=4;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;exitX=0.733;exitY=0.003;exitDx=0;exitDy=0;exitPerimeter=0;">
+          <mxGeometry relative="1" x="-0.2767" as="geometry">
+            <Array as="points">
+              <mxPoint x="839.7" y="451.6" />
+            </Array>
+            <mxPoint x="841.1680000000001" y="451.594" as="sourcePoint" />
+            <mxPoint x="840" y="298" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peer_to_ledger" edge="1" parent="1" source="peercloud" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2865AE;strokeWidth=3.2;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1421.44" y="383.13" />
+            </Array>
+            <mxPoint x="1445" y="384.88" as="sourcePoint" />
+            <mxPoint x="1410.44" y="383.13" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ledger_to_peer" edge="1" parent="1" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2865AE;strokeWidth=3.2;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;entryX=0.008;entryY=0.784;entryDx=0;entryDy=0;entryPerimeter=0;" target="peercloud">
+          <mxGeometry relative="1" x="-0.9505" as="geometry">
+            <mxPoint x="1409" y="417" as="sourcePoint" />
+            <mxPoint x="1429" y="417" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peerA_cloud" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2865AE;strokeWidth=3;endArrow=block;endFill=1;endSize=11;startArrow=block;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1495" y="281" as="sourcePoint" />
+            <mxPoint x="1495" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peerB_cloud" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2865AE;strokeWidth=3;endArrow=block;endFill=1;endSize=11;startArrow=block;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1620" y="281" as="sourcePoint" />
+            <mxPoint x="1620" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peerC_cloud" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2865AE;strokeWidth=3;endArrow=block;endFill=1;endSize=11;startArrow=block;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1746" y="281" as="sourcePoint" />
+            <mxPoint x="1746" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_arrow_0" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2865AE;strokeWidth=3;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1433" y="711" as="sourcePoint" />
+            <mxPoint x="1478" y="711" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_arrow_1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#BD413B;strokeWidth=3;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1433" y="750" as="sourcePoint" />
+            <mxPoint x="1478" y="750" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_arrow_2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#287D52;strokeWidth=3;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1433" y="789" as="sourcePoint" />
+            <mxPoint x="1478" y="789" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_arrow_3" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#7740A3;strokeWidth=3;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1433" y="828" as="sourcePoint" />
+            <mxPoint x="1478" y="828" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_arrow_4" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#147E90;strokeWidth=3;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1433" y="867" as="sourcePoint" />
+            <mxPoint x="1478" y="867" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=32;fontColor=#172A4B;fontStyle=1;spacing=5;" value="UserDimensions Database Distributed Ledger (UDDL) — Complete System Architecture" vertex="1">
+          <mxGeometry height="42" width="1784" x="28" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=18;fontColor=#57687B;fontStyle=0;spacing=5;" value="End-state architecture after Step 4 · Component responsibilities and delivery phases" vertex="1">
+          <mxGeometry height="27" width="1784" x="28" y="54" as="geometry" />
+        </mxCell>
+        <mxCell id="client_head" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#2865AE;strokeColor=#2865AE;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="49" width="289" x="20" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="client_head_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=5;" value="CLIENT / APPLICATION LAYER" vertex="1">
+          <mxGeometry height="45" width="273" x="28" y="107" as="geometry" />
+        </mxCell>
+        <mxCell id="database_head" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#287D52;strokeColor=#287D52;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="49" width="625" x="325" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="database_head_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=5;" value="LOCAL DATABASE ENGINE" vertex="1">
+          <mxGeometry height="45" width="609" x="333" y="107" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_head" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#7740A3;strokeColor=#7740A3;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="49" width="440" x="966" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_head_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=5;" value="LOCAL LEDGER SUBSYSTEM" vertex="1">
+          <mxGeometry height="45" width="424" x="974" y="107" as="geometry" />
+        </mxCell>
+        <mxCell id="peers_head" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#147E90;strokeColor=#147E90;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="49" width="400" x="1422" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="peers_head_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#FFFFFF;fontStyle=1;spacing=5;" value="PEER SYNCHRONIZATION / NETWORK" vertex="1">
+          <mxGeometry height="45" width="384" x="1430" y="107" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_head" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#C26C20;strokeColor=#C26C20;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="47" width="706" x="20" y="641" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_head_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=5;" value="PERSISTENT INSTANCE STORAGE  ·  Steps 1–4" vertex="1">
+          <mxGeometry height="43" width="690" x="28" y="643" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_head" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#147E90;strokeColor=#147E90;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="47" width="664" x="742" y="641" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_head_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontColor=#FFFFFF;fontStyle=1;spacing=5;" value="IDENTITY &amp; TRUST FOUNDATIONS  ·  All steps" vertex="1">
+          <mxGeometry height="43" width="648" x="750" y="643" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_head" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#57687B;strokeColor=#57687B;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="47" width="400" x="1422" y="641" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_head_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=5;" value="LEGEND" vertex="1">
+          <mxGeometry height="43" width="384" x="1430" y="643" as="geometry" />
+        </mxCell>
+        <mxCell id="phases_head" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#2865AE;strokeColor=#2865AE;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="43" width="1386" x="20" y="929" as="geometry" />
+        </mxCell>
+        <mxCell id="phases_head_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=19;fontColor=#FFFFFF;fontStyle=1;spacing=5;" value="DELIVERY PHASES" vertex="1">
+          <mxGeometry height="39" width="1370" x="28" y="931" as="geometry" />
+        </mxCell>
+        <mxCell id="apps" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F3F8FF;strokeColor=#2865AE;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="89" width="259" x="35" y="177" as="geometry" />
+        </mxCell>
+        <mxCell id="apps_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Applications / Users" vertex="1">
+          <mxGeometry height="30" width="241" x="44" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="apps_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="SQL clients and end users" vertex="1">
+          <mxGeometry height="50" width="241" x="44" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlclients" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F3F8FF;strokeColor=#2865AE;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="103" width="259" x="35" y="313" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlclients_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="SQLite API / SQL Clients" vertex="1">
+          <mxGeometry height="30" width="241" x="44" y="316" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlclients_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="e.g., sqlite3 and language bindings" vertex="1">
+          <mxGeometry height="64" width="241" x="44" y="346" as="geometry" />
+        </mxCell>
+        <mxCell id="management" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F3F8FF;strokeColor=#2865AE;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="91" width="259" x="35" y="459" as="geometry" />
+        </mxCell>
+        <mxCell id="management_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Management CLI: ledgerctl" vertex="1">
+          <mxGeometry height="30" width="241" x="44" y="462" as="geometry" />
+        </mxCell>
+        <mxCell id="management_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="or the management API" vertex="1">
+          <mxGeometry height="52" width="241" x="44" y="492" as="geometry" />
+        </mxCell>
+        <mxCell id="db_inner_header" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#287D52;strokeColor=#287D52;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="31" width="582" x="346" y="159" as="geometry" />
+        </mxCell>
+        <mxCell id="db_inner_header_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#FFFFFF;fontStyle=1;spacing=5;" value="Local UDDL Database Instance  (Steps 2 &amp; 3)" vertex="1">
+          <mxGeometry height="27" width="566" x="354" y="161" as="geometry" />
+        </mxCell>
+        <mxCell id="read" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#E9F4FE;strokeColor=#2865AE;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="91" width="225" x="349" y="207" as="geometry" />
+        </mxCell>
+        <mxCell id="read_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Read Queries" vertex="1">
+          <mxGeometry height="30" width="207" x="358" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="read_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Direct reads from the projected database" vertex="1">
+          <mxGeometry height="52" width="207" x="358" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlite" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#DFECFF;strokeColor=#2865AE;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="94" width="216" x="708" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlite_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=18;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="SQLite Engine&lt;br/&gt;(.DLDB)" vertex="1">
+          <mxGeometry height="52" width="198" x="717" y="208" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlite_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=14;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Projected relational state" vertex="1">
+          <mxGeometry height="45" width="198" x="717" y="248" as="geometry" />
+        </mxCell>
+        <mxCell id="intercept" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#FFF1EE;strokeColor=#BD413B;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="126" width="261" x="347" y="317" as="geometry" />
+        </mxCell>
+        <mxCell id="intercept_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Native SQL Mutation&lt;br/&gt;Interception (Step 2)" vertex="1">
+          <mxGeometry height="50" width="243" x="356" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="intercept_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="INSERT / UPDATE / DELETE become ledger events; direct changes to .DLDB are blocked" vertex="1">
+          <mxGeometry height="77" width="243" x="356" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="event" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#FFF4E8;strokeColor=#C26C20;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="93" width="98" x="660" y="334.5" as="geometry" />
+        </mxCell>
+        <mxCell id="event_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Ledger Event Creation" vertex="1">
+          <mxGeometry height="93" width="98" x="660" y="337.5" as="geometry" />
+        </mxCell>
+        <mxCell id="schema" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F4FBF2;strokeColor=#287D52;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="93" width="242" x="348" y="463" as="geometry" />
+        </mxCell>
+        <mxCell id="schema_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Schema / Entity Dependency Tracking" vertex="1">
+          <mxGeometry height="30" width="224" x="357" y="466" as="geometry" />
+        </mxCell>
+        <mxCell id="schema_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Authorized blocks can wait for later projection when prerequisites are missing" vertex="1">
+          <mxGeometry height="54" width="224" x="357" y="496" as="geometry" />
+        </mxCell>
+        <mxCell id="projection" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#EAF7EE;strokeColor=#287D52;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="94" width="312" x="611" y="462" as="geometry" />
+        </mxCell>
+        <mxCell id="projection_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Projection / Replay Engine (Step 3)" vertex="1">
+          <mxGeometry height="30" width="294" x="620" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="projection_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Applies authenticated and authorized history into SQLite" vertex="1">
+          <mxGeometry height="55" width="294" x="620" y="495" as="geometry" />
+        </mxCell>
+        <mxCell id="projector_only" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#E5F5EA;strokeColor=#287D52;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="30" width="579" x="347" y="574" as="geometry" />
+        </mxCell>
+        <mxCell id="projector_only_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Only the projector writes the official database file during normal operation" vertex="1">
+          <mxGeometry height="24" width="561" x="356" y="577" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_inner" parent="1" style="rounded=1;arcSize=9;whiteSpace=wrap;html=1;fillColor=#EDE4F9;strokeColor=#EDE4F9;strokeWidth=0.7;" value="" vertex="1">
+          <mxGeometry height="29" width="412" x="981" y="159" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_inner_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#7740A3;fontStyle=1;spacing=5;" value="Local Ledger Subsystem" vertex="1">
+          <mxGeometry height="25" width="396" x="989" y="161" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_valid" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F9F6FF;strokeColor=#A78AC5;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="50" width="409" x="982" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_valid_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontColor=#7740A3;fontStyle=1;spacing=5;" value="Block Validation &amp;amp; Authorization" vertex="1">
+          <mxGeometry height="31" width="391" x="989" y="190.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_valid_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Authenticate new blocks and verify signing authority" vertex="1">
+          <mxGeometry height="27" width="391" x="990.5" y="219" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_canonical" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F9F6FF;strokeColor=#A78AC5;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="50" width="409" x="982" y="251" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_canonical_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontColor=#7740A3;fontStyle=1;spacing=5;" value="Canonical Ordering" vertex="1">
+          <mxGeometry height="27" width="391" x="989" y="248" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_canonical_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="(timestamp_utc_ms, block_guid, signer_public_key)" vertex="1">
+          <mxGeometry height="27" width="391" x="991.5" y="273" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_durable" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F9F6FF;strokeColor=#A78AC5;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="50" width="409" x="982" y="307" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_durable_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontColor=#7740A3;fontStyle=1;spacing=5;" value="Durable Publication" vertex="1">
+          <mxGeometry height="31" width="391" x="989" y="304" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_durable_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Preserve exact signed bytes as crash-safe .BLK files" vertex="1">
+          <mxGeometry height="29" width="391" x="991" y="331" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_batch" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F9F6FF;strokeColor=#A78AC5;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="73" width="409" x="982" y="363" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_batch_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontColor=#7740A3;fontStyle=1;spacing=5;" value="Import / Batch Import" vertex="1">
+          <mxGeometry height="30" width="391" x="991" y="366" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_batch_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Validate in memory; canonical sort; persist grants before dependents; return results in input order" vertex="1">
+          <mxGeometry height="44" width="391" x="991" y="396" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_authority" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F9F6FF;strokeColor=#A78AC5;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="48" width="409" x="982" y="442" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_authority_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontColor=#7740A3;fontStyle=1;spacing=5;" value="Authorization Model" vertex="1">
+          <mxGeometry height="27" width="391" x="991" y="439" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_authority_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Masters grant or revoke other masters" vertex="1">
+          <mxGeometry height="24" width="391" x="991" y="466" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_revocation" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F9F6FF;strokeColor=#A78AC5;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="59" width="409" x="982" y="496" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_revocation_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontColor=#7740A3;fontStyle=1;spacing=5;" value="Revocation Flow — Protocol 1.03" vertex="1">
+          <mxGeometry height="30" width="391" x="991" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_revocation_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="A signs consent with A timestamp; B signs final block using B timestamp; valid for 15 minutes" vertex="1">
+          <mxGeometry height="39" width="391" x="991" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_status" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F9F6FF;strokeColor=#A78AC5;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="44" width="409" x="982" y="561" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_status_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontColor=#7740A3;fontStyle=1;spacing=5;" value="Status / Diagnostics" vertex="1">
+          <mxGeometry height="25" width="391" x="991" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="ledger_status_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Ledger and identity health" vertex="1">
+          <mxGeometry height="25" width="391" x="991" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="peer1438" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F3FAFE;strokeColor=#147E90;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="102" width="112" x="1438" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="peer1438_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Peer&lt;br/&gt;Instance A" vertex="1">
+          <mxGeometry height="48" width="94" x="1447" y="182" as="geometry" />
+        </mxCell>
+        <mxCell id="peer1438_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Own identity" vertex="1">
+          <mxGeometry height="53" width="94" x="1447" y="222" as="geometry" />
+        </mxCell>
+        <mxCell id="peer1563" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F3FAFE;strokeColor=#147E90;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="102" width="112" x="1563" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="peer1563_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Peer&lt;br/&gt;Instance B" vertex="1">
+          <mxGeometry height="48" width="94" x="1572" y="182" as="geometry" />
+        </mxCell>
+        <mxCell id="peer1563_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Own identity" vertex="1">
+          <mxGeometry height="53" width="94" x="1572" y="222" as="geometry" />
+        </mxCell>
+        <mxCell id="peer1688" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F3FAFE;strokeColor=#147E90;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="102" width="112" x="1688" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="peer1688_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Peer&lt;br/&gt;Instance C" vertex="1">
+          <mxGeometry height="48" width="94" x="1697" y="182" as="geometry" />
+        </mxCell>
+        <mxCell id="peer1688_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Own identity" vertex="1">
+          <mxGeometry height="53" width="94" x="1697" y="222" as="geometry" />
+        </mxCell>
+        <mxCell id="peercloud" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#E7F3FD;strokeColor=#2865AE;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="125" width="360" x="1445" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="peercloud_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=19;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="Peer Synchronization &amp;amp;&lt;br/&gt;Recovery (Step 4)" vertex="1">
+          <mxGeometry height="56" width="342" x="1454" y="323" as="geometry" />
+        </mxCell>
+        <mxCell id="peercloud_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Periodic inventory comparison and authenticated block exchange" vertex="1">
+          <mxGeometry height="76" width="342" x="1454" y="363" as="geometry" />
+        </mxCell>
+        <mxCell id="peer_notes_bg" parent="1" style="rounded=1;arcSize=14;whiteSpace=wrap;html=1;fillColor=#F8FCFE;strokeColor=#B9D5E3;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="147" width="360" x="1445" y="462" as="geometry" />
+        </mxCell>
+        <mxCell id="peer_notes" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="• Exchange blocks and converge on shared history.&lt;br/&gt;• Missing or corrupted blocks can be recovered from peers in Step 4.&lt;br/&gt;• Every recovered block is independently verified before acceptance." vertex="1">
+          <mxGeometry height="128" width="335" x="1459" y="473" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_tree_bg" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E5D5C3;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="201" width="345" x="31" y="698" as="geometry" />
+        </mxCell>
+        <mxCell id="filetree" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=3;" value="&lt;b&gt;ABC.DLDB&lt;/b&gt; &lt;font color=&quot;#577288&quot;&gt;(projected; Step 3)&lt;/font&gt;&lt;br/&gt;&lt;b&gt;ABC/&lt;/b&gt;&lt;br/&gt;&amp;nbsp;&amp;nbsp;instance.identity.json  &lt;font color=&quot;#577288&quot;&gt;(v2)&lt;/font&gt;&lt;br/&gt;&amp;nbsp;&amp;nbsp;signing-key.v1.json  &lt;font color=&quot;#577288&quot;&gt;(v1)&lt;/font&gt;&lt;br/&gt;&amp;nbsp;&amp;nbsp;instance.config.json  &lt;font color=&quot;#577288&quot;&gt;(v1)&lt;/font&gt;&lt;br/&gt;&amp;nbsp;&amp;nbsp;&lt;b&gt;BLK/YYYY/YYYYMM/YYYYMMDD/&lt;/b&gt;&lt;br/&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;…&amp;lt;guid&amp;gt;…&amp;lt;sha512&amp;gt;.BLK&lt;br/&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;…&amp;lt;guid&amp;gt;…&amp;lt;signer&amp;gt;.XBLK&lt;br/&gt;&amp;nbsp;&amp;nbsp;STAT/ &lt;font color=&quot;#577288&quot;&gt;(Step 3; regenerable)&lt;/font&gt;&lt;br/&gt;&amp;nbsp;&amp;nbsp;DELn/ &lt;font color=&quot;#577288&quot;&gt;(Step 3 cleanup)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="190" width="325" x="42" y="704" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_note_0" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#FFF9F1;strokeColor=#E2CFB9;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="61" width="318" x="392" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_note_text_0" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="&lt;b&gt;Step 1:&lt;/b&gt; Missing/corrupt retained history triggers safe restrictions; peer repair waits until Step 4." vertex="1">
+          <mxGeometry height="50" width="299" x="402" y="706" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_note_1" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#FFF9F1;strokeColor=#E2CFB9;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="61" width="318" x="392" y="766" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_note_text_1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="&lt;b&gt;Incoming blocks:&lt;/b&gt; Unauthorized or unresolved new blocks are rejected in memory, not saved." vertex="1">
+          <mxGeometry height="50" width="299" x="402" y="772" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_note_2" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#FFF9F1;strokeColor=#E2CFB9;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="61" width="318" x="392" y="832" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_note_text_2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="&lt;b&gt;GUID reuse:&lt;/b&gt; Exact duplicates are idempotent; different bytes return BLOCK_GUID_CONFLICT." vertex="1">
+          <mxGeometry height="50" width="299" x="402" y="838" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_id" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F3FAFB;strokeColor=#147E90;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="199" width="171" x="754" y="699" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_id_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=18;fontColor=#1C2C40;fontStyle=1;spacing=5;" value="IDENTITY &amp;amp; TRUST" vertex="1">
+          <mxGeometry height="30" width="153" x="763" y="702" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_id_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=14;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="Persistent Ed25519 identity per instance" vertex="1">
+          <mxGeometry height="160" width="153" x="763" y="732" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_bullets_bg" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#F8FDFD;strokeColor=#B1D0D4;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="198" width="272" x="938" y="699" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_bullets" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="• Ledger ID = original genesis signer public key.&lt;br/&gt;• Trusted genesis = SHA-512 of exact signed genesis.&lt;br/&gt;• Protocol 1.03 signed blocks.&lt;br/&gt;• DDLB transport Version 1.&lt;br/&gt;• Portable core with isolated OS-specific durability." vertex="1">
+          <mxGeometry height="184" width="252" x="948" y="708" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_right_bg" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#E8F5EA;strokeColor=#A6CAA7;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="198" width="174" x="1222" y="699" as="geometry" />
+        </mxCell>
+        <mxCell id="trust_right" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=13;fontColor=#287D52;fontStyle=0;spacing=5;" value="&lt;b&gt;Enforced by:&lt;/b&gt;&lt;br/&gt;✓ Local publication&lt;br/&gt;✓ Import validation&lt;br/&gt;✓ Projection / replay&lt;br/&gt;✓ Peer reconciliation" vertex="1">
+          <mxGeometry height="177" width="152" x="1232" y="712" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_txt_0" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="&lt;b&gt;Read path&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#59697B&quot;&gt;Read-only SQL to .DLDB&lt;/font&gt;" vertex="1">
+          <mxGeometry height="43" width="321" x="1488" y="697" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_txt_1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="&lt;b&gt;Mutation path&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#59697B&quot;&gt;SQL mutations become signed ledger events&lt;/font&gt;" vertex="1">
+          <mxGeometry height="44" width="321" x="1488" y="736" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_txt_2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="&lt;b&gt;Projection path&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#59697B&quot;&gt;Authenticated history applied to SQLite&lt;/font&gt;" vertex="1">
+          <mxGeometry height="45" width="321" x="1488" y="775" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_txt_3" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="&lt;b&gt;Management path&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#59697B&quot;&gt;Administrative commands and status&lt;/font&gt;" vertex="1">
+          <mxGeometry height="45" width="321" x="1488" y="814" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_txt_4" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="&lt;b&gt;Peer synchronization&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#59697B&quot;&gt;Block exchange and recovery (Step 4)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="47" width="321" x="1488" y="853" as="geometry" />
+        </mxCell>
+        <mxCell id="phase1_card" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#EEF5FE;strokeColor=#2865AE;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="121" width="347" x="30" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="phase1_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#2865AE;fontStyle=1;spacing=5;" value="Step 1 — Standalone Signed Ledger" vertex="1">
+          <mxGeometry height="28" width="329" x="39" y="987" as="geometry" />
+        </mxCell>
+        <mxCell id="phase1_status" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#2865AE;fontStyle=1;spacing=5;" value="ACCEPTED · 2026-11-18" vertex="1">
+          <mxGeometry height="21" width="331" x="38" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="phase1_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="• Publish and verify Protocol 1.03 blocks.&lt;br/&gt;• Identity and master authorization.&lt;br/&gt;• Durable import / export and recovery." vertex="1">
+          <mxGeometry height="56" width="330" x="39" y="1039" as="geometry" />
+        </mxCell>
+        <mxCell id="phase2_card" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#FFF1EE;strokeColor=#BD413B;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="121" width="345" x="380" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="phase2_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#BD413B;fontStyle=1;spacing=5;" value="Step 2 — Native SQL Interception" vertex="1">
+          <mxGeometry height="28" width="327" x="389" y="987" as="geometry" />
+        </mxCell>
+        <mxCell id="phase2_status" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#BD413B;fontStyle=1;spacing=5;" value="PLANNED" vertex="1">
+          <mxGeometry height="21" width="329" x="388" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="phase2_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="• Intercept SQL INSERT/UPDATE/DELETE.&lt;br/&gt;• Convert mutations into signed blocks.&lt;br/&gt;• No direct user writes to .DLDB." vertex="1">
+          <mxGeometry height="56" width="328" x="389" y="1039" as="geometry" />
+        </mxCell>
+        <mxCell id="phase3_card" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#EAF6EC;strokeColor=#287D52;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="121" width="338" x="728" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="phase3_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#287D52;fontStyle=1;spacing=5;" value="Step 3 — Projection / Replay" vertex="1">
+          <mxGeometry height="28" width="320" x="737" y="987" as="geometry" />
+        </mxCell>
+        <mxCell id="phase3_status" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#287D52;fontStyle=1;spacing=5;" value="PLANNED" vertex="1">
+          <mxGeometry height="21" width="322" x="736" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="phase3_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="• Replay authenticated ledger history.&lt;br/&gt;• Only projector writes SQLite .DLDB.&lt;br/&gt;• Track state in .STAT." vertex="1">
+          <mxGeometry height="56" width="321" x="737" y="1039" as="geometry" />
+        </mxCell>
+        <mxCell id="phase4_card" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#F3EFFB;strokeColor=#7740A3;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="121" width="329" x="1069" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="phase4_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontColor=#7740A3;fontStyle=1;spacing=5;" value="Step 4 — Peer Sync &amp; Recovery" vertex="1">
+          <mxGeometry height="28" width="311" x="1078" y="987" as="geometry" />
+        </mxCell>
+        <mxCell id="phase4_status" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#7740A3;fontStyle=1;spacing=5;" value="PLANNED" vertex="1">
+          <mxGeometry height="21" width="313" x="1077" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="phase4_body" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="• Exchange blocks and compare inventories.&lt;br/&gt;• Recover missing / damaged history.&lt;br/&gt;• Authenticate all recovered blocks." vertex="1">
+          <mxGeometry height="56" width="312" x="1078" y="1039" as="geometry" />
+        </mxCell>
+        <mxCell id="endstate_note" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontColor=#1C2C40;fontStyle=0;spacing=5;" value="&lt;b&gt;Scope note&lt;/b&gt;&lt;br/&gt;This is the intended architecture after Step 4. Step 1 was accepted on 2026-11-18; Steps 2–4 are planned.&lt;br/&gt;&lt;br/&gt;The ledger is authoritative. SQLite .DLDB is a rebuildable projection." vertex="1">
+          <mxGeometry height="148" width="372" x="1436" y="948" as="geometry" />
+        </mxCell>
+        <mxCell id="peersync_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#2865AE;fontStyle=1;spacing=5;" value="peer sync&lt;br/&gt;Step 4" vertex="1">
+          <mxGeometry height="43" width="87" x="1372" y="337.5" as="geometry" />
+        </mxCell>
+        <mxCell id="mutlbl" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#BD413B;fontStyle=1;spacing=5;" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;Mutating SQL&lt;br&gt;INSERT / UPDATE / DELETE&lt;/font&gt;" vertex="1">
+          <mxGeometry height="77" width="78" x="280" y="286" as="geometry" />
+        </mxCell>
+        <mxCell id="projectedflow" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#287D52;fontStyle=1;spacing=5;" value="projected state&lt;br/&gt;(write)" vertex="1">
+          <mxGeometry height="59" width="64" x="850" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="a_admin" edge="1" parent="1" source="management" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#7740A3;strokeWidth=3;endArrow=block;endFill=1;endSize=11;startArrow=none;startFill=1;entryX=0;entryY=0.602;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1.002;exitY=0.66;exitDx=0;exitDy=0;exitPerimeter=0;" target="schema">
+          <mxGeometry relative="1" x="-0.4324" as="geometry">
+            <mxPoint x="296" y="505" as="sourcePoint" />
+            <mxPoint x="976" y="585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="readlbl" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=12;fontColor=#2865AE;fontStyle=1;spacing=5;" value="Read (SQL)" vertex="1">
+          <mxGeometry height="31" width="87" x="280" y="190" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
