@@ -1,0 +1,48 @@
+{
+  "assignment": "QA-015",
+  "disposition": "NOT_READY",
+  "production_revision": "c001fc4a0d50067e2b8c9a2685625bf43aeea464",
+  "repository_commit": "06af60d969fddab1045146ecaed7775320d6c49d",
+  "cli_sha256": "7ad53dd36931831df14bc8ecb82f9a53576d71c2fff28a0d22f085191c9c504b",
+  "ledger_library_sha256": "9cbc07e403386ec87ed9a576666fc1c0a3bb3a1a40814e5789ae925477a50941",
+  "ordinary_windows_evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa015-20261117-170913-72b92553",
+  "preflight_evidence": "C:\\AnthonyO\\32GB_HOME\\Development\\UserDimensions.DatabaseDistributedLedger\\.git\\dev-003-work\\qa015-20261117-170505-ab13ec54",
+  "context": "OrdinaryWindowsPowerShell",
+  "owner_transcript_received": true,
+  "candidate_counts": {
+    "PASS": 47,
+    "FAIL": 2,
+    "BLOCKED": 0,
+    "NOT-RUN": 0
+  },
+  "reference_counts": {
+    "PASS": 76,
+    "FAIL": 0
+  },
+  "qa014_original_cases": {
+    "PASS": 38,
+    "FAIL": 0
+  },
+  "archived_duplicate_cases": {
+    "PASS": 3,
+    "FAIL": 0
+  },
+  "representative_precedence": {
+    "PASS": 6,
+    "FAIL": 0
+  },
+  "missing_genesis_cases": {
+    "PASS": 0,
+    "FAIL": 2,
+    "defect": "QA015-D01"
+  },
+  "exit_code": 1,
+  "command_receipts_independently_verified": 313,
+  "validation_receipt_sha256": "66c5a9f5ceb1ddd44d2ec78fc068f325ee984ffe7c2dacfde410d624e65d55fb",
+  "unchanged_assertion_runner_sha256": "aeb7b7fc26adb07fecae56078dc6f1f867daff578563c82d3f40f2a93616b676",
+  "production_modified": false,
+  "historical_results_preserved": true,
+  "formal_step1_acceptance": "NOT_DECLARED",
+  "independent_source_order_finding": "Open; not counted as a new QA015 executed failure",
+  "completed_utc": "2026-11-17T23:11:58.751038+00:00"
+}

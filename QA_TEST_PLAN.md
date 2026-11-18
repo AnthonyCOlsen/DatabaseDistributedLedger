@@ -219,3 +219,62 @@ and linked archives. QA-Tester maintains acceptance recommendations and approves
 future expectations. Coordinate Git commits with concurrent Developer/Architect work;
 stage only authorized QA-owned changes. Publication is not acceptance. Do not begin
 Steps 2–4 from this plan or this final Step 1 regression assignment.
+
+## 8. QA-015 running log — 2026-11-17
+
+This append-only follow-up preserves every QA-010 through QA-014 historical row,
+original assertion, and Owner-approved FI-07/FI-15/FI09 disposition above. The
+older defect/specification descriptions are historical as of their recorded
+candidate, not claims that the corrected candidate still produces those errors.
+
+Reviewed production: `c001fc4a0d50067e2b8c9a2685625bf43aeea464`; repository/document
+HEAD and observed GitHub main: `06af60d969fddab1045146ecaed7775320d6c49d`.
+CLI SHA-256 `7ad53dd36931831df14bc8ecb82f9a53576d71c2fff28a0d22f085191c9c504b`;
+Ledger library SHA-256 `9cbc07e403386ec87ed9a576666fc1c0a3bb3a1a40814e5789ae925477a50941`.
+Production source equivalence and clean Developer paths checked. Only QA-014
+launcher's repository/production/hash selection values changed; its 38-case
+assertion runner remains byte-identical to the committed historical source.
+
+| Execution / evidence | Actual results | Disposition |
+| --- | --- | --- |
+| QA-014 diagnostic follow-up, ordinary Windows, `E\qa014-integrity-20261117-161439-2ce90d05` | 7 candidate PASS, 0 FAIL/BLOCKED/NOT-RUN; 4 reference PASS; exit 0; 52 receipts independently verified | Supplied-input errors remain distinct from accepted-history corruption; healthy-key diagnostics and unchanged identity/good bytes verified. Separate source-order finding remains open. |
+| QA-015 Codex preflight, `E\qa015-20261117-170505-ab13ec54` | 47 candidate PASS, 2 FAIL, 0 BLOCKED, 0 NOT-RUN; 76 reference PASS; exit 1. Original QA-014 38/38 PASS; three archived-duplicate cases PASS; six representative input/history precedence cases PASS. Both missing-genesis cases FAIL. 313 receipts independently verified; both QA adapter builds zero warnings/errors. | **NOT READY. QA015-D01:** missing pinned genesis (file or whole directory) lacks `LEDGER_HISTORY_INCOMPLETE` reason and misreports intact key as unavailable. Restrictions and preservation work. Native qualification is not claimed from this run. |
+| QA-015 ordinary Windows, `E\qa015-20261117-170913-72b92553` | **47 candidate PASS, 2 FAIL, 0 BLOCKED, 0 NOT-RUN; 76 reference PASS; exit 1.** Original QA-014 38/38 PASS, all three archived-duplicate cases PASS, all six representative precedence cases PASS. Same two missing-genesis failures. Owner transcript and 313 command receipts independently verified; both QA adapters build with zero warnings/errors. | **NOT READY: QA015-D01 confirmed.** Native run 2026-11-17 17:09:13–17:10:24 America/Chicago, exact production/binary identities above. No production changes or assertion changes. Preflight and confirmation are separate runs of the same coverage, not additional distinct test cases. |
+
+The current authoritative design removed the old OPEN archived-retry wording;
+§13.3.1 is the tested contract. The corrected candidate passes all four formerly
+failing QA-014 assertions in preflight and ordinary Windows, without changing their expectations.
+Missing known pinned genesis is Step 1 diagnostic/restriction scope; automatic
+peer repair stays Step 4. No later-phase repair acceptance criterion is added.
+
+The separate fresh-publication signing-before-integrity-gate source finding is
+retained in `tests/IndependentQA/QA014_INTEGRITY_CONFORMANCE.md`. It is not counted
+as another newly executed failing QA-015 case. Developer disposition remains open.
+See `tests/IndependentQA/QA015_REPORT.md` and `QA015_D01_DEVELOPER_HANDOFF.md` for
+exact observed JSON, source locations, commands, hashes and evidence.
+
+No production, Developer-regression, Architect, SQLite or shared fixture changes;
+no antivirus/install changes. Formal Step 1 acceptance is not declared.
+
+## 9. QA-015 evidence publication — 2026-11-17
+
+Repository maintenance only: publish the completed QA-015 reports, original
+execution/validation scripts, historical candidate-selection metadata and the
+running log above. No candidate tests are newly executed by this publication.
+QA-015's **47 PASS / 2 FAIL** on production
+`c001fc4a0d50067e2b8c9a2685625bf43aeea464` remains unchanged. The three historical
+integrity/QA-015 reports are preserved byte for byte.
+
+The subsequent published Developer production revision is
+`fbb38781faa29eb5cead9de3dcda0e760b63c7a1`, following the pre-signing correction
+in `3e33f5e0bafb1e092aaf4ffcea06dc4c13879368`. Those corrections are not independent
+QA retest results. Earlier statements that the defects remain open describe their
+recorded historical candidate; final verification of the corrections is pending.
+**Step 1 remains NOT READY pending independent retest; no acceptance is declared.**
+
+Full command receipts and generated instances/keys remain in their existing local
+`.git/dev-003-work/` evidence directories, outside Git publication. See
+`tests/IndependentQA/README.md` for historical replay guards and fresh-clone limits.
+QA-016's separately authored optional source-order checker/instructions are not
+present in this checkout and are not integrated or counted by this commit. Preserve
+all prior results and Owner-approved FI-07/FI-15/FI09 dispositions above.
