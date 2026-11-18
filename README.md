@@ -17,6 +17,8 @@ Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Complete_Sy
 
 **Block validation and storage lifecycle:** [View diagram](docs/diagrams/UDDL_Block_Validation_Storage_Lifecycle.png) — in-memory validation, canonical batch admission, durable `.BLK` storage, later `.XBLK` archival, and recovery boundaries. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Block_Validation_Storage_Lifecycle.drawio).
 
+**Filesystem and identity structure:** [View diagram](docs/diagrams/UDDL_Filesystem_Identity_Structure.png) — same-basename `.DLDB`/support-directory pairing, persistent Ed25519 identity, genesis trust pin, active `.BLK` and local `.XBLK` files, and planned `.STAT`/`TREE.HASH` files. Editable diagram source: [diagrams.net (.drawio)](docs/diagrams/UDDL_Filesystem_Identity_Structure.drawio).
+
 ## Project milestone and acceptance record — 2026-11-18
 
 | Field | Accepted record |
