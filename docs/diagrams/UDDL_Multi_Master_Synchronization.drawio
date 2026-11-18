@@ -1,0 +1,371 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<mxfile host="Electron" modified="2026-11-18T00:00:00.000Z" agent="UDDL Architecture" version="24.7.17" type="device">
+  <diagram id="uddl-step4-sync" name="Multi-Master Sync">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1740" pageHeight="1110" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title_bg" value="" style="rounded=1;arcSize=27;whiteSpace=wrap;html=1;strokeColor=#172A4B;fillColor=#172A4B;strokeWidth=0;" vertex="1" parent="1">
+          <mxGeometry x="27" y="21" width="1686" height="86" as="geometry"/>
+        </mxCell>
+        <mxCell id="title" value="UDDL · Multi-Master Synchronization" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=35;fontColor=#FFFFFF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="55" y="28" width="1630" height="49" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="Planned Step 4 end-state  ·  peers exchange signed blocks, not SQLite database files" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#FFFFFF;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="55" y="77" width="1630" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1" value="" style="rounded=1;arcSize=32;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#EDF5FF;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="42" y="125" width="389" height="49" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1_text" value="STEP 1 · SIGNED LEDGER — ACCEPTED" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#2865AE;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="50" y="131" width="373" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2" value="" style="rounded=1;arcSize=32;whiteSpace=wrap;html=1;strokeColor=#B83B38;fillColor=#FFF0EE;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="444" y="125" width="389" height="49" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2_text" value="STEP 2 · SQL INTERCEPTION — PLANNED" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#B83B38;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="452" y="131" width="373" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3" value="" style="rounded=1;arcSize=32;whiteSpace=wrap;html=1;strokeColor=#277C50;fillColor=#EAF7EF;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="846" y="125" width="389" height="49" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3_text" value="STEP 3 · PROJECTOR / REPLAY — PLANNED" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#277C50;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="854" y="131" width="373" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="p4" value="" style="rounded=1;arcSize=32;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#E9F7FA;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1248" y="125" width="446" height="49" as="geometry"/>
+        </mxCell>
+        <mxCell id="p4_text" value="STEP 4 · PEER SYNC — PLANNED" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#117B91;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1256" y="131" width="430" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_panel" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;strokeColor=#A9C9EA;fillColor=#F3F7FD;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="42" y="193" width="500" height="373" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_banner" value="" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#2865AE;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="206" width="474" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_title" value="MASTER A  ·  OFFLINE AUTHOR" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=20;fontColor=#FFFFFF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="69" y="214" width="444" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_identity" value="" style="rounded=1;arcSize=32;whiteSpace=wrap;html=1;strokeColor=#A9C9EA;fillColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="69" y="278" width="446" height="61" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_key_title" value="INDEPENDENT INSTANCE IDENTITY" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=13;fontColor=#2865AE;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="80" y="282" width="423" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_key" value="Own key A  ·  authorized master" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#1E2A3A;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="80" y="308" width="423" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_offline" value="" style="rounded=1;arcSize=25;whiteSpace=wrap;html=1;strokeColor=#A9C9EA;fillColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="69" y="353" width="446" height="78" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_offline_title" value="OFFLINE LOCAL PUBLICATION" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=14;fontColor=#2865AE;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="83" y="360" width="418" height="23" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_offline_line_0" value="Locally signs events A1 and A2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="81" y="389" width="422" height="21" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_offline_line_1" value="using its current UTC timestamp" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="81" y="410" width="422" height="21" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_blk" value="" style="rounded=1;arcSize=21;whiteSpace=wrap;html=1;strokeColor=#A9C9EA;fillColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="69" y="445" width="446" height="95" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_block_title" value="LOCAL VERIFIED LEDGER  ·  BLK/" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=14;fontColor=#2865AE;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="81" y="451" width="422" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_block_list" value="Genesis · Grants · A1 · A2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#1E2A3A;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="81" y="480" width="422" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_a_block_note" value="Independent local publication" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=14;fontColor=#526278;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="83" y="511" width="418" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_panel" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;strokeColor=#C8B4E2;fillColor=#F8F5FD;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="620" y="193" width="500" height="373" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_banner" value="" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;strokeColor=#734AAF;fillColor=#734AAF;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="633" y="206" width="474" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_title" value="MASTER B  ·  OFFLINE AUTHOR" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=20;fontColor=#FFFFFF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="647" y="214" width="444" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_identity" value="" style="rounded=1;arcSize=32;whiteSpace=wrap;html=1;strokeColor=#C8B4E2;fillColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="647" y="278" width="446" height="61" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_key_title" value="INDEPENDENT INSTANCE IDENTITY" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=13;fontColor=#734AAF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="658" y="282" width="423" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_key" value="Own key B  ·  authorized master" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#1E2A3A;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="658" y="308" width="423" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_offline" value="" style="rounded=1;arcSize=25;whiteSpace=wrap;html=1;strokeColor=#C8B4E2;fillColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="647" y="353" width="446" height="78" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_offline_title" value="OFFLINE LOCAL PUBLICATION" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=14;fontColor=#734AAF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="661" y="360" width="418" height="23" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_offline_line_0" value="Locally signs event B1 while" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="659" y="389" width="422" height="21" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_offline_line_1" value="disconnected from Master A" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="659" y="410" width="422" height="21" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_blk" value="" style="rounded=1;arcSize=21;whiteSpace=wrap;html=1;strokeColor=#C8B4E2;fillColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="647" y="445" width="446" height="95" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_block_title" value="LOCAL VERIFIED LEDGER  ·  BLK/" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=14;fontColor=#734AAF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="659" y="451" width="422" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_block_list" value="Genesis · Grants · B1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#1E2A3A;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="659" y="480" width="422" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_b_block_note" value="Prior grant is already known" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=14;fontColor=#526278;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="661" y="511" width="418" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_panel" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;strokeColor=#95CDD8;fillColor=#F1FAFB;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="1198" y="193" width="500" height="373" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_banner" value="" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#117B91;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1211" y="206" width="474" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_title" value="REPLICA C  ·  READ-ONLY" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=20;fontColor=#FFFFFF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1225" y="214" width="444" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_identity" value="" style="rounded=1;arcSize=32;whiteSpace=wrap;html=1;strokeColor=#95CDD8;fillColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="1225" y="278" width="446" height="61" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_key_title" value="INDEPENDENT INSTANCE IDENTITY" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=13;fontColor=#117B91;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1236" y="282" width="423" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_key" value="Own key C  ·  not a master" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#1E2A3A;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1236" y="308" width="423" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_offline" value="" style="rounded=1;arcSize=25;whiteSpace=wrap;html=1;strokeColor=#95CDD8;fillColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="1225" y="353" width="446" height="78" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_offline_title" value="REPLICA MODE" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=14;fontColor=#117B91;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1239" y="360" width="418" height="23" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_offline_line_0" value="Cannot originate authorized" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1237" y="389" width="422" height="21" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_offline_line_1" value="database mutation blocks" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=16;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1237" y="410" width="422" height="21" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_blk" value="" style="rounded=1;arcSize=21;whiteSpace=wrap;html=1;strokeColor=#95CDD8;fillColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="1225" y="445" width="446" height="95" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_block_title" value="LOCAL VERIFIED LEDGER  ·  BLK/" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=14;fontColor=#117B91;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1237" y="451" width="422" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_block_list" value="Genesis · Grants · older events" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#1E2A3A;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1237" y="480" width="422" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_c_block_note" value="Can validate, store and project" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=14;fontColor=#526278;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1239" y="511" width="418" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="peerlink_a" value="" style="edgeStyle=none;rounded=0;html=1;strokeColor=#117B91;strokeWidth=4;startArrow=block;startFill=1;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="292" y="540" as="sourcePoint"/>
+            <mxPoint x="292" y="603" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peerlink_b" value="" style="edgeStyle=none;rounded=0;html=1;strokeColor=#117B91;strokeWidth=4;startArrow=block;startFill=1;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="870" y="540" as="sourcePoint"/>
+            <mxPoint x="870" y="603" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peerlink_c" value="" style="edgeStyle=none;rounded=0;html=1;strokeColor=#117B91;strokeWidth=4;startArrow=block;startFill=1;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1448" y="540" as="sourcePoint"/>
+            <mxPoint x="1448" y="603" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peer_net" value="" style="rounded=1;arcSize=30;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#E9F7FA;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="42" y="599" width="1656" height="99" as="geometry"/>
+        </mxCell>
+        <mxCell id="peer_net_title" value="STEP 4 · DECENTRALIZED PEER LINKS — NO CENTRAL LEDGER SERVER" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=22;fontColor=#117B91;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="72" y="608" width="1596" height="34" as="geometry"/>
+        </mxCell>
+        <mxCell id="peer_net_body" value="Best-effort push of accepted blocks  •  Periodic TREE.HASH comparison and pull  •  Reconnect after offline operation" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="72" y="646" width="1596" height="27" as="geometry"/>
+        </mxCell>
+        <mxCell id="process_heading" value="RECONNECTION AND RECONCILIATION — performed independently by each instance" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=23;fontColor=#172A4B;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="45" y="716" width="1650" height="43" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_inventory" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#EDF5FF;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="42" y="770" width="309" height="177" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_inventory_no" value="" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#2865AE;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="782" width="47" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_inventory_count" value="01" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="57" y="784" width="43" height="33" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_inventory_title" value="COMPARE INVENTORIES" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#2865AE;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="110" y="781" width="230" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_inventory_body_0" value="SHA-256 TREE.HASH over" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="59" y="838" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_inventory_body_1" value="active BLK/ inventory only" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="59" y="863" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_inventory_body_2" value="(exclude local .XBLK)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="59" y="888" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="to_step_2" value="" style="edgeStyle=none;rounded=0;html=1;strokeColor=#117B91;strokeWidth=4;startArrow=none;startFill=1;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="352" y="862" as="sourcePoint"/>
+            <mxPoint x="379" y="862" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step_retrieve" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#E9F7FA;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="379" y="770" width="309" height="177" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_retrieve_no" value="" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#117B91;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="392" y="782" width="47" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_retrieve_count" value="02" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="394" y="784" width="43" height="33" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_retrieve_title" value="REQUEST MISSING BYTES" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#117B91;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="447" y="781" width="230" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_retrieve_body_0" value="Descend mismatched trees;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="396" y="838" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_retrieve_body_1" value="fetch exact signed records;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="396" y="863" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_retrieve_body_2" value="identify gaps or corruption" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="396" y="888" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="to_step_3" value="" style="edgeStyle=none;rounded=0;html=1;strokeColor=#117B91;strokeWidth=4;startArrow=none;startFill=1;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="689" y="862" as="sourcePoint"/>
+            <mxPoint x="716" y="862" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step_verify" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=1;strokeColor=#734AAF;fillColor=#F3EFFF;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="716" y="770" width="309" height="177" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_verify_no" value="" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;strokeColor=#734AAF;fillColor=#734AAF;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="729" y="782" width="47" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_verify_count" value="03" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="731" y="784" width="43" height="33" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_verify_title" value="VERIFY IN MEMORY" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#734AAF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="784" y="781" width="230" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_verify_body_0" value="Protocol 1.03 · Ed25519;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="733" y="838" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_verify_body_1" value="ledger ID + pinned genesis;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="733" y="863" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_verify_body_2" value="historical master authority" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="733" y="888" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="to_step_4" value="" style="edgeStyle=none;rounded=0;html=1;strokeColor=#117B91;strokeWidth=4;startArrow=none;startFill=1;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1026" y="862" as="sourcePoint"/>
+            <mxPoint x="1053" y="862" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step_persist" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=1;strokeColor=#A15A15;fillColor=#FFF4E4;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="1053" y="770" width="309" height="177" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_persist_no" value="" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;strokeColor=#A15A15;fillColor=#A15A15;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1066" y="782" width="47" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_persist_count" value="04" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1068" y="784" width="43" height="33" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_persist_title" value="DURABLY RETAIN" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#A15A15;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1121" y="781" width="230" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_persist_body_0" value="Accept eligible .BLK bytes;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="838" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_persist_body_1" value="never overwrite existing data;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="863" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_persist_body_2" value="grant durable before dependent" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="888" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="to_step_5" value="" style="edgeStyle=none;rounded=0;html=1;strokeColor=#117B91;strokeWidth=4;startArrow=none;startFill=1;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1363" y="862" as="sourcePoint"/>
+            <mxPoint x="1390" y="862" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step_replay" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=1;strokeColor=#277C50;fillColor=#EAF7EF;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="1390" y="770" width="309" height="177" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_replay_no" value="" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;strokeColor=#277C50;fillColor=#277C50;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1403" y="782" width="47" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_replay_count" value="05" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#FFFFFF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1405" y="784" width="43" height="33" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_replay_title" value="PROJECT AND CONVERGE" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#277C50;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1458" y="781" width="230" height="37" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_replay_body_0" value="Canonical order, then Step 3" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1407" y="838" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_replay_body_1" value="projector rebuilds SQLite .DLDB;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1407" y="863" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="step_replay_body_2" value="same history = same state" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1407" y="888" width="275" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_trust" value="" style="rounded=1;arcSize=23;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#EDF5FF;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="42" y="970" width="500" height="103" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_trust_title" value="CRYPTOGRAPHIC TRUST ≠ TRANSPORT" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#2865AE;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="54" y="978" width="476" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_trust_body_0" value="New unauthorized or unresolved input" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="54" y="1015" width="476" height="23" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_trust_body_1" value="is rejected before any disk write." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="54" y="1038" width="476" height="23" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_archives" value="" style="rounded=1;arcSize=23;whiteSpace=wrap;html=1;strokeColor=#734AAF;fillColor=#F3EFFF;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="620" y="970" width="500" height="103" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_archives_title" value="LOCAL .XBLK IS NOT PROPAGATED" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#734AAF;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="632" y="978" width="476" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_archives_body_0" value="Formerly accepted invalidated blocks stay" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="632" y="1015" width="476" height="23" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_archives_body_1" value="archived within BLK/ until reauthorized." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="632" y="1038" width="476" height="23" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_repair" value="" style="rounded=1;arcSize=23;whiteSpace=wrap;html=1;strokeColor=#A15A15;fillColor=#FFF4E4;strokeWidth=1.3;" vertex="1" parent="1">
+          <mxGeometry x="1198" y="970" width="500" height="103" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_repair_title" value="REPAIR REQUIRES A VALID PEER" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#A15A15;fontStyle=1;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="978" width="476" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_repair_body_0" value="Missing/corrupt history is verified again;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="1015" width="476" height="23" as="geometry"/>
+        </mxCell>
+        <mxCell id="callout_repair_body_1" value="otherwise retain recovery diagnostics." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#1E2A3A;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="1038" width="476" height="23" as="geometry"/>
+        </mxCell>
+        <mxCell id="footer_line" value="" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;strokeColor=#D2D9E2;fillColor=#D2D9E2;strokeWidth=0;" vertex="1" parent="1">
+          <mxGeometry x="42" y="1089" width="1656" height="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="footer" value="Architectural end-state (planned Step 4) · Signed blocks are independent—not hash-chained · No peer completeness claim without sufficient history" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=13;fontColor=#526278;fontStyle=0;spacing=0;overflow=visible;" vertex="1" parent="1">
+          <mxGeometry x="49" y="1090" width="1642" height="18" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
