@@ -4,7 +4,8 @@
 > QA-014 (2026-11-17) expressly authorizes Codex, acting as QA's implementation
 > assistant through the Project Owner, to consolidate this QA-owned document.
 > Production code, Developer regressions and Architect documents are outside this
-> assignment. **Formal Step 1 acceptance remains pending QA review and Owner decision.**
+> assignment. **QA-016 recommends QA READY for its exact reviewed candidate;
+> formal Step 1 acceptance remains an Owner decision.**
 
 | Field | Current value |
 | --- | --- |
@@ -13,7 +14,11 @@
 | Active authority | Owner-approved ARCH-014 and signed Protocol 1.03; four current root design documents |
 | Initial acceptance platform | Windows 11, local qualified storage; other platforms unqualified |
 | Phase boundary | Step 1 ledger/identity/authorization; Step 2 interception, Step 3 projection and Step 4 peers remain separate |
-| Current closure state | Targeted ordinary Windows: 34 PASS, 4 FAIL, 0 BLOCKED, 0 NOT-RUN; 76 independent reference PASS. Two implementation defects remain; no acceptance declared. |
+| Current closure state | QA-016 on fbb38781faa29eb5cead9de3dcda0e760b63c7a1: 52 candidate PASS, 6 source checks PASS, 76 reference PASS; zero FAIL/BLOCKED/NOT-RUN. Independent QA READY; formal Owner acceptance not declared. See §10. |
+
+Earlier closure/issue descriptions below retain the historical candidate and outcome
+they recorded. QA-016 verifies the corrected candidate without rewriting those
+results, including QA-015's 47 PASS / 2 FAIL.
 
 This is a QA plan and evidence index, not a normative architecture specification.
 [Technical Design](Database_Distributed_Ledger_Technical_Design.md) owns signed bytes,
@@ -278,3 +283,34 @@ Full command receipts and generated instances/keys remain in their existing loca
 QA-016's separately authored optional source-order checker/instructions are not
 present in this checkout and are not integrated or counted by this commit. Preserve
 all prior results and Owner-approved FI-07/FI-15/FI09 dispositions above.
+
+## 10. QA-016 independent retest running log — 2026-11-17
+
+Candidate: `fbb38781faa29eb5cead9de3dcda0e760b63c7a1`; execution HEAD:
+`5475d8521c9d751f1393261dbfb8cd5558d8d251`. Exact source equivalence and reviewed
+CLI/library hashes are checked. Only QA-owned selection constants change in the
+QA-015 launcher/validator; all original assertions and historical results remain.
+
+| Evidence / actual run | Results | Qualification |
+| --- | --- | --- |
+| `E\qa016-20261117-203347-335c1a87`, Codex preflight | 52 candidate PASS, 0 FAIL/BLOCKED/NOT-RUN; 76 reference PASS; original source checker 5 PASS/1 BLOCKED; exit 2 | All original 49 cases, including both missing-genesis failures, now pass; three new no-GUID runtime cases pass. Source blocker is a QA lexical limitation, not a production defect. Original receipts preserved. |
+| `E\qa016-source-review-20261117-203711-f0345428`, source-only follow-up | 6 source checks PASS, 0 FAIL/BLOCKED/NOT-RUN | Corrected handling of C# verbatim path/character literals after independent manual call-graph review. Same frozen production source; no repeated candidate tests or weakened expectations. Combined evidence validator verified 331 candidate command receipts. |
+| `E\qa016-20261117-204215-069dc0e9`, ordinary Windows confirmation | **52 candidate PASS, 0 FAIL/BLOCKED/NOT-RUN; 6 source checks PASS; 76 reference PASS; exit 0.** Original 49 assertions and three fresh no-GUID checks pass. | **Independent QA READY for fbb38781faa29eb5cead9de3dcda0e760b63c7a1.** Owner transcript matches completed receipts; 331 command receipts and source/design/binary snapshots independently validated. No runtime observation of in-memory signing is claimed. |
+
+Candidate, source and reference totals are separate; preflight/confirmation are not
+counted as distinct additional coverage. Runtime checks do not claim direct
+in-memory signing observation. QA016_REPORT.md identifies the actual call graph,
+new healthy/impaired no-GUID checks, evidence and current independent disposition.
+
+QA-015's 47 PASS / 2 FAIL against c001fc4 and all historical reports remain intact.
+Maintain FI-07/FI-15 11 replacement PASS with literal checkpoints REPLACED/NOT
+EXECUTED, FI09-LIVE-RESULT-SNAPSHOT NOT OBSERVED — OWNER-APPROVED EQUIVALENT EVIDENCE,
+and automatic repair deferred to Step 4. No Developer/Architect/SQLite changes,
+new protocol requirements, Step 2 work or formal Owner acceptance are introduced.
+
+QA-016 final disposition: **QA READY for the exact reviewed production candidate**.
+Both QA015-D01 scenarios and the pre-signing finding are independently verified
+corrected within this scope; no additional defect reproduced. Historical QA-015
+47 PASS / 2 FAIL and the initial QA-016 source-checker blocker remain preserved.
+Final recommendation is returned to Developer, Security and PM through the Owner;
+formal Step 1 acceptance is not declared by this execution report.

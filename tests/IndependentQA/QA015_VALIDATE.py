@@ -10,9 +10,9 @@ from QA010_RUN import inventory, block_path
 from QA014_RUN import EXISTING, NEW
 from QA015_RUN import EXTRA
 
-PRODUCTION='c001fc4a0d50067e2b8c9a2685625bf43aeea464'
-CLI='7ad53dd36931831df14bc8ecb82f9a53576d71c2fff28a0d22f085191c9c504b'
-LIBRARY='9cbc07e403386ec87ed9a576666fc1c0a3bb3a1a40814e5789ae925477a50941'
+PRODUCTION='fbb38781faa29eb5cead9de3dcda0e760b63c7a1'
+CLI='3232c397f4a33b9e9132e2dafd7592589f56b59d17df53baa822a68f74ae3d7f'
+LIBRARY='a71123aea438bf33c0fa142d357d4513614f53812d0b10169061040ad2d03798'
 
 
 def read(path):return json.loads(path.read_text(encoding='utf-8-sig'))

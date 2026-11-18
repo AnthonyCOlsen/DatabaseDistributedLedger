@@ -106,3 +106,34 @@ separate QA work item. No QA-016 artifact was present in this checkout when this
 publication was prepared, and no QA-016 result is claimed here. The three historical
 reports, original assertions/fixtures/results and approved FI-07/FI-15/FI09
 dispositions are preserved unchanged.
+
+## QA-016 independent retest of the corrected candidate
+
+Invoke-QA016.ps1 selects production `fbb38781faa29eb5cead9de3dcda0e760b63c7a1`
+with explicitly reviewed CLI/library SHA-256 values. The QA-015 launcher/validator
+selection constants now recognize that candidate; their original assertions are
+unchanged. Historical execution against `c001fc4` remains recorded in the prior
+Git versions and immutable local snapshots, including the 47-PASS/2-FAIL result.
+
+QA-016 executes the original 49 candidate cases, three fresh no-GUID runtime cases,
+six separately recorded source-order checks and 76 independent reference checks.
+It distinguishes source inspection from runtime observations and does not claim
+direct instrumentation of in-memory signing. See QA016_REPORT.md for actual results,
+the preserved initial advisory-checker limitation/source-only follow-up, commands,
+candidate provenance and ordinary-Windows execution status.
+
+QA016_VALIDATE.py reviews saved results and snapshots without candidate re-execution.
+Complete receipts, synthetic instances/keys, original damaged/withdrawn blocks and
+frozen candidates remain local under `.git/dev-003-work/`. The launcher guards must
+not be bypassed; a later QA/documentation-only HEAD requires an explicit reviewed
+`-ExpectedCommit` selection with the same verified production source and binaries.
+No old-candidate source-order observation is represented as a new-candidate result.
+
+Final ordinary-Windows QA-016 outcome: **52 candidate PASS, 6 source checks PASS,
+76 reference PASS; zero FAIL/BLOCKED/NOT-RUN; exit 0. Independent QA READY for
+`fbb38781faa29eb5cead9de3dcda0e760b63c7a1`.** Complete native receipts remain at
+`.git/dev-003-work/qa016-20261117-204215-069dc0e9`; its independently verified
+331 command receipts and frozen source/binaries support the tracked report/results.
+This recommendation supersedes the earlier pending-retest disposition for this
+candidate without rewriting any historical result or declaring formal Owner
+acceptance. Publication/Owner coordination and later phases remain separate.

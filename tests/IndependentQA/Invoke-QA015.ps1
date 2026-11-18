@@ -7,7 +7,7 @@ param(
  [ValidateSet('All','Reference','Candidate')][string]$Suite='All',
  [ValidateSet('Targeted')][string]$Selection='Targeted',
  [Parameter(Mandatory=$true)][ValidateSet('CodexSandboxPreflight','OrdinaryWindowsPowerShell','PortableReference')][string]$RunContext,
- [string]$ExpectedCommit='06af60d969fddab1045146ecaed7775320d6c49d',
+ [string]$ExpectedCommit='5475d8521c9d751f1393261dbfb8cd5558d8d251',
  [string]$PythonExe='', [string]$LedgerCtlDll='', [string]$EvidenceRoot='',
  [string]$AntivirusState='Not recorded by operator; settings unchanged'
 )
@@ -61,7 +61,7 @@ function Run-Process([string]$Name,[string]$Executable,[string[]]$ProcessArgumen
 }
 $status=[ordered]@{format='UDDL-QA015-RUN';version=1;utc_start=(Get-Date).ToUniversalTime().ToString('o');context_operator_reported=$RunContext;
  os=[Environment]::OSVersion.VersionString;powershell=$PSVersionTable.PSVersion.ToString();antivirus_operator_reported=$AntivirusState;antivirus_changed=$false;
- candidate_scope='QA-015: original 38 QA-014 assertions plus 11 independent follow-up cases';selection=$Selection;production_revision='c001fc4a0d50067e2b8c9a2685625bf43aeea464';os_or_storage_certified=$false;
+ candidate_scope='QA-015: original 38 QA-014 assertions plus 11 independent follow-up cases';selection=$Selection;production_revision='fbb38781faa29eb5cead9de3dcda0e760b63c7a1';os_or_storage_certified=$false;
  expected_commit=$ExpectedCommit;actual_commit=$null;reference='NOT-RUN';candidate='NOT-RUN';adapter='NOT-RUN';formal_step1_acceptance='NOT_DECLARED';physical_power_loss_proven=$false}
 $exitCode=1
 try{
@@ -122,7 +122,7 @@ try{
   Write-QaJson (Join-Path $EvidenceRoot 'candidate-artifact-hashes.json') $artifactHashes
   $candidate=Join-Path $snapshot ([IO.Path]::GetFileName($LedgerCtlDll));$status['candidate_dll_sha256']=(Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant()
   $status['ledger_library_sha256']=(Get-FileHash -LiteralPath (Join-Path $snapshot 'UserDimensions.Ledger.dll') -Algorithm SHA256).Hash.ToLowerInvariant()
-  if($status.candidate_dll_sha256 -cne '7ad53dd36931831df14bc8ecb82f9a53576d71c2fff28a0d22f085191c9c504b' -or $status.ledger_library_sha256 -cne '9cbc07e403386ec87ed9a576666fc1c0a3bb3a1a40814e5789ae925477a50941'){throw 'Candidate binary hashes differ from the explicitly reviewed QA-014 build; obtain a reviewed candidate selection'}
+  if($status.candidate_dll_sha256 -cne '3232c397f4a33b9e9132e2dafd7592589f56b59d17df53baa822a68f74ae3d7f' -or $status.ledger_library_sha256 -cne 'a71123aea438bf33c0fa142d357d4513614f53812d0b10169061040ad2d03798'){throw 'Candidate binary hashes differ from the explicitly reviewed QA-014 build; obtain a reviewed candidate selection'}
   $driverRoot=Join-Path $EvidenceRoot 'driver';$null=New-Item -ItemType Directory -Path $driverRoot
   foreach($name in @('QA010_FaultDriver.cs','QA010_FaultDriver.csproj')){Copy-Item -LiteralPath (Join-Path $suiteSnapshot $name) -Destination (Join-Path $driverRoot $name)}
   [IO.File]::WriteAllText((Join-Path $driverRoot 'NuGet.Config'),'<configuration><packageSources><clear/></packageSources></configuration>',[Text.UTF8Encoding]::new($false))
