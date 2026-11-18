@@ -98,7 +98,8 @@ public sealed class LedgerInstance : IDisposable
         EnsureConfig(); var result=new List<(SignedBlock,string)>(); var directory=Path.Combine(Root,"BLK"); long resident=0;
         if (!Directory.Exists(directory))
         {
-            Errors.Require(Manifest.Binding==null,"RECOVERY_REQUIRED",4,"Pinned signed genesis storage is missing.");
+            if(Manifest.Binding!=null) throw new LedgerException("RECOVERY_REQUIRED",4,"Pinned signed genesis storage is missing.",
+                new LedgerHistoryFailure("LEDGER_HISTORY_INCOMPLETE",directory));
             return result;
         }
         foreach (var path in SafeInventoryFiles(directory))
@@ -123,9 +124,9 @@ public sealed class LedgerInstance : IDisposable
             Errors.Require(resident<=Limits.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Decoded history exceeds configured memory.");
             result.Add((block,path));
         }
-        if(Manifest.Binding is {} binding)
-            Errors.Require(result.Any(x=>x.Item1.IsGenesis && x.Item1.LedgerId==binding.LedgerId && x.Item1.Hash==binding.GenesisHash),
-                "RECOVERY_REQUIRED",4,"The exact pinned signed genesis is missing; preserve the original identity and trust binding.");
+        if(Manifest.Binding is {} binding && !result.Any(x=>x.Item1.IsGenesis && x.Item1.LedgerId==binding.LedgerId && x.Item1.Hash==binding.GenesisHash))
+            throw new LedgerException("RECOVERY_REQUIRED",4,"The exact pinned signed genesis is missing; preserve the original identity and trust binding.",
+                new LedgerHistoryFailure("LEDGER_HISTORY_INCOMPLETE",directory));
         return result;
     }
     private static IEnumerable<string> SafeInventoryFiles(string root)
