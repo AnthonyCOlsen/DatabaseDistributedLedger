@@ -8,6 +8,10 @@ An MIT-licensed open-source distributed signed ledger that derives relational st
 
 ![UDDL Complete System Architecture](docs/diagrams/UDDL_Complete_System_Architecture.png)
 
+**Database write and read lifecycle:** [View the lifecycle diagram](docs/diagrams/UDDL_Database_Write_Read_Lifecycle.png) — how SELECT reads projected SQLite state, SQL mutations become signed ledger events, and the Step 3 projector alone writes `.DLDB`. Steps 2–4 are planned, not implemented.
+
+**Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Database_Write_Read_Lifecycle.drawio).
+
 ## Project milestone and acceptance record — 2026-11-18
 
 | Field | Accepted record |
