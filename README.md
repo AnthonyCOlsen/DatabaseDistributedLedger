@@ -16,6 +16,10 @@ An MIT-licensed open-source distributed signed ledger that derives relational st
 
 **Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Multi_Master_Synchronization.drawio).
 
+**Ledger authorization lifecycle:** [View diagram](docs/diagrams/UDDL_Ledger_Authorization_Lifecycle.png) — genesis establishes the first master, grants add authority, two-signature revocations remove it, and late-arriving historical blocks can change local authorization classifications.
+
+**Editable diagram source:** [diagrams.net (.drawio)](docs/diagrams/UDDL_Ledger_Authorization_Lifecycle.drawio).
+
 ## Project milestone and acceptance record — 2026-11-18
 
 | Field | Accepted record |
