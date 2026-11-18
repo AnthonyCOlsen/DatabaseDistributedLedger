@@ -1,6 +1,4 @@
-using System.Buffers.Binary;
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 
 namespace UserDimensions.Ledger;
@@ -95,20 +93,31 @@ public sealed class LedgerInstance : IDisposable
     }
     private List<(SignedBlock Block,string Path)> Inventory()
     {
-        EnsureConfig(); var result=new List<(SignedBlock,string)>(); var directory=Path.Combine(Root,"BLK"); long resident=0;
+        EnsureConfig();
+        var result = new List<(SignedBlock,string)>();
+        var directory = Path.Combine(Root,"BLK");
+        long resident = 0;
+
         if (!Directory.Exists(directory))
         {
-            if(Manifest.Binding!=null) throw new LedgerException("RECOVERY_REQUIRED",4,"Pinned signed genesis storage is missing.",
-                new LedgerHistoryFailure("LEDGER_HISTORY_INCOMPLETE",directory));
+            if (Manifest.Binding != null)
+                throw new LedgerException("RECOVERY_REQUIRED",4,"Pinned signed genesis storage is missing.",
+                    new LedgerHistoryFailure("LEDGER_HISTORY_INCOMPLETE",directory));
             return result;
         }
+
         foreach (var path in SafeInventoryFiles(directory))
         {
-            var length=new FileInfo(path).Length; Limits.CheckRaw(length);
+            var length = new FileInfo(path).Length;
+            Limits.CheckRaw(length);
             Errors.Require(resident + length*8 <= Limits.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Canonical replay exceeds configured buffered history memory; raise the limit.");
+
             SignedBlock block;
-            try { block=BlockCodec.Parse(Paths.ReadBounded(path,Math.Min(Limits.MaxRawBlockBytes,Limits.MaxInflightImportBytes/4)),Limits); }
-            catch(LedgerException e) when(e.Code is "BAD_FRAME" or "HASH_MISMATCH" or "BAD_SIGNATURE" or "BAD_EVENT" or
+            try
+            {
+                block = BlockCodec.Parse(Paths.ReadBounded(path,Math.Min(Limits.MaxRawBlockBytes,Limits.MaxInflightImportBytes/4)),Limits);
+            }
+            catch (LedgerException e) when (e.Code is "BAD_FRAME" or "HASH_MISMATCH" or "BAD_SIGNATURE" or "BAD_EVENT" or
                 "UNSUPPORTED_VERSION" or "LEDGER_IDENTITY_MISMATCH" or "CONSENT_EXPIRED")
             {
                 // This boundary reads retained history, not untrusted new input. Resource,
@@ -116,17 +125,21 @@ public sealed class LedgerInstance : IDisposable
                 throw new LedgerException("RECOVERY_REQUIRED",4,"Retained signed history failed verification ("+e.Code+").",
                     new LedgerHistoryFailure("LEDGER_HISTORY_CORRUPT",path));
             }
-            if (Manifest.Binding!=null && Manifest.Binding.LedgerId!=block.LedgerId) continue;
-            var expected=BlockPath(block,path.EndsWith(".XBLK",StringComparison.Ordinal));
-            if(!string.Equals(path,expected,OperatingSystem.IsWindows()?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal))
+            if (Manifest.Binding != null && Manifest.Binding.LedgerId != block.LedgerId) continue;
+
+            var expected = BlockPath(block,path.EndsWith(".XBLK",StringComparison.Ordinal));
+            if (!string.Equals(path,expected,OperatingSystem.IsWindows()?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal))
                 throw new LedgerException("RECOVERY_REQUIRED",4,"Block filename does not match verified bytes.",new LedgerHistoryFailure("LEDGER_HISTORY_CORRUPT",path));
-            resident+=length*8+block.EventBytes.LongLength*4;
-            Errors.Require(resident<=Limits.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Decoded history exceeds configured memory.");
+
+            resident += length*8 + block.EventBytes.LongLength*4;
+            Errors.Require(resident <= Limits.MaxInflightImportBytes,"RESOURCE_LIMIT",5,"Decoded history exceeds configured memory.");
             result.Add((block,path));
         }
-        if(Manifest.Binding is {} binding && !result.Any(x=>x.Item1.IsGenesis && x.Item1.LedgerId==binding.LedgerId && x.Item1.Hash==binding.GenesisHash))
+
+        if (Manifest.Binding is {} binding && !result.Any(x=>x.Item1.IsGenesis && x.Item1.LedgerId==binding.LedgerId && x.Item1.Hash==binding.GenesisHash))
             throw new LedgerException("RECOVERY_REQUIRED",4,"The exact pinned signed genesis is missing; preserve the original identity and trust binding.",
                 new LedgerHistoryFailure("LEDGER_HISTORY_INCOMPLETE",directory));
+
         return result;
     }
     private static IEnumerable<string> SafeInventoryFiles(string root)
