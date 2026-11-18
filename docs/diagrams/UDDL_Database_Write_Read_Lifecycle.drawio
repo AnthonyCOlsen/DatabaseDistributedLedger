@@ -1,0 +1,188 @@
+<mxfile host="Electron" agent="UDDL Architecture">
+  <diagram id="uddl-write-read" name="Write and Read Lifecycle">
+    <mxGraphModel dx="2315" dy="1334" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1680" pageHeight="960" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#172A4B;fillColor=#172A4B;fontColor=#FFFFFF;fontSize=34;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;UDDL · Database Write and Read Lifecycle&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;End-state interaction map · Step 1 accepted · Steps 2–4 planned&lt;/div&gt;" vertex="1">
+          <mxGeometry height="82" width="1620" x="30" y="21" as="geometry" />
+        </mxCell>
+        <mxCell id="phase1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#EDF5FF;fontColor=#2865AE;fontSize=17;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;STEP 1  ·  Signed Ledger — ACCEPTED&lt;/div&gt;" vertex="1">
+          <mxGeometry height="44" width="390" x="34" y="118" as="geometry" />
+        </mxCell>
+        <mxCell id="phase2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#B83B38;fillColor=#FFF0EE;fontColor=#B83B38;fontSize=17;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;STEP 2  ·  SQL Interception — PLANNED&lt;/div&gt;" vertex="1">
+          <mxGeometry height="44" width="386" x="438" y="118" as="geometry" />
+        </mxCell>
+        <mxCell id="phase3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#277C50;fillColor=#EAF7EF;fontColor=#277C50;fontSize=17;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;STEP 3  ·  Projector / Replay — PLANNED&lt;/div&gt;" vertex="1">
+          <mxGeometry height="44" width="388" x="838" y="118" as="geometry" />
+        </mxCell>
+        <mxCell id="phase4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#E9F7FA;fontColor=#117B91;fontSize=17;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;STEP 4  ·  Peer Sync / Repair — PLANNED&lt;/div&gt;" vertex="1">
+          <mxGeometry height="44" width="406" x="1240" y="118" as="geometry" />
+        </mxCell>
+        <mxCell id="clientPanel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#A9C9EA;fillColor=#F2F7FD;fontColor=#2865AE;fontSize=21;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;CLIENTS&lt;/div&gt;" vertex="1">
+          <mxGeometry height="560" width="270" x="32" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlPanel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#9BCDAC;fillColor=#F0F8F2;fontColor=#277C50;fontSize=16;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;SQLITE DATABASE INSTANCE&lt;/div&gt;" vertex="1">
+          <mxGeometry height="560" width="300" x="321" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="eventPanel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#CAB0DD;fillColor=#FCF7FB;fontColor=#734AAF;fontSize=16;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;MUTATION → LEDGER EVENTS&lt;/div&gt;" vertex="1">
+          <mxGeometry height="560" width="296" x="639" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="ledgerPanel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#C4AFE1;fillColor=#F7F2FC;fontColor=#734AAF;fontSize=16;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;LEDGER + PROJECTION&lt;/div&gt;" vertex="1">
+          <mxGeometry height="560" width="305" x="953" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="peerPanel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#94CDD8;fillColor=#EFF9FA;fontColor=#117B91;fontSize=16;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;PEER NETWORK&lt;/div&gt;" vertex="1">
+          <mxGeometry height="560" width="370" x="1278" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="event_to_sign" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#B83B38;strokeWidth=5;endArrow=block;endFill=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="787" y="386" as="sourcePoint" />
+            <mxPoint x="787" y="446" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sign_to_store" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#B83B38;strokeWidth=5;endArrow=block;endFill=1;" value="Publish">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="945" y="507" />
+              <mxPoint x="945" y="490" />
+            </Array>
+            <mxPoint x="913" y="507" as="sourcePoint" />
+            <mxPoint x="975" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="batch_to_store" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#117B91;strokeWidth=5;endArrow=block;endFill=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1106" y="376" as="sourcePoint" />
+            <mxPoint x="1106" y="432" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peer_recovery_to_batch" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#117B91;strokeWidth=3;endArrow=block;endFill=1;dashed=1;entryX=0.991;entryY=0.559;entryDx=0;entryDy=0;entryPerimeter=0;" target="blk" value="">
+          <mxGeometry relative="1" x="-0.3298" as="geometry">
+            <Array as="points">
+              <mxPoint x="1267" y="497" />
+            </Array>
+            <mxPoint x="1302" y="497" as="sourcePoint" />
+            <mxPoint x="1236" y="381" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="store_to_projector" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#277C50;strokeWidth=5;endArrow=block;endFill=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1106" y="548" as="sourcePoint" />
+            <mxPoint x="1106" y="592" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="projection_return" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#277C50;strokeWidth=6;endArrow=block;endFill=1;" value="Projector-only .DLDB write">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="948" y="665" />
+              <mxPoint x="948" y="775" />
+              <mxPoint x="626" y="775" />
+              <mxPoint x="626" y="300" />
+            </Array>
+            <mxPoint x="975" y="665" as="sourcePoint" />
+            <mxPoint x="600" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="admin" edge="1" parent="1" source="mgmt" style="edgeStyle=none;rounded=1;html=1;strokeColor=#734AAF;strokeWidth=3;endArrow=block;endFill=1;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.513;entryY=1.018;entryDx=0;entryDy=0;entryPerimeter=0;" target="projector" value="Ledger administration">
+          <mxGeometry relative="1" x="-0.1824" as="geometry">
+            <Array as="points">
+              <mxPoint x="167.5" y="794" />
+              <mxPoint x="317" y="792" />
+              <mxPoint x="965" y="792" />
+              <mxPoint x="1110" y="790" />
+            </Array>
+            <mxPoint x="167.5" y="737" as="sourcePoint" />
+            <mxPoint x="1020" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="app" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#EDF5FF;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Applications / users&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;SQL SELECT · read only&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="227" x="54" y="252" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlClients" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#EDF5FF;fontColor=#1E2A3A;fontSize=18;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;SQLite API / SQL clients&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;INSERT · UPDATE · DELETE&lt;/div&gt;" vertex="1">
+          <mxGeometry height="104" width="227" x="54" y="417" as="geometry" />
+        </mxCell>
+        <mxCell id="mgmt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#EDF5FF;fontColor=#1E2A3A;fontSize=17;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Management CLI&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;ledgerctl · direct block APIs&lt;/div&gt;" vertex="1">
+          <mxGeometry height="98" width="227" x="54" y="595" as="geometry" />
+        </mxCell>
+        <mxCell id="dldb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#277C50;fillColor=#EAF7EF;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Projected SQLite · .DLDB&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Queries read derived state.&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Only Step 3 projector writes.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="102" width="258" x="342" y="249" as="geometry" />
+        </mxCell>
+        <mxCell id="intercept" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#B83B38;fillColor=#FFF0EE;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Native SQL interception&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Step 2: mutations become events.&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Direct application writes to .DLDB&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;are blocked.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="132" width="258" x="342" y="412" as="geometry" />
+        </mxCell>
+        <mxCell id="event" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#734AAF;fillColor=#F4EFFF;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Ledger event creation&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Encode schema / row changes.&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Preserve SQLite-native types.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="126" width="252" x="661" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="sign" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#734AAF;fillColor=#F4EFFF;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Validate and sign&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Step 1 rules · current UTC&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Ed25519 · historical authority&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;No unauthorized disk writes.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="252" x="661" y="446" as="geometry" />
+        </mxCell>
+        <mxCell id="import" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#734AAF;fillColor=#F4EFFF;fontColor=#1E2A3A;fontSize=18;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Import / batch validation&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;In-memory checks first.&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Sort by timestamp, GUID, signer.&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Durable grants before dependents.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="122" width="261" x="975" y="254" as="geometry" />
+        </mxCell>
+        <mxCell id="blk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#734AAF;fillColor=#F4EFFF;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Durable ledger · BLK/&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Store authentic signed blocks.&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Later invalidation → local .XBLK.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="116" width="261" x="975" y="432" as="geometry" />
+        </mxCell>
+        <mxCell id="projector" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#277C50;fillColor=#EAF7EF;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Projector / replay&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Step 3: apply authenticated&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;history into the projected .DLDB.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="119" width="261" x="975" y="592" as="geometry" />
+        </mxCell>
+        <mxCell id="peers" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#E9F7FA;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Masters and replicas&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Step 4: exchange signed blocks&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;and compare ledger inventories.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="116" width="321" x="1302" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="peerChecks" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#E9F7FA;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Peer block recovery&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Find missing/corrupt history.&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Revalidate before acceptance.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="111" width="321" x="1302" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="key" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#E9F7FA;fontColor=#1E2A3A;fontSize=19;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;Shared immutable history&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Different signing identities,&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;same ledger ID + genesis pin.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="106" width="321" x="1302" y="601" as="geometry" />
+        </mxCell>
+        <mxCell id="note1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2865AE;fillColor=#EDF5FF;fontColor=#1E2A3A;fontSize=17;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;READ PATH&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;SELECT reads the projected database.&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;No mutation of official .DLDB.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="106" width="390" x="35" y="816" as="geometry" />
+        </mxCell>
+        <mxCell id="note2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#B83B38;fillColor=#FFF0EE;fontColor=#1E2A3A;fontSize=17;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;WRITE PATH&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;INTERCEPT → EVENT → SIGN → BLK&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;No direct SQL-file write.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="106" width="385" x="440" y="816" as="geometry" />
+        </mxCell>
+        <mxCell id="note3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#277C50;fillColor=#EAF7EF;fontColor=#1E2A3A;fontSize=17;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;PROJECTION RETURN&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;BLK → PROJECTOR → SQLite .DLDB&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Green return path is Step 3.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="106" width="387" x="840" y="816" as="geometry" />
+        </mxCell>
+        <mxCell id="note4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#117B91;fillColor=#E9F7FA;fontColor=#1E2A3A;fontSize=17;fontFamily=Arial;align=center;verticalAlign=middle;spacing=8;" value="&lt;div style=&quot;font-weight:bold&quot;&gt;SYNC + RECOVERY&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;Peers exchange independently validated&lt;/div&gt;&lt;div style=&quot;font-size:13px;font-weight:normal;line-height:1.4;margin-top:8px;&quot;&gt;blocks after Step 4.&lt;/div&gt;" vertex="1">
+          <mxGeometry height="106" width="404" x="1242" y="816" as="geometry" />
+        </mxCell>
+        <mxCell id="read" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#2865AE;strokeWidth=5;endArrow=block;endFill=1;" value="SQL SELECT">
+          <mxGeometry relative="1" x="-0.0492" y="14" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="281" y="294" as="sourcePoint" />
+            <mxPoint x="342" y="294" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="write" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#B83B38;strokeWidth=5;endArrow=block;endFill=1;" value="Mutating SQL">
+          <mxGeometry relative="1" x="-0.0492" y="22" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="281" y="472" as="sourcePoint" />
+            <mxPoint x="342" y="472" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="intercept_to_event" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#B83B38;strokeWidth=5;endArrow=block;endFill=1;" value="Create&lt;br&gt;event">
+          <mxGeometry relative="1" x="0.4067" y="-20" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="630" y="477" />
+              <mxPoint x="630" y="329" />
+            </Array>
+            <mxPoint x="600" y="477" as="sourcePoint" />
+            <mxPoint x="661" y="329" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peers_to_validation" edge="1" parent="1" style="edgeStyle=none;rounded=1;html=1;strokeColor=#117B91;strokeWidth=4;endArrow=block;endFill=1;" value="Import / sync">
+          <mxGeometry relative="1" x="-0.0303" y="-14" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1255" y="314" />
+              <mxPoint x="1255" y="314" />
+            </Array>
+            <mxPoint x="1302" y="314" as="sourcePoint" />
+            <mxPoint x="1236" y="314" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
