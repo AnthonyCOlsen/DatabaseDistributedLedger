@@ -21,7 +21,7 @@ docs/
   archive/                   historical Developer/QA records
   upstream/                  SQLite provenance and maintenance
 scripts/                     build, shared path discovery, combined tests
-third_party/sqlite/          pristine upstream baseline; keep its internal layout
+third_party/sqlite/          maintained, modifiable fork; upstream baseline tracked in Git
 artifacts/                   ignored, reproducible builds and tool caches
 local/qa/                    ignored, retained test receipts and disposable instances
 local-notes/                 ignored personal notes
@@ -77,6 +77,10 @@ run every old acceptance campaign against arbitrary new HEADs.
 directory. It resolves inputs across the new folders and understands the current
 artifact path, with a legacy build-output fallback for explicit historical runs.
 The solution, shared build properties and production projects remain in place.
+
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for coding, review and attribution
+standards. Its SQLite fork policy permits justified downstream changes while
+preserving the tagged import baseline and applicable notices.
 
 ## Local output and evidence policy
 

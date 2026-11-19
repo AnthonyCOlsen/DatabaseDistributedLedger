@@ -1,5 +1,19 @@
 # Database Distributed Ledger
 
+**Created and directed by Anthony Charles Olsen, developed with AI assistance.**
+
+Project Owner: **Anthony Charles Olsen (Tony Olsen)**. OpenAI ChatGPT and Codex
+have assisted with architecture, implementation, testing, documentation and
+review. AI tools are acknowledged as tools, not legal copyright holders or
+independent human contributors. See [Contributing](CONTRIBUTING.md) for coding
+standards and human/AI attribution practices.
+
+Original UDDL contributions owned by Anthony Charles Olsen are provided under
+the [MIT license](LICENSE). This attribution does not claim ownership of upstream
+public-domain SQLite or others' contributions. Preserve applicable per-file
+licenses, [third-party notices](THIRD_PARTY_NOTICES.txt) and
+[SQLite provenance](docs/upstream/SQLITE_PROVENANCE.md).
+
 An MIT-licensed open-source distributed signed ledger that derives relational state from immutable authenticated history. **The ledger is authoritative; SQLite `.DLDB` is a rebuildable projection.** Independent masters publish offline, and replicas may verify/relay blocks.
 
 **Status (2026-11-18; Step 1 final Security clearance):** **Step 1 — Standalone Signed Ledger: ACCEPTED AND CLOSED** on Windows 11 at the exact production commit recorded below. Step 2 — Native SQLite SQL Interception is **ready for planning and separate implementation authorization**; no Step 2 implementation is authorized by this documentation update. Steps 3–4 remain deferred. This is not a claim that the full SQLite-integrated distributed database has been implemented or released. Baseline: internally maintained **SQLite 3.54.1** fork with official upstream source provenance in the SQLite architecture plan; C#/.NET 10 application components. PostgreSQL/AI-task adapter obligations are historical. **Owner-approved signed-block protocol: 1.03 (`0x0103`)** with the 32-byte genesis-key ledger ID, exact 165-byte `DDL-REVOKE-v3` consent, and Version 2 identity manifest. Historical 1.01 (`0x0101`) and 1.00 (`0x0001`) are incompatible; no released historical ledger migration is required.
@@ -46,6 +60,13 @@ To prevent duplicate or conflicting "latest override" paragraphs, keep **one nor
 ## Repository navigation
 
 [Documentation index](docs/README.md) · [Repository layout and commands](docs/development/REPOSITORY_LAYOUT.md) · [Independent QA](tests/IndependentQA/README.md) · [QA plans and reports](docs/qa/README.md)
+
+`third_party/sqlite/` is an intentionally maintained, modifiable fork. Its
+original imported baseline remains identifiable through Git provenance and
+`sqlite/upstream-3.54.1`; the working fork may be modified, reorganized or
+reformatted when justified by approved UDDL development. Preserve applicable
+notices and document downstream changes. See the
+[fork policy](CONTRIBUTING.md#sqlite-fork-policy).
 
 ## Authoritative documents
 

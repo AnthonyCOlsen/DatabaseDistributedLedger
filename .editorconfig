@@ -1,0 +1,41 @@
+# Apply incrementally. Preserve existing line endings; no global EOL conversion.
+# Formatting preferences only: no new analyzer or build severity requirements.
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+indent_size = 4
+tab_width = 4
+
+[*.{c,h}]
+indent_size = 2
+tab_width = 2
+
+[*.{json,jsonc,csproj,props,targets,slnx,xml,config,yml,yaml}]
+indent_size = 2
+
+[*.md]
+indent_size = 2
+# Markdown may use two trailing spaces for a hard line break.
+trim_trailing_whitespace = false
+
+# Retain upstream file encodings/whitespace on save. The working fork is modifiable;
+# deliberate formatting changes remain permitted as part of reviewed UDDL work.
+[third_party/sqlite/**]
+charset = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+# Frozen QA records and the original bundle must not be reformatted on save.
+[{docs/qa/reports/**,docs/qa/evidence/**,docs/archive/qa/**,tests/IndependentQA/suites/legacy-dev003/**}]
+charset = unset
+indent_style = unset
+indent_size = unset
+tab_width = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
