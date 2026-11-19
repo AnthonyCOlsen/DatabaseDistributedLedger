@@ -1,7 +1,8 @@
 param([string]$AntivirusState = 'Not recorded by operator', [string]$LedgerRunContext = 'Ordinary Windows terminal (operator should verify)')
 $ErrorActionPreference = 'Stop'
-$ledgerRoot = Split-Path $PSScriptRoot -Parent
-$ledgerEvidence = Join-Path $ledgerRoot ('.git/dev-003-work/native-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+. (Join-Path $PSScriptRoot 'Repository.Paths.ps1')
+$ledgerRoot = Get-LedgerRepository
+$ledgerEvidence = Join-Path (Get-LedgerEvidenceRoot) ('developer-native-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 New-Item -ItemType Directory -Path $ledgerEvidence -Force | Out-Null
 $ledgerReceipt = Join-Path $ledgerEvidence 'environment.txt'
 @(

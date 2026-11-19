@@ -3,9 +3,9 @@ using UserDimensions.Ledger;
 
 internal static partial class Tests
 {
-    internal static string Scratch = Path.Combine(Repository(), ".git", "dev-003-work", "tests-" + Guid.NewGuid().ToString("N"));
+    internal static string Scratch = Path.Combine(Repository(), "local", "qa", "developer-tests-" + Guid.NewGuid().ToString("N"));
     private static string Repository()
-    { for (var d=new DirectoryInfo(AppContext.BaseDirectory);d!=null;d=d.Parent) if(Directory.Exists(Path.Combine(d.FullName,".git"))) return d.FullName; throw new Exception("Run tests inside this checkout."); }
+    { for (var d=new DirectoryInfo(AppContext.BaseDirectory);d!=null;d=d.Parent) if(File.Exists(Path.Combine(d.FullName,"UserDimensions.Ledger.slnx"))) return d.FullName; throw new Exception("Run tests inside this checkout."); }
     public static void RunIdentity()
     {
         Directory.CreateDirectory(Scratch);

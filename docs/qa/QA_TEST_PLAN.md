@@ -21,14 +21,14 @@ they recorded. QA-016 verifies the corrected candidate without rewriting those
 results, including QA-015's 47 PASS / 2 FAIL.
 
 This is a QA plan and evidence index, not a normative architecture specification.
-[Technical Design](Database_Distributed_Ledger_Technical_Design.md) owns signed bytes,
-authorization and canonical history; [Management API](Distributed_Ledger_Management_API_Specification.md)
-owns CLI/JSON/errors; [SQLite Plan](SQLite_Architecture_and_Implementation_Plan.md)
-owns SQLite/filesystem integration and qualification. [README](README.md) is an overview.
+[Technical Design](../architecture/Database_Distributed_Ledger_Technical_Design.md) owns signed bytes,
+authorization and canonical history; [Management API](../architecture/Distributed_Ledger_Management_API_Specification.md)
+owns CLI/JSON/errors; [SQLite Plan](../architecture/SQLite_Architecture_and_Implementation_Plan.md)
+owns SQLite/filesystem integration and qualification. [README](../../README.md) is an overview.
 Current Owner-approved requirements control over obsolete examples and this plan.
 
 The complete pre-consolidation document is preserved byte-for-byte as
-[QA_TEST_PLAN_PRE_QA014_20261109.md](tests/IndependentQA/QA_TEST_PLAN_PRE_QA014_20261109.md).
+[QA_TEST_PLAN_PRE_QA014_20261109.md](../archive/qa/QA_TEST_PLAN_PRE_QA014_20261109.md).
 Its old protocol, consent-length, direct-to-archive and dispute assumptions are
 **historical, not active acceptance criteria**. Original test/evidence files and
 past PASS/FAIL/BLOCKED outcomes remain intact.

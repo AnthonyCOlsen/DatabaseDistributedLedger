@@ -2,7 +2,7 @@
 
 **Revision:** 2026-11-18 — Step 1 Owner acceptance and final Security READY closure update; **ARCH-014 + portability directive**, with ARCH-013 Owner-approved active signed protocol 1.03 (`0x0103`), A-generated two-timestamp revocation consent with B-current-UTC final block, 15-minute validity, no public authoring-time overrides, and in-memory authorization of all new inbound blocks before persistent publication. ARCH-012 genesis public-key ledger identity and pinned genesis SHA-512 remain unchanged. **QA-013 Step 1 ledger-history corruption and Step 3/4 repair boundaries clarified 2026-11-17.** **2026-11-17 Step 1 closure clarification:** Batch-import sorting precedes authorization, preserving dependency-first durable writes and input-order results.
 **Status:** **Step 1 ACCEPTED AND CLOSED (Owner acceptance 2026-11-18)** at production commit `fbb38781faa29eb5cead9de3dcda0e760b63c7a1`; QA-016 READY with independent evidence `70d4d77888bdf869925da7193d8ca44e01d93dd7`. Architect/Developer/QA/Security **READY**; Owner **ACCEPTED**; **no outstanding Step 1 Security issues**. Step 2 (Native SQLite SQL Interception) may be planned but implementation awaits separate authorization. Phase 1 command families, ARCH-010 and ARCH-011 additions, JSON/exit-code conventions, local archive rules, and recovery rules are Owner-approved. The detailed per-command normalization and field definitions in §13 are the Architect’s deterministic implementation-facing contract for Developer/QA peer review, not independent Owner approval of new product behavior. Later peer/SQL/STAT commands are not Phase 1 requirements.
-**License:** Copyright © 2026 Anthony C. Olsen. Licensed under the [MIT License](LICENSE).
+**License:** Copyright © 2026 Anthony C. Olsen. Licensed under the [MIT License](../../LICENSE).
 
 ## 1. Scope and supersession
 
@@ -24,7 +24,7 @@ Finite CLI commands should produce exactly one UTF-8 JSON object terminated by a
 {"ok":false,"data":null,"error":{"code":"CODE","message":"Human-readable text","retryable":false,"details":{}}}
 ```
 
-The raw signed bytes are **always transferred by files or binary peer streams**, not JSON reserialization. Canonical UUID strings are lowercase hyphenated; SHA-512 hashes and Ed25519 public keys are lowercase hex in JSON. Private signing material never appears in status, logs, or successful responses. Exit-code groups and command response field types are specified in §§3 and 13. QA/Tester independently checks that contract and develops conformance vectors. The Step 1 acceptance evidence and qualifications are recorded in the [README milestone record](README.md#project-milestone-and-acceptance-record--2026-11-18); this document does not claim an additional test run.
+The raw signed bytes are **always transferred by files or binary peer streams**, not JSON reserialization. Canonical UUID strings are lowercase hyphenated; SHA-512 hashes and Ed25519 public keys are lowercase hex in JSON. Private signing material never appears in status, logs, or successful responses. Exit-code groups and command response field types are specified in §§3 and 13. QA/Tester independently checks that contract and develops conformance vectors. The Step 1 acceptance evidence and qualifications are recorded in the [README milestone record](../../README.md#project-milestone-and-acceptance-record--2026-11-18); this document does not claim an additional test run.
 
 ## 3. Phase 1 approved commands and lifecycle
 

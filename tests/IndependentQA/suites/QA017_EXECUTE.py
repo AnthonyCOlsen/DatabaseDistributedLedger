@@ -22,7 +22,7 @@ def digest(path):
 def execute(a):
     work = pathlib.Path(a.work_root).resolve()
     candidate = work / 'candidate'
-    qa = pathlib.Path(__file__).resolve().parent
+    qa = pathlib.Path(__file__).resolve().parents[1]
     evidence = pathlib.Path(a.evidence).resolve() if a.evidence else work / (
         ('native-' if a.context == 'OrdinaryWindowsPowerShell' else 'preflight-') +
         dt.datetime.now().strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:8])
@@ -86,7 +86,9 @@ def execute(a):
         if a.context == 'OrdinaryWindowsPowerShell' and sys.platform != 'win32':
             raise RuntimeError('Windows context requires Windows execution')
         inputs = evidence / 'suite-snapshot'; inputs.mkdir()
-        for p in qa.iterdir():
+        for p in qa.rglob('*'):
+            if any(part in ('bin', 'obj', '__pycache__') for part in p.relative_to(qa).parts):
+                continue
             if p.is_file() and p.suffix in ('.py', '.cs', '.csproj', '.ps1', '.json'):
                 shutil.copy2(p, inputs / p.name)
         write('suite-hashes.json', {p.name: digest(p) for p in inputs.iterdir()})
@@ -134,7 +136,7 @@ def execute(a):
         write('run-status.json', status)
         if 'candidate_counts' in status:
             try:
-                run('evidence-validation', [sys.executable, '-B', qa / 'QA017_VALIDATE.py', evidence])
+                run('evidence-validation', [sys.executable, '-B', qa / 'suites/QA017_VALIDATE.py', evidence])
             except Exception:
                 status.update(disposition='QA NOT READY', exit_code=1, validation_error=traceback.format_exc())
                 write('run-status.json', status)

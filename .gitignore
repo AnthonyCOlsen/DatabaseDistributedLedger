@@ -11,5 +11,10 @@ TestResults/
 **/__pycache__/
 **/*.pyc
 **/*.pyo
-# Extracted design download; canonical design documents live at the repository root.
+# Generated builds and caches; retained local QA receipts have a separate home.
+/artifacts/
+/local/*
+!/local/README.md
+/local-notes/
+# Extracted design download; canonical design documents live under docs/architecture.
 /DDL_ARCH014_*_UNCOMPRESSED*/

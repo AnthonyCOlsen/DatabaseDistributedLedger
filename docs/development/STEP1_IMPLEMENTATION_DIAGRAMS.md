@@ -8,16 +8,16 @@ the implementation; they do not amend the protocol or approved architecture.
 | `fbb38781faa29eb5cead9de3dcda0e760b63c7a1` | Immutable accepted Step 1 production baseline |
 | `83cbcb5ec7933d1d83cb61a9712353c169ba7788` | Exact code documented here: QA-017-verified, Owner-authorized behavior-preserving maintenance successor |
 
-The [maintenance review](STEP1_MAINTAINABILITY_REVIEW_20261118.md) records the
+The [maintenance review](../archive/development/STEP1_MAINTAINABILITY_REVIEW_20261118.md) records the
 successor's limited changes and verification. Its implementation paths are the
 same as the accepted baseline; the original accepted milestone remains immutable.
-The [integration record](STEP1_FOLLOWUP_INTEGRATION_20261118.md) records subsequent
+The [integration record](../archive/development/STEP1_FOLLOWUP_INTEGRATION_20261118.md) records subsequent
 Owner authorization and independent QA-017 verification.
 The diagrams' documentation commit is separate from that code-maintenance commit.
 
-The [Technical Design](../../Database_Distributed_Ledger_Technical_Design.md),
-[Management API](../../Distributed_Ledger_Management_API_Specification.md) and
-[SQLite Plan](../../SQLite_Architecture_and_Implementation_Plan.md) remain the
+The [Technical Design](../architecture/Database_Distributed_Ledger_Technical_Design.md),
+[Management API](../architecture/Distributed_Ledger_Management_API_Specification.md) and
+[SQLite Plan](../architecture/SQLite_Architecture_and_Implementation_Plan.md) remain the
 authorities for contracts. This guide deliberately omits wire-byte definitions.
 
 ## 1. Codebase architecture

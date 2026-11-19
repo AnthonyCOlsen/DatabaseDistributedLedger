@@ -13,9 +13,10 @@ param(
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot '../../../scripts/Repository.Paths.ps1')
 if($PSVersionTable.PSVersion.Major -lt 7){throw 'QA-010 requires PowerShell 7. Invoke this script with pwsh.exe; do not use Windows PowerShell 5.1.'}
-$repo=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$work=Join-Path $repo '.git/dev-003-work'
+$repo=Get-LedgerRepository
+$work=Get-LedgerEvidenceRoot
 $git=(Get-Command git -CommandType Application|Select-Object -First 1).Source
 $dotnet=(Get-Command dotnet -CommandType Application|Select-Object -First 1).Source
 if(!$PythonExe){
@@ -38,11 +39,11 @@ if(!$PythonExe){
  }
 }
 if(!$PythonExe -or !(Test-Path -LiteralPath $PythonExe -PathType Leaf)){throw 'Supply -PythonExe with existing Python 3 + cryptography/lzma; this launcher installs nothing.'}
-if(!$LedgerCtlDll){$LedgerCtlDll=Join-Path $repo 'src/ledgerctl/bin/Release/net10.0/ledgerctl.dll'}
+if(!$LedgerCtlDll){$LedgerCtlDll=Get-LedgerCandidate}
 if(!$EvidenceRoot){$EvidenceRoot=Join-Path $work ('qa010-'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[guid]::NewGuid().ToString('N').Substring(0,8))}
 $EvidenceRoot=[IO.Path]::GetFullPath($EvidenceRoot)
 $allowed=[IO.Path]::GetFullPath($work).TrimEnd('\','/')+[IO.Path]::DirectorySeparatorChar
-if(!$EvidenceRoot.StartsWith($allowed,[StringComparison]::OrdinalIgnoreCase) -or (Test-Path -LiteralPath $EvidenceRoot)){throw 'Evidence must be a fresh subdirectory under .git/dev-003-work; reuse and other locations are refused.'}
+if(!$EvidenceRoot.StartsWith($allowed,[StringComparison]::OrdinalIgnoreCase) -or (Test-Path -LiteralPath $EvidenceRoot)){throw 'Evidence must be a fresh subdirectory under local/qa; reuse and other locations are refused.'}
 $null=New-Item -ItemType Directory -Path $EvidenceRoot
 function Write-QaJson([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 30)+"`n",[Text.UTF8Encoding]::new($false))}
 function Run-Process([string]$Name,[string]$Executable,[string[]]$ProcessArguments){
@@ -73,19 +74,19 @@ try{
  $drive=[IO.DriveInfo]::new([IO.Path]::GetPathRoot($EvidenceRoot))
  $status['filesystem']=[ordered]@{format=$drive.DriveFormat;drive_type=$drive.DriveType.ToString()}
  if(![OperatingSystem]::IsWindows() -or $drive.DriveType -ne 'Fixed' -or $drive.DriveFormat -ne 'NTFS'){throw 'Initial candidate durability suite requires local Windows fixed NTFS'}
- $history=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'ORIGINALS.manifest.json') -Raw -Encoding UTF8|ConvertFrom-Json
- foreach($file in $history.files){if((Get-FileHash -LiteralPath (Join-Path $PSScriptRoot $file.name) -Algorithm SHA256).Hash.ToLowerInvariant() -cne $file.sha256){throw ('Historical QA original changed: '+$file.name)}}
+ $history=Get-Content -LiteralPath (Get-LedgerFile 'ORIGINALS.manifest.json') -Raw -Encoding UTF8|ConvertFrom-Json
+ foreach($file in $history.files){if((Get-FileHash -LiteralPath (Get-LedgerFile $file.name) -Algorithm SHA256).Hash.ToLowerInvariant() -cne $file.sha256){throw ('Historical QA original changed: '+$file.name)}}
  $status['historical_originals_verified']=$true
  $suiteSnapshot=Join-Path $EvidenceRoot 'suite-snapshot';$null=New-Item -ItemType Directory -Path $suiteSnapshot
  $inputs=@()
- foreach($file in Get-ChildItem -LiteralPath $PSScriptRoot -File|Where-Object {$_.Name -like 'QA010*' -or $_.Name -eq 'Invoke-QA010.ps1'}){
+ foreach($file in Get-QAFiles|Where-Object {$_.Name -like 'QA010*' -or $_.Name -eq 'Invoke-QA010.ps1'}){
   $hash=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
   Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $suiteSnapshot $file.Name)
   if((Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant() -cne $hash -or (Get-FileHash -LiteralPath (Join-Path $suiteSnapshot $file.Name) -Algorithm SHA256).Hash.ToLowerInvariant() -cne $hash){throw 'QA source changed while creating an immutable run snapshot'}
   $inputs += [ordered]@{name=$file.Name;sha256=$hash}
  }
  Write-QaJson (Join-Path $EvidenceRoot 'qa-source-hashes.json') @($inputs)
- $docHashes=@('README.md','Database_Distributed_Ledger_Technical_Design.md','Distributed_Ledger_Management_API_Specification.md','SQLite_Architecture_and_Implementation_Plan.md')|ForEach-Object {[ordered]@{name=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $repo $_) -Algorithm SHA256).Hash.ToLowerInvariant()}}
+ $docHashes=@('README.md','Database_Distributed_Ledger_Technical_Design.md','Distributed_Ledger_Management_API_Specification.md','SQLite_Architecture_and_Implementation_Plan.md')|ForEach-Object {[ordered]@{name=$_;sha256=(Get-FileHash -LiteralPath (Get-LedgerFile $_) -Algorithm SHA256).Hash.ToLowerInvariant()}}
  Write-QaJson (Join-Path $EvidenceRoot 'design-document-hashes.json') @($docHashes)
  $null=Run-Process 'dotnet-info' $dotnet @('--info')
  $null=Run-Process 'python-info' $PythonExe @('-B','-c','import sys,cryptography,lzma;print(sys.version);print(cryptography.__version__)')

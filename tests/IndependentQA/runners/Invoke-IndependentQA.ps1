@@ -12,16 +12,18 @@ param(
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
-$qaSource=$PSScriptRoot
-$qaRepo=Split-Path (Split-Path $qaSource -Parent) -Parent
-$qaWork=Join-Path $qaRepo '.git\dev-003-work'
+. (Join-Path $PSScriptRoot '../../../scripts/Repository.Paths.ps1')
+$qaSource=Join-Path (Get-LedgerRepository) 'tests/IndependentQA/suites/legacy-dev003'
+$qaRepo=Get-LedgerRepository
+$qaWork=Get-LedgerEvidenceRoot
 $qaRuntimeHint=Join-Path $qaWork 'independent-qa-runtimes.json'
+if(!(Test-Path -LiteralPath $qaRuntimeHint)){$qaRuntimeHint=Join-Path (Get-LedgerGitDirectory) 'dev-003-work/independent-qa-runtimes.json'}
 if(Test-Path -LiteralPath $qaRuntimeHint){
  $qaHints=Get-Content -LiteralPath $qaRuntimeHint -Raw -Encoding UTF8|ConvertFrom-Json
  if(!$PythonExe -and $null -ne $qaHints.PSObject.Properties['python'] -and (Test-Path -LiteralPath $qaHints.python -PathType Leaf)){$PythonExe=$qaHints.python}
  if(!$PowerShellExe -and $null -ne $qaHints.PSObject.Properties['powershell'] -and (Test-Path -LiteralPath $qaHints.powershell -PathType Leaf)){$PowerShellExe=$qaHints.powershell}
 }
-if(!$LedgerCtlDll){$LedgerCtlDll=Join-Path $qaRepo 'src\ledgerctl\bin\Release\net10.0\ledgerctl.dll'}
+if(!$LedgerCtlDll){$LedgerCtlDll=Get-LedgerCandidate}
 if(!$PowerShellExe){
  $qaPwsh=Get-Command pwsh -CommandType Application -ErrorAction SilentlyContinue|Select-Object -First 1
  if($null -ne $qaPwsh){$PowerShellExe=$qaPwsh.Source}
@@ -31,7 +33,7 @@ if(!$PowerShellExe){
 if(!$EvidenceRoot){$EvidenceRoot=Join-Path $qaWork ('independent-qa-'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[Guid]::NewGuid().ToString('N').Substring(0,8))}
 $EvidenceRoot=[IO.Path]::GetFullPath($EvidenceRoot)
 $qaAllowed=[IO.Path]::GetFullPath($qaWork).TrimEnd('\')+'\'
-if(!$EvidenceRoot.StartsWith($qaAllowed,[StringComparison]::OrdinalIgnoreCase)){throw 'Evidence must be a fresh subdirectory of the approved .git/dev-003-work folder.'}
+if(!$EvidenceRoot.StartsWith($qaAllowed,[StringComparison]::OrdinalIgnoreCase)){throw 'Evidence must be a fresh subdirectory of the local/qa folder.'}
 if(Test-Path -LiteralPath $EvidenceRoot){throw 'Refusing to reuse or overwrite an existing QA evidence directory.'}
 $null=New-Item -ItemType Directory -Path $EvidenceRoot
 
@@ -88,7 +90,7 @@ try{
  $drive=[IO.DriveInfo]::new([IO.Path]::GetPathRoot($EvidenceRoot))
  $qaSummary['filesystem']=[ordered]@{format=$drive.DriveFormat;drive_type=$drive.DriveType.ToString()}
  $qaGit=(Get-Command git -CommandType Application -ErrorAction Stop|Select-Object -First 1).Source
- $gitHead=Invoke-QaProcess 'git-head' $qaGit @('--git-dir', (Join-Path $qaRepo '.git'),'rev-parse','HEAD')
+ $gitHead=Invoke-QaProcess 'git-head' $qaGit @('--git-dir', (Get-LedgerGitDirectory),'rev-parse','HEAD')
  if($gitHead.exit_code -ne 0){throw 'Cannot record candidate Git HEAD.'}
  $qaSummary.actual_head=[IO.File]::ReadAllText($gitHead.stdout).Trim()
  $gitStatus=Invoke-QaProcess 'git-status' $qaGit @('--no-optional-locks','-C',$qaRepo,'status','--short','--branch')

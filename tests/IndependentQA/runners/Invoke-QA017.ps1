@@ -9,9 +9,10 @@ param(
  [string]$WorkRoot='', [string]$EvidenceRoot=''
 )
 $ErrorActionPreference='Stop'
-if(!$WorkRoot){$WorkRoot=Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent}
+. (Join-Path $PSScriptRoot '../../../scripts/Repository.Paths.ps1')
+if(!$WorkRoot){$WorkRoot=Join-Path (Get-LedgerGitDirectory) 'dev-003-work/qa017-20261118-111036-e94e79c9'}
 if(!(Test-Path -LiteralPath $PythonExe -PathType Leaf)){throw 'Supply an existing Python with cryptography/lzma; nothing is installed.'}
-$arguments=@('-B',(Join-Path $PSScriptRoot 'QA017_EXECUTE.py'),'--work-root',$WorkRoot,'--context',$RunContext)
+$arguments=@('-B',(Get-LedgerFile 'QA017_EXECUTE.py'),'--work-root',$WorkRoot,'--context',$RunContext)
 if($EvidenceRoot){$arguments+=@('--evidence',$EvidenceRoot)}
 & $PythonExe @arguments
 exit $LASTEXITCODE

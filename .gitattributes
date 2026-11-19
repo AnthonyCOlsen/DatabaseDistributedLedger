@@ -1,2 +1,5 @@
 third_party/sqlite/** -text
-tests/IndependentQA/** -text
+tests/IndependentQA/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/qa/reports/** -text
+docs/qa/evidence/** -text
+docs/archive/qa/** -text

@@ -33,8 +33,14 @@ var assemblies = new List<object>();
 foreach (var name in new[]{"UserDimensions.Ledger.dll","ledgerctl.dll"})
 {
     var relative = name == "ledgerctl.dll" ? "src/ledgerctl/bin/Release/net10.0/" : "src/UserDimensions.Ledger/bin/Release/net10.0/";
-    var left = Snapshot.Read(Path.Combine(args[0],relative,name));
-    var right = Snapshot.Read(Path.Combine(args[1],relative,name));
+    string Artifact(string root)
+    {
+        var project = name == "ledgerctl.dll" ? "ledgerctl" : "UserDimensions.Ledger";
+        var current = Path.Combine(root,"artifacts","build","bin",project,"release",name);
+        return File.Exists(current) ? current : Path.Combine(root,relative,name);
+    }
+    var left = Snapshot.Read(Artifact(args[0]));
+    var right = Snapshot.Read(Artifact(args[1]));
     var changedMethods = left.Methods.Keys.Union(right.Methods.Keys).Where(k=>!left.Methods.TryGetValue(k,out var a) || !right.Methods.TryGetValue(k,out var b) || a!=b).ToArray();
     var changedMetadata = left.Metadata.Keys.Union(right.Metadata.Keys).Where(k=>!left.Metadata.TryGetValue(k,out var a) || !right.Metadata.TryGetValue(k,out var b) || a!=b).ToArray();
     if (changedMethods.Length+changedMetadata.Length != 0) failures.Add(name+": compiled differences");
