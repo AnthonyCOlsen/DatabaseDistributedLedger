@@ -101,6 +101,8 @@ Reuse SQLite's native parser, planner, expressions, and transaction execution wh
 
 **C3 observable disposition:** Publication and projection are separate. After COMMIT expose authenticated publication evidence alongside projection pending, applied independent changes and omissions, correlated to request/event/target, reason and generation. Pending is not omitted, and durable publication is not proof of all-field application or permanent applicability. Before selection, wholly obsolete unsigned work may be suppressed only under Technical Design §0.2's approved evidence rule. Ready frozen bytes/GUID remain exact: later partial deletion publishes the original if otherwise eligible; Step 3 applies valid survivors and records omissions without rewriting history. Wholly obsolete frozen fate remains unselected. No new approved API or Step 2 projector is introduced.
 
+See [Management API §5](Distributed_Ledger_Management_API_Specification.md#5-sql-behavior-read-barriers-and-errors) for when the separate Step 3 projection-status facility is available and why later omissions do not change the `COMMIT` publication outcome.
+
 **No additional historical-state auditing before signing:** The publisher may trust the application-controlled local `.DLDB` projection under the accepted threat model. This waiver does **not** remove signature validation, historical authorization replay, ledger-first publication, or the ban on supported direct SQLite write bypasses.
 
 ## 5. SQLite-native value semantics — OWNER-APPROVED five-class grammar retained in Protocol 1.03
