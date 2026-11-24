@@ -2,6 +2,10 @@
 
 **Status:** Revised review draft. This manual describes operations. It grants no access, approval, or authority to execute work. Repository `AGENTS.md`, pinned specifications, and verified Project Owner decisions govern when they conflict with this draft.
 
+**Review update:** 2026-11-24 — proposed operational revisions from the November 23–24 L5 and Step 2 specialist coordination rounds. This is a candidate runbook revision, not a repository edit, a live grant, or acceptance of any design. Do not treat examples, past approvals, or historical incident states as current authorization.
+
+**Revision focus:** Immutable verified-file exchanges; recovery from missing delivery receipts and shared-browser contention; QA/Security independence; separate assignment and message counters; cross-specification closeout evidence; and explicit distinction between established Owner requirements and incomplete technical contracts.
+
 ## 1. Responsibilities and shared resources
 
 ```mermaid
@@ -25,6 +29,8 @@ flowchart LR
 - **QA** defines observable behavior and acceptance evidence. **Security** reviews trust boundaries, failure handling, and defensive controls. Each produces an independent initial report before seeing other new findings. Preserve dissent in the consolidated record.
 
 **Public repository:** Governance, authoritative specifications, design trackers, and approved publication artifacts. **Private workspace:** Full handoffs, approved recipient/task registry, raw approvals, receipts, working evidence, and machine details. Never put private operational data in a public issue, PR, or this runbook. Keep task IDs and personal account details in the private registry. Handoffs record historical context; they are not live state or authority.
+
+**Local design staging:** When an approved local worker can access it, use the repository-relative `local-notes/temp/` (verify that staging is excluded from tracked changes) for **temporary complete review artifacts**, subject to the authorization and filesystem preflight below. Resolve the absolute path from the private local profile rather than publishing a personal Windows path here. Staging is neither an authoritative specification directory nor a substitute for the private approval/receipt registry. Files staged locally must not be assumed accessible to cloud Work tasks. Keep sensitive or private data out of public artifacts; location under `local-notes/` is not itself a confidentiality guarantee.
 
 ## 2. Replacement Windows laptop
 
@@ -124,6 +130,39 @@ sequenceDiagram
 
 **Dated example (November 21, 2026):** The five-role Step 2 grant allowed dot only to relay a technical question and its unchanged reply between named tasks on Issues #1–#3. It allowed up to **10 pairs per America/Chicago calendar day and 150 total over 30 calendar days** from direct approval, after Developer continuity passed. The historical example used one recipient and one reply relay, native receipts, a bounded check budget, no retries or chains, and no new work or writes. It is not standing policy. Check the currently verified grant, its activation/expiry, exact recipients and pin, revocations, and remaining counters before each send or relay. An uncertain attempted pair remains reserved.
 
+### Verified artifact exchange and independent reviews (November 2026 lessons)
+
+**Preferred path, only after verifying actual access and approval:** The author writes a complete, versioned Markdown review artifact to the approved `local-notes/temp/` staging area. New filenames begin `YYYY-MM-DD-` (America/Chicago calendar date), followed by a descriptive identifier and version or unique suffix, for example `2026-11-24-UDDL-STEP2-CONTRACT-v1.md`. Do **not** retroactively rename tracked files or change protocol-defined names. A new version gets a new immutable filename: no overwriting a candidate already distributed for review.
+
+1. Before writing, verify the specific task's filesystem permissions, excluded staging location, source repository pin, scope and write authorization. Write to a private temporary name, finish and flush the entire candidate where appropriate, then finalize it into its versioned name. Do not claim an atomic publish when the filesystem operation has not been qualified. Never modify tracked source or specifications under a design-only grant.
+2. The author supplies a manifest: exact filename and relative location, version, repository pin, byte count, SHA-256 of the **raw source bytes**, text encoding, completion marker, immutable candidate ID, and the authorization/request ID. Verify the end marker **and** the entire byte count/digest. End markers and counts alone are insufficient.
+3. Dot verifies the raw source candidate and records its manifest privately. QA and Security must independently obtain **the same raw-byte version** before comparing conclusions. A chat-rendered preview, HTML text, excerpt, or successful browser open is not itself proof of byte identity. Literal characters such as `>` may be displayed as `&gt;`; even a few escaped characters change the digest. On mismatch, stop and obtain exact source bytes or reconstruct and independently verify the full digest, with provenance. Never silently accept a visually equivalent copy or "fix" a hash by changing the expected value.
+4. Each reviewer must have a separately accessible copy/source and perform an independent first review without the other reviewer's new findings. Avoid sharing one browser-session/tab ownership between concurrent specialist tasks; a tab already held by another session is an access blocker, not proof that a reviewer received or read the document.
+5. If a worker lacks direct local filesystem access, send the **entire verified raw document** into the **existing approved worker task** using its supported route. Recheck the received byte count, digest, end marker and candidate ID there. Do not fall back to a shared live browser, partial excerpt, link the worker cannot open, or another worker's unverified summary. If the platform transforms raw bytes, mark the evidence blocked until exact content verification succeeds.
+6. Reviewers produce separately attributed, complete findings, linked to the exact candidate ID and source pin. Do not mark QA or Security complete just because a task emitted `COMPLETE`: completion of an access-blocked turn is not a substantive independent review.
+7. At closeout, provide Project Manager and Dot the original verified reports whenever possible. If a PM cannot open the reports, label its output as **summary-based**, identify missing originals, preserve dissent and do not claim firsthand verification. Closeout distinguishes corrected clauses, unresolved engineering qualification, open Owner policy decisions, and separately gated official-specification changes.
+
+**Document lifecycle:** A dated staging filename helps locate old drafts but is not a retention or deletion instruction. Remove or archive only after referenced handoffs, approvals, reviews, and evidence-retention obligations have been checked; never discard the sole verifiable source of a decision or review.
+
+### Missing receipts and same-task handoff recovery
+
+A send attempt without a native receipt is **unknown**, not failed. Record that uncertainty and the already-reserved assignment/message budget. Inspect the existing task's native history and the expected staged artifact under a bounded read-only check; distinguish not delivered, delivered but not started, completed, and inconclusive. If a specialist is already running, wait for its exact turn rather than initiate another execution.
+
+- Default: **no automatic resend, duplicate worker, replacement task, or reissued assignment**. A readable linked chat or a manual copy proves at most that it reached that surface; it does not prove the original automated route failed or that the work was authorized to run again.
+- If the original delivery cannot be proven unsuccessful, Dot may request a **new, assignment-specific Owner recovery authorization** that explicitly waives that proof requirement. The waiver must be restricted to the **same original worker task and assignment ID**, contingent on verifying that no substantive work or completed artifact already exists, and must forbid duplicate execution. The waiver is not a standing runbook permission and does not expand design or communication limits.
+- A manual Owner handoff remains a draft unless its execution is covered by the original grant or a separately verified recovery authorization. If a late original send appears, correlate it to the existing assignment, treat it as a duplicate, and do not execute twice.
+- For a review access blocker, first ask the worker to retry **read-only access to the exact candidate** under its current grant. If still blocked, seek narrow Owner authorization for **one existing-task delivery recovery**, using full verified text. Verify the worker's output independently; do not conflate receiving the document with finishing the review.
+- Record each recovery request, original and replacement transport attempts, native input/turn/reply IDs, source manifest, stop conditions, deadline, explicit Owner waiver and the exact evidence of one execution. A missing receipt is not a reason to reset the accounting or extend the deadline.
+
+### Distinguish budgets, assignments, and acceptance
+
+**Communication pairs** (including dated daily/30-day caps) and **specialist assignments** are distinct authorization classes. A low communication count does not permit a new specialist design assignment; an assignment reserved by a previous grant is not an unreserved new slot. Track attempted, reserved, active, completed, blocked and expired **by exact grant and worker**; show the date/time with the Chicago offset. A historical cap is not a current entitlement.
+
+An accepted handoff, a completed worker turn, a verified artifact, an independent review, a PM closeout, an Owner design decision, an official specification change, an implementation, a test run and milestone acceptance are **separate states**. Do not advance one from evidence for another. After design reviews, present a requested cross-document integration map (e.g. Technical Design / Management API / SQLite Plan), identify the owning clauses, distinguish policy choices from engineering qualifications and solicit only genuine outstanding Owner decisions. Design-only scope does not silently authorize new assignments, tracked writes, tests, builds, publication or acceptance.
+
+**Historical incidents, not standing authority:** During the November 23–24, 2026 rounds, an Architect recovery used an explicit Owner waiver to activate a manually delivered assignment in the original task; later QA and Security handoffs also required same-task recovery. A concurrent shared browser caused a Security read failure. In a subsequent independent review, a chat-formatted QA candidate differed from the verified Markdown by escaped characters (including `&gt;`) and was correctly rejected until exact bytes could be verified. These events establish operational failure modes, not guaranteed platform behavior or permission to retry automatically.
+
+
 ## 5. Startup, pause, shutdown, reboot, and recovery
 
 ### Startup checklist
@@ -131,6 +170,8 @@ sequenceDiagram
 - [ ] Open the correct Owner channel; read any new instructions, pause orders, revocations, and scope changes.
 - [ ] Load the last private checkpoint. Verify the designated Coordinator, registry revision, source pin, exact task IDs and executor identity. Confirm the intended machine is online when required.
 - [ ] Reconcile all nonterminal turns before any new dispatch. If history is stale, use only the permitted bounded checks.
+
+- [ ] Reconcile any shared-browser ownership collision, unverified artifact digest, prior handoff recovery waiver, or pending independent review before dispatching a successor assignment. See Section 4's verified-artifact and recovery procedures.
 - [ ] Recompute the Chicago calendar day, grant expiry, reserved/used daily and total pairs, and each outstanding response deadline from scope and receipts. Never reset a cumulative count on reboot.
 - [ ] Check required file reads and exact revision. Record who did preflight, the time, and any blocker. Start only covered operations whose attempt record is not already reserved.
 
@@ -155,7 +196,10 @@ sequenceDiagram
 | Git reports `fatal: cannot change to …: Permission denied` at `rev-parse`. | Compare the same read-only preflight in ordinary user PowerShell and the approved worker shell. Check the exact root and common Git directory. Existing successful handoff file reads do not prove Git can enter the root. | Do not infer an ACL cause, add a broad safe-directory rule, elevate, change permissions, or write without verifiable status. Use an approved pinned public read or private downloadable runbook when scope permits. |
 | Codex CLI runs but `codex app-server daemon version` fails on `app-server-control.sock`, Windows OS error 10050. | Record CLI version, exact error and executor; inspect connection status and whether the expected native task’s history is readable. A help screen is not a connectivity test. | Do not start or change daemon/network settings, run queue delivery, guess an ID, or create another task as a fallback. Prefer the already validated Work route when authorized. |
 | Standalone or older task shows “Failed to resume chat” or “Model unavailable.” | Read its exact existing history, confirm task type, connected computer, same account, and model availability. Compare native task link versus copied deep link; another user’s or worker’s access is not implied. | No silent replacement, direct queue send, or claim of delivery from apparent readability. Mark BLOCKED and maintain the old history. |
-| Task admitted but response missing or link redirects. | Use native IDs and bounded history reads. A delayed page or completion marker alone is not a receipt. For a permitted handoff, include an attributed verified excerpt when the exact original cannot be opened. | Stop on expired window, missing identity linkage, or uncertain delivery; no repeat turn or additional recipient. Label any synthesis relying on a synopsis rather than the original. |
+| Task admitted but response missing or link redirects. | Use native IDs and bounded history reads; check the exact existing task and candidate manifest. A delayed page, completion marker, or readable manual copy alone is not a receipt. For a permitted review handoff, deliver full verified raw content, not merely an excerpt. | Stop on expired window, missing identity linkage, uncertain delivery, or absent narrowly scoped recovery approval. Never repeat a turn automatically. Label any synthesis relying on a synopsis rather than the original. |
+| Shared browser/tab reports another session owns it. | Retry read-only in the original task if permitted; otherwise use an approved independent local-file read or full verified existing-task delivery. | No shared-tab takeover, duplicate assignment, or claim of independent review from a failed access attempt. |
+| File looks correct but its byte count or SHA-256 differs. | Compare original source bytes and candidate/version metadata. Check whether the transport escaped text such as `>` to `&gt;`; verify exact recovered bytes and final marker before reviewing. | Do not review or sign off on mismatched text, excerpts, or hash changes chosen to force a match. |
+| Assignment shows `COMPLETE` but says draft was inaccessible. | Inspect the original completion disposition and evidence of full content access. Recover within an existing task only under the applicable specific Owner authorization. | A finished access-blocked turn is not a completed substantive review. |
 
 ## 6. Replacement workers and cold-start rehearsal
 
@@ -166,6 +210,13 @@ Onboard only after approval. Keep each original conversation intact. Provide the
 ## 7. Project and publication checklist
 
 Step 1 remains accepted. Step 2 is design/research only. Use [Issue #1](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/issues/1) for GUID identity and collisions, [Issue #2](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/issues/2) for partial COMMIT and restart outcomes, and [Issue #3](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/issues/3) for the IPC contract. Steps 3 and 4 remain future planning. The decision queue and a specialist recommendation never grant implementation permission.
+
+### Dated design-decision context (not a technical specification)
+
+As of the November 24, 2026 Owner instructions, Step 2 design coordination must **track**, without implementing or silently rewriting the official specifications: Option A (COMMIT success after all required durable block publications); stable event/block GUIDs and immutable signed bytes; separate immutable transaction intents and an append-only progress journal as an approved design direction; an explicitly qualified durable `.lock`/ready-state boundary; local independent multi-master publication; a 10-second default for **ordinary relational projection delay** without delaying canonical master grants/revocations; no partial database visibility during replay; and caller-visible projection/suppression outcomes. Frozen, partially applicable events preserve original signed history while the projector applies independently valid portions, subject to verifying the protocol representation. The Owner accepts the late-history tradeoff for suppression of wholly obsolete **unsigned, pre-irrevocable** changes using a consistent available projection. The Ledger Service and Step 2 must still function without mandatory Step 3 projection.
+
+These are a **historical coordination snapshot**, not a substitute for the exact authenticated Owner messages, implementation-qualified design, or protocol documents. Exact C3 irrevocability, SQLite caller interruption codes and lifecycle, authenticated journal compaction/recovery, and per-signature authority synchronization were subject to independent specialist qualification in the November 24 closure round. Cleanup A/B, release E/T, restore guarantees and retention choices must not be silently selected. Resolve competing technical statements from the canonical approved evidence/decision register, not from this runbook. Escalate any required wire-protocol change rather than assuming that partial projection is already representable.
+
 
 The eventual home is `docs/operations/UDDL_AI_COORDINATION_RUNBOOK.md`. Review this draft, scan for private data, and preview the fenced diagrams in a Mermaid-capable Markdown viewer. [GitHub Mermaid documentation](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams). Verify only the intended file and exact reviewed bytes are proposed for publication. Keep publication and merge separately authorized; no approval is inferred from receiving or reviewing this draft.
 
@@ -180,6 +231,8 @@ The eventual home is `docs/operations/UDDL_AI_COORDINATION_RUNBOOK.md`. Review t
 - Task: role, exact native task ID, executor, acceptance evidence, pin, handoff hashes, original-history reference, and replacement lineage.
 - Exchange: original request/reply provenance, parent IDs, source/destination, state, attempt reservation, Chicago-day and total counts, native input/turn/reply IDs, timestamps/deadline, error and verification basis.
 - Checkpoint: active Coordinator, schema/version, latest consistent transaction or event sequence, unresolved operations, backup integrity and retention reference.
+- Artifact: canonical source candidate ID and version, raw-byte SHA-256, byte count, encoding, end marker, repo pin, owner of file, staging and delivery routes, reviewer-access verification, immutable supersession and retention disposition.
+- Recovery: original assignment ID, uncertain delivery evidence, any specific Owner waiver, existing-task identity, nonduplication checks, transport attempts, live/complete/blocked state, and which original reviewer report was actually available to downstream agents.
 
 **Atomicity and recovery requirements:** In one local transaction, reserve the unique operation/message ID, debit or reserve both counters, and append the intent before sending. Update the receipt and state together. Enforce uniqueness and compare-and-set state transitions; a crash cannot clear a reservation. A local transaction does not include the service sending the message. A lost service response is therefore **uncertain** until native evidence resolves it; do not claim exactly-once delivery or retry. Resolve multi-writer contention by pausing, not by replaying.
 
@@ -200,6 +253,9 @@ Copy the template below into a separate private location **only when authorized*
 - Checkout root / expected remote / branch / reviewed revision: <values>
 - Git directory / common directory / permitted workspace: <paths>
 - Private handoff directory / manifest digest / backup reference: <values>
+- Local staging directory (private absolute path) / last verified manifest: <references>
+- Latest immutable review candidate / raw-byte count / SHA-256 / end marker: <references>
+- Independent QA and Security access/first-review receipts: <references>
 - ChatGPT account/workspace alias and confirmed feature entitlements: <references>
 - App, CLI, Git and editor versions / connector status: <values>
 - Subscription or receipt reference / next verification: <reference only>
@@ -209,5 +265,7 @@ Copy the template below into a separate private location **only when authorized*
 - Backup steward / encrypted backup reference / last restore drill: <references>
 - Current grant references and revocations: <references; do not transcribe secrets>
 - Outstanding reservations and recovery notes: <checkpoint references only>
+- Current assignment slots versus message-pair counters / expiry: <references>
+- Delivery-uncertainty and specific Owner recovery waivers: <references>
 - Credential manager location: <reference only; never include credentials>
 ```
