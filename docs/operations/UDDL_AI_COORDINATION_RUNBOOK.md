@@ -101,6 +101,8 @@ A formal approval package shows **Approval datetime: Pending**. It identifies th
 
 ## 4. Dispatch, review, and receipts
 
+**Mandatory assignment preflight:** Before activating an assignment, identify every required source, intended output and authorized delivery route. Verify on the exact worker task and its actual execution environment that it can read the complete sources and produce the requested deliverables by that route. Check effective session capabilities separately from filesystem permissions; a readable directory or a writable account ACL is not evidence that the worker can write. Use only authorized, bounded read-only evidence. Do not perform unauthorized test writes, change permissions, bypass restrictions, or create extra assignments. If any required capability is unverified, report the specific blocker before dispatch instead of assuming access.
+
 ```mermaid
 sequenceDiagram
     participant D as dot
@@ -151,8 +153,16 @@ A send attempt without a native receipt is **unknown**, not failed. Record that 
 - Default: **no automatic resend, duplicate worker, replacement task, or reissued assignment**. A readable linked chat or a manual copy proves at most that it reached that surface; it does not prove the original automated route failed or that the work was authorized to run again.
 - If the original delivery cannot be proven unsuccessful, Dot may request a **new, assignment-specific Owner recovery authorization** that explicitly waives that proof requirement. The waiver must be restricted to the **same original worker task and assignment ID**, contingent on verifying that no substantive work or completed artifact already exists, and must forbid duplicate execution. The waiver is not a standing runbook permission and does not expand design or communication limits.
 - A manual Owner handoff remains a draft unless its execution is covered by the original grant or a separately verified recovery authorization. If a late original send appears, correlate it to the existing assignment, treat it as a duplicate, and do not execute twice.
-- For a review access blocker, first ask the worker to retry **read-only access to the exact candidate** under its current grant. If still blocked, seek narrow Owner authorization for **one existing-task delivery recovery**, using full verified text. Verify the worker's output independently; do not conflate receiving the document with finishing the review.
+- For a review access blocker, use only a recovery allowed by both the underlying assignment and an explicitly active standing delegation, or seek narrow assignment-specific Owner approval. Use the full verified candidate. Receiving a document does not complete a review.
 - Record each recovery request, original and replacement transport attempts, native input/turn/reply IDs, source manifest, stop conditions, deadline, explicit Owner waiver and the exact evidence of one execution. A missing receipt is not a reason to reset the accounting or extend the deadline.
+
+### Bounded operational recovery
+
+This procedure grants no authority by itself. A standing delegation is effective only after explicit Owner activation of the exact verified revision. Verify it and the original assignment before each action. The narrower scope controls; a revocation or original deadline stops recovery. Maximum two recovery actions per assignment, or fewer if the assignment says so.
+
+1. **Reconcile first.** Inspect the original task history, native receipts and expected artifacts. Wait for a running turn; use a verified complete result. Resume a stopped task only from a verified checkpoint when the remaining work can be identified without repeating completed steps. Unknown delivery alone never authorizes resending. Correlate any late delivery to the original assignment. If duplicate execution cannot be ruled out, stop automatic recovery and escalate.
+2. **Keep the same assignment and task.** Use only an already authorized alternative delivery route or temporary location, exact-byte restoration after a known transport change, or continuation from a verified checkpoint. Verify complete content, byte count and SHA-256 before review. Keep approval evidence separate from peer findings until independent reviews are recorded. Do not change the authorized writer, deliverables, permissions or deadline; do not bypass access controls, add workers or work, make tracked edits, run tests or builds, implement, merge, publish or accept work.
+3. **Reserve and report.** Authorized, bounded read-only verification of histories, receipts, artifact integrity, source access and execution capabilities does not consume a recovery action. Reserve and count every actual recovery attempt before execution, even if it fails or returns no receipt. Reconcile before taking another action. Stop and escalate when the limit is reached or scope, integrity, permissions, independence or nonduplication cannot be established. Report routine recoveries in Coordination Status rather than requesting separate approval.
 
 ### Distinguish budgets, assignments, and acceptance
 
@@ -232,7 +242,8 @@ The eventual home is `docs/operations/UDDL_AI_COORDINATION_RUNBOOK.md`. Review t
 - Exchange: original request/reply provenance, parent IDs, source/destination, state, attempt reservation, Chicago-day and total counts, native input/turn/reply IDs, timestamps/deadline, error and verification basis.
 - Checkpoint: active Coordinator, schema/version, latest consistent transaction or event sequence, unresolved operations, backup integrity and retention reference.
 - Artifact: canonical source candidate ID and version, raw-byte SHA-256, byte count, encoding, end marker, repo pin, owner of file, staging and delivery routes, reviewer-access verification, immutable supersession and retention disposition.
-- Recovery: original assignment ID, uncertain delivery evidence, any specific Owner waiver, existing-task identity, nonduplication checks, transport attempts, live/complete/blocked state, and which original reviewer report was actually available to downstream agents.
+- Standing recovery delegation: separate grant ID, original authenticated Owner approval, verified activation revision and time, phase/assignment exclusions, revocation and supersession history.
+- Recovery: underlying grant and original assignment IDs, exact task and artifact references, failure and nonduplication evidence, reserved action number and time, route and timestamps, any specific Owner waiver, native receipts, outcome and integrity evidence, remaining allowance, and which original reviewer report was available downstream. Preserve earlier events and reservations across handoffs and restarts. If the authoritative registry is unavailable, stop automatic recovery.
 
 **Atomicity and recovery requirements:** In one local transaction, reserve the unique operation/message ID, debit or reserve both counters, and append the intent before sending. Update the receipt and state together. Enforce uniqueness and compare-and-set state transitions; a crash cannot clear a reservation. A local transaction does not include the service sending the message. A lost service response is therefore **uncertain** until native evidence resolves it; do not claim exactly-once delivery or retry. Resolve multi-writer contention by pausing, not by replaying.
 
