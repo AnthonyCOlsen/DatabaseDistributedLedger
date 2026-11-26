@@ -988,6 +988,22 @@ int sqlite3_step(sqlite3_stmt *pStmt){
   }
   db = v->db;
   sqlite3_mutex_enter(db->mutex);
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+  int publicationOp=0;
+  if( db->publicationManaged==1 ){
+    publicationOp=sqlite3PublicationStatement(v->zSql,-1);
+    if( !publicationOp || (db->publicationConsumed && publicationOp!=4)
+     || (publicationOp==2 && (db->autoCommit || db->publicationRow || v->nVar!=1 ||
+             !(v->aVar[0].flags & MEM_Blob) || (v->aVar[0].flags & MEM_Zero) ||
+             v->aVar[0].n!=16 || !v->aVar[0].z))
+     || (publicationOp==3 && (db->autoCommit || !db->publicationRow)) ){
+      db->publicationConsumed=1;
+      sqlite3ErrorWithMsg(db,SQLITE_AUTH,"unsupported managed transaction");
+      sqlite3_mutex_leave(db->mutex);
+      return SQLITE_AUTH;
+    }
+  }
+#endif
   while( (rc = sqlite3Step(v))==SQLITE_SCHEMA
          && cnt++ < SQLITE_MAX_SCHEMA_RETRY ){
     int savedPc = v->pc;
@@ -1022,6 +1038,27 @@ int sqlite3_step(sqlite3_stmt *pStmt){
     }
     assert( v->expired==0 );
   }
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+  if( publicationOp ){
+    if( rc!=SQLITE_DONE || publicationOp==4 ) db->publicationConsumed=1;
+    else if( publicationOp==2 ){
+      memcpy(db->publicationFrame+49,v->aVar[0].z,16);
+      db->publicationRow=1;
+    }else if( publicationOp==3 ){
+      /* Only the private transaction has committed. SQL success still depends
+      ** on the service acknowledgment for this exact immutable request. */
+      db->publicationConsumed=1;
+      rc=sqlite3PublicationSubmit(db);
+      if( rc==SQLITE_OK ) rc=SQLITE_DONE;
+      else{
+        v->rc=rc;
+        sqlite3ErrorWithMsg(db,rc,rc==SQLITE_AUTH ? "publication rejected" :
+          rc==SQLITE_CANTOPEN ? "publication endpoint unavailable before submission" :
+          "publication outcome unknown after submission");
+      }
+    }
+  }
+#endif
   sqlite3_mutex_leave(db->mutex);
   return rc;
 }

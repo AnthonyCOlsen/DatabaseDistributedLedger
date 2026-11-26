@@ -1696,7 +1696,17 @@ typedef int (*sqlite3_xauth)(void*,int,const char*,const char*,const char*,
 /*
 ** Each database connection is an instance of the following structure.
 */
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+int sqlite3PublicationStatement(const char*, int);
+int sqlite3PublicationSubmit(sqlite3*);
+#endif
 struct sqlite3 {
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+  u8 publicationManaged, publicationRow, publicationConsumed;
+  u32 publicationServer;
+  char publicationPipe[64];
+  unsigned char publicationFrame[66];
+#endif
   sqlite3_vfs *pVfs;            /* OS Interface */
   struct Vdbe *pVdbe;           /* List of active virtual machines */
   CollSeq *pDfltColl;           /* BINARY collseq for the database encoding */

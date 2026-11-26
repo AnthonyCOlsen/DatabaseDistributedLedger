@@ -874,6 +874,15 @@ static int sqlite3LockAndPrepare(
     return SQLITE_MISUSE_BKPT;
   }
   sqlite3_mutex_enter(db->mutex);
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+  if( db->publicationManaged==1 && !sqlite3PublicationStatement(zSql,nBytes) ){
+    db->publicationConsumed=1;
+    sqlite3ErrorWithMsg(db,SQLITE_AUTH,"unsupported managed SQL");
+    if( pzTail ) *pzTail=zSql;
+    sqlite3_mutex_leave(db->mutex);
+    return SQLITE_AUTH;
+  }
+#endif
   sqlite3BtreeEnterAll(db);
   do{
     /* Make multiple attempts to compile the SQL, until it either succeeds
