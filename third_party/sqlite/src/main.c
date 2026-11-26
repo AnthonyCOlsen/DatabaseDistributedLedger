@@ -3385,6 +3385,9 @@ static const char *uriParameter(const char *zFilename, const char *zParam){
 ** sqlite3_open() and sqlite3_open16(). The database filename "zFilename" 
 ** is UTF-8 encoded.
 */
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+static int publicationLoad(sqlite3*, const char*);
+#endif
 static int openDatabase(
   const char *zFilename, /* Database filename UTF-8 encoded */
   sqlite3 **ppDb,        /* OUT: Returned database handle */
@@ -3639,6 +3642,22 @@ static int openDatabase(
   }
 #endif
 
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+  {
+    size_t len = strlen(zOpen);
+    if( len>=5 && sqlite3_stricmp(zOpen+len-5,".DLDB")==0 ){
+      if( strcmp(zFilename,zOpen)!=0 || zVfs ||
+          (flags&(SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE|SQLITE_OPEN_SHAREDCACHE|SQLITE_OPEN_MEMORY))
+             !=SQLITE_OPEN_READWRITE ){
+        sqlite3ErrorWithMsg(db, SQLITE_CANTOPEN, "unsupported managed projection open");
+        goto opendb_out;
+      }
+      flags |= SQLITE_OPEN_MEMORY|SQLITE_OPEN_PRIVATECACHE;
+      db->temp_store = 2;
+      db->publicationManaged = 2; /* Configuring, before the handle is returned. */
+    }
+  }
+#endif
   /* Open the backend database driver */
   rc = sqlite3BtreeOpen(db->pVfs, zOpen, db, &db->aDb[0].pBt, 0,
                         flags | SQLITE_OPEN_MAIN_DB);
@@ -3719,6 +3738,13 @@ static int openDatabase(
                         sqlite3GlobalConfig.nLookaside);
 
   sqlite3_wal_autocheckpoint(db, SQLITE_DEFAULT_WAL_AUTOCHECKPOINT);
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+  if( db->publicationManaged==2 && rc==SQLITE_OK ){
+    rc = publicationLoad(db,zOpen);
+    if( rc!=SQLITE_OK ) sqlite3ErrorWithMsg(db,rc,"managed projection unavailable");
+    else db->publicationManaged=1;
+  }
+#endif
 
 opendb_out:
   if( db ){
@@ -5271,3 +5297,130 @@ const char *sqlite3_compileoption_get(int N){
   return 0;
 }
 #endif /* SQLITE_OMIT_COMPILEOPTION_DIAGS */
+
+/* A supervised Windows launch supplies the pipe, server PID, request identity
+** and a frozen, clean projection path. The server authenticates its own child.
+** This opt-in slice accepts a single parameterized INSERT on one private copy. */
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+#include <windows.h>
+
+static int publicationHex(const char *name, unsigned char *out){
+  char hex[33];
+  int i;
+  if( GetEnvironmentVariableA(name,hex,sizeof(hex))!=32 ) return 0;
+  for(i=0; i<16; i++){
+    int j, n=0;
+    for(j=0; j<2; j++){
+      char c=hex[2*i+j];
+      if( c>='0' && c<='9' ) n=n*16+c-'0';
+      else if( c>='a' && c<='f' ) n=n*16+c-'a'+10;
+      else return 0;
+    }
+    out[i]=(unsigned char)n;
+  }
+  return 1;
+}
+
+static int publicationLoad(sqlite3 *db, const char *path){
+  WCHAR wide[512], expected[512], side[530];
+  const WCHAR *suffix[]={L"-wal",L"-shm",L"-journal"};
+  LARGE_INTEGER size;
+  DWORD n, got;
+  HANDLE f;
+  unsigned char *image=0;
+  sqlite3_stmt *s=0;
+  int i, rc=SQLITE_CANTOPEN;
+  char pid[16], *end;
+  n=GetEnvironmentVariableW(L"UDDL_PROJECTION",expected,512);
+  if( !n || n>=512 || !MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,path,-1,wide,512)
+   || wcscmp(expected,wide)!=0 || wide[1]!=L':' || wide[2]!=L'\\' ) return rc;
+  n=GetEnvironmentVariableA("UDDL_LOCAL_PIPE",db->publicationPipe,sizeof(db->publicationPipe));
+  if( n!=44 || strncmp(db->publicationPipe,"uddl-step2a-",12)!=0 || strspn(db->publicationPipe+12,"0123456789abcdef")!=32 ) return rc;
+  n=GetEnvironmentVariableA("UDDL_SERVER_PID",pid,sizeof(pid));
+  if( !n || n>=sizeof(pid) ) return rc;
+  db->publicationServer=strtoul(pid,&end,10);
+  if( *end || !db->publicationServer ||
+      !publicationHex("UDDL_INSTANCE",db->publicationFrame) ||
+      !publicationHex("UDDL_EVENT_ID",db->publicationFrame+16) ) return rc;
+  db->publicationFrame[32]=1;
+  memset(db->publicationFrame+33,0x11,16);
+  f=CreateFileW(wide,GENERIC_READ,FILE_SHARE_READ,0,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0);
+  if( f==INVALID_HANDLE_VALUE ) return rc;
+  for(i=0; i<3; i++){
+    wcscpy(side,wide); wcscat(side,suffix[i]);
+    if( GetFileAttributesW(side)!=INVALID_FILE_ATTRIBUTES || GetLastError()!=ERROR_FILE_NOT_FOUND ) goto done;
+  }
+  if( !GetFileSizeEx(f,&size) || size.QuadPart<100 || size.QuadPart>1048576 ) goto done;
+  image=sqlite3_malloc64(size.QuadPart);
+  if( !image ){ rc=SQLITE_NOMEM; goto done; }
+  if( !ReadFile(f,image,(DWORD)size.QuadPart,&got,0) || got!=size.QuadPart ||
+      memcmp(image,"UDDL database 1",16) || image[18]!=1 || image[19]!=1 ) goto done;
+  memcpy(image,"SQLite format 3",16); /* Only the owned, in-memory image. */
+  rc=sqlite3_deserialize(db,"main",image,size.QuadPart,size.QuadPart,
+                         SQLITE_DESERIALIZE_FREEONCLOSE|SQLITE_DESERIALIZE_RESIZEABLE);
+  image=0; /* FREEONCLOSE transfers ownership even on failure. */
+  if( rc!=SQLITE_OK ) goto done;
+  rc=sqlite3_prepare_v2(db,"SELECT sql FROM main.sqlite_schema",-1,&s,0);
+  if( rc==SQLITE_OK ){
+    rc=SQLITE_SCHEMA;
+    if( sqlite3_step(s)==SQLITE_ROW ){
+      const unsigned char *sql=sqlite3_column_text(s,0);
+      if( sql && strcmp((const char*)sql,
+          "CREATE TABLE items(row_guid BLOB PRIMARY KEY) WITHOUT ROWID")==0 &&
+          sqlite3_step(s)==SQLITE_DONE ) rc=SQLITE_OK;
+    }
+  }
+done:
+  sqlite3_finalize(s);
+  sqlite3_free(image);
+  CloseHandle(f);
+  return rc;
+}
+
+/* Bounded grammar for this first client slice. All accepted statements still
+** go through SQLite's own compiler, binder and VM. */
+int sqlite3PublicationStatement(const char *z, int n){
+  static const char *const sql[]={"BEGIN","INSERT INTO items(row_guid) VALUES(?1)","COMMIT","ROLLBACK"};
+  int i, len=0;
+  if( !z ) return 0;
+  while( len<128 && (n<0 || len<n) && z[len] ) len++;
+  if( len==128 ) return 0;
+  while( len && sqlite3Isspace(z[len-1]) ) len--;
+  if( len && z[len-1]==';' ) len--;
+  while( len && sqlite3Isspace(z[len-1]) ) len--;
+  while( len && sqlite3Isspace(*z) ){ z++; len--; }
+  for(i=0; i<4; i++){
+    if( (int)strlen(sql[i])==len && sqlite3_strnicmp(z,sql[i],len)==0 ) return i+1;
+  }
+  return 0;
+}
+
+/* The supervised server bounds its child lifetime. A missing reply after the
+** write is an unknown publication outcome and consumes this submission. */
+int sqlite3PublicationSubmit(sqlite3 *db){
+  char name[100];
+  HANDLE h;
+  ULONG server=0;
+  unsigned char reply[67];
+  DWORD n, offset=0;
+  int rc=SQLITE_CANTOPEN;
+  sqlite3_snprintf(sizeof(name),name,"\\\\.\\pipe\\%s",db->publicationPipe);
+  h=CreateFileA(name,GENERIC_READ|GENERIC_WRITE,0,0,OPEN_EXISTING,
+                SECURITY_SQOS_PRESENT|SECURITY_IDENTIFICATION,0);
+  if( h==INVALID_HANDLE_VALUE ) return rc;
+  if( GetNamedPipeServerProcessId(h,&server) && server==db->publicationServer ){
+    rc=SQLITE_IOERR;
+    if( WriteFile(h,db->publicationFrame,66,&n,0) && n==66 ){
+      while( offset<sizeof(reply) && ReadFile(h,reply+offset,sizeof(reply)-offset,&n,0) && n ){
+        offset+=n;
+      }
+      if( offset==sizeof(reply) && memcmp(reply+1,db->publicationFrame,66)==0 ){
+        if( reply[0]==1 ) rc=SQLITE_OK;
+        if( reply[0]==2 ) rc=SQLITE_AUTH;
+      }
+    }
+  }
+  CloseHandle(h);
+  return rc;
+}
+#endif
