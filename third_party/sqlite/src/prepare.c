@@ -812,7 +812,12 @@ static int sqlite3Prepare(
     *pzTail = sParse.zTail;
   }
 
-  if( db->init.busy==0 ){
+  if( db->init.busy==0
+#ifdef SQLITE_ENABLE_UDDL_STEP2A
+      /* Retain the exact internal read so step can independently check it. */
+      || sqlite3PublicationSchemaRead(db,zSql,nBytes)
+#endif
+  ){
     sqlite3VdbeSetSql(sParse.pVdbe, zSql, (int)(sParse.zTail-zSql), prepFlags);
   }
   if( db->mallocFailed ){
@@ -875,7 +880,8 @@ static int sqlite3LockAndPrepare(
   }
   sqlite3_mutex_enter(db->mutex);
 #ifdef SQLITE_ENABLE_UDDL_STEP2A
-  if( db->publicationManaged==1 && !sqlite3PublicationStatement(zSql,nBytes) ){
+  if( db->publicationManaged==1 && !sqlite3PublicationSchemaRead(db,zSql,nBytes) &&
+      (db->publicationSchemaOp || !sqlite3PublicationStatement(zSql,nBytes)) ){
     db->publicationConsumed=1;
     sqlite3ErrorWithMsg(db,SQLITE_AUTH,"unsupported managed SQL");
     if( pzTail ) *pzTail=zSql;

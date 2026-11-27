@@ -16,6 +16,7 @@ internal static class Step2aCommand
     private static extern bool GetNamedPipeClientProcessId(SafePipeHandle pipe, out uint pid);
     private const int WaitMs = 10000;
     private const byte Published = 1, Rejected = 2, Uncertain = 3;
+    private static readonly Guid NotesId = new("33333333-3333-3333-3333-333333333333");
     private static readonly Guid Table = new("11111111-1111-1111-1111-111111111111");
 
     internal static int Run(string[] args)
@@ -29,6 +30,9 @@ internal static class Step2aCommand
                 : args[2] switch { "--rollback" => [Scenario.Rollback], "--commit-control" => [Scenario.Enrolled],
                     "--discard-at-savepoint" => [Scenario.Discard], "--retain-at-savepoint" => [Scenario.Retain],
                     "--outer-release" => [Scenario.Outer], "--outer-denied" => [Scenario.OuterDenied],
+                    "--create-notes" => [Scenario.SchemaRollback, Scenario.SchemaUnsupported, Scenario.SchemaMixed, Scenario.SchemaCreate],
+                    "--add-tag" => [Scenario.SchemaDuplicate, Scenario.SchemaAdd],
+                    "--drop-notes" => [Scenario.SchemaDrop],
                     "--effective-dml" => [Scenario.Unchanged, Scenario.Missing, Scenario.UpdateRollback, Scenario.Update, Scenario.Delete],
                     "--outer-lost" => [Scenario.OuterLost], _ => [] };
             if (scenarios.Length == 0) return 2;
@@ -80,7 +84,8 @@ internal static class Step2aCommand
         catch { file.Dispose(); throw; }
     }
 
-    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback, Discard, Retain, Outer, OuterDenied, OuterLost, Update, Delete, Unchanged, Missing, UpdateRollback }
+    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback, Discard, Retain, Outer, OuterDenied, OuterLost, Update, Delete, Unchanged, Missing, UpdateRollback,
+        SchemaCreate, SchemaAdd, SchemaDrop, SchemaDuplicate, SchemaUnsupported, SchemaRollback, SchemaMixed }
 
     private static void ServeChild(NamedPipeServerStream pipe, string name, LedgerInstance ledger, Scenario scenario, string path)
     {
@@ -90,16 +95,20 @@ internal static class Step2aCommand
         bool lost = scenario is Scenario.LostReply or Scenario.OuterLost;
         var enroll = scenario is not (Scenario.Unenrolled or Scenario.OuterDenied);
         bool update = scenario is Scenario.Update or Scenario.UpdateRollback or Scenario.Unchanged;
-        bool silent = scenario is Scenario.Rollback or Scenario.Unchanged or Scenario.Missing or Scenario.UpdateRollback;
+        bool schema = scenario is Scenario.SchemaCreate or Scenario.SchemaAdd or Scenario.SchemaDrop;
+        bool silent = scenario is Scenario.SchemaMixed or Scenario.SchemaDuplicate or Scenario.SchemaUnsupported or Scenario.SchemaRollback or Scenario.Rollback or Scenario.Unchanged or Scenario.Missing or Scenario.UpdateRollback;
         var row = update || scenario == Scenario.DuplicateSeed ? new Guid("01000000-0000-0000-0000-000000000000") :
             scenario == Scenario.Delete ? new Guid("02000000-0000-0000-0000-000000000000") : Guid.NewGuid();
         bool savepoint = outer || scenario is Scenario.Discard or Scenario.Retain;
+        bool barrier = savepoint || schema;
         var start = new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "publication-client.exe"))
-        { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardInput = savepoint };
+        { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardInput = barrier };
         start.ArgumentList.Add(path);
         start.ArgumentList.Add(row.ToString("N"));
         if (update || scenario is Scenario.Delete or Scenario.Missing)
             start.ArgumentList.Add(scenario == Scenario.UpdateRollback ? "--update-rollback" : "--" + scenario.ToString().ToLowerInvariant());
+        if (schema || scenario is Scenario.SchemaMixed or Scenario.SchemaRollback or Scenario.SchemaDuplicate or Scenario.SchemaUnsupported)
+            start.ArgumentList.Add("--" + scenario.ToString().ToLowerInvariant());
         if (scenario == Scenario.LostReply) start.ArgumentList.Add("--lost-reply");
         if (scenario == Scenario.Rollback) start.ArgumentList.Add("--rollback");
         if (savepoint) start.ArgumentList.Add(outer ? "--outer-release" : scenario == Scenario.Discard ? "--discard-at-savepoint" : "--retain-at-savepoint");
@@ -108,11 +117,11 @@ internal static class Step2aCommand
         start.Environment["UDDL_LOCAL_PIPE"] = name;
         start.Environment["UDDL_INSTANCE"] = instance.ToString("N");
         start.Environment["UDDL_EVENT_ID"] = block.ToString("N");
-        Console.WriteLine($"LAUNCH_EXPECTED scenario={scenario} instance={instance} enrolled={enroll} block={block} table={Table} row={row}");
+        Console.WriteLine($"LAUNCH_EXPECTED scenario={scenario} instance={instance} enrolled={enroll} block={block} table={(scenario.ToString().StartsWith("Schema", StringComparison.Ordinal) ? NotesId : Table)} row={row}");
         // Arm the single local pipe before launch. Any connection during rollback,
         // even without a complete or admissible request, fails the observation.
         using var observation = new CancellationTokenSource();
-        var connection = silent || savepoint ? pipe.WaitForConnectionAsync(observation.Token) : null;
+        var connection = silent || barrier ? pipe.WaitForConnectionAsync(observation.Token) : null;
         using var child = Process.Start(start) ?? throw new IOException("Producer launch failed");
         try
         {
@@ -140,7 +149,7 @@ internal static class Step2aCommand
             }
             using var deadline = new CancellationTokenSource(WaitMs);
             var token = deadline.Token;
-            if (savepoint)
+            if (barrier)
             {
                 // The child cannot enter COMMIT until the host releases stdin.
                 string? line;
@@ -157,16 +166,21 @@ internal static class Step2aCommand
                     throw new IOException("Unexpected submission before outer COMMIT");
                 }
                 catch (OperationCanceledException) when (connection!.IsCanceled) { }
-                if (outer && ledger.SelectExport().Blocks.Any(record => record.Id == block))
-                    throw new IOException("Block already retained before outer RELEASE");
+                if ((outer || schema) && ledger.SelectExport().Blocks.Any(record => record.Id == block))
+                    throw new IOException("Block already retained before transaction boundary");
                 Console.WriteLine(outer ? "BEFORE_OUTER_RELEASE connections=0 requests=0 block=absent" :
                     "BEFORE_OUTER_COMMIT connections=0 requests=0");
             }
             var accept = pipe.WaitForConnectionAsync(token);
-            if (savepoint) { child.StandardInput.WriteLine("G"); child.StandardInput.Flush(); }
+            if (barrier) { child.StandardInput.WriteLine("G"); child.StandardInput.Flush(); }
             accept.GetAwaiter().GetResult();
             var expectedBody = EventCodec.Encode(scenario switch
             {
+                Scenario.SchemaCreate => new LedgerEvent(0x10, NotesId, Name: "notes",
+                    Columns: [new ColumnDefinition(new Guid("44444444-4444-4444-4444-444444444444"), "v", "BLOB", true, null)]),
+                Scenario.SchemaAdd => new LedgerEvent(0x13, NotesId,
+                    Columns: [new ColumnDefinition(new Guid("55555555-5555-5555-5555-555555555555"), "tag", "TEXT", true, null)]),
+                Scenario.SchemaDrop => new LedgerEvent(0x11, NotesId),
                 Scenario.Update => new LedgerEvent(2, Table, row, Fields: [new RowField(new Guid("22222222-2222-2222-2222-222222222222"), LedgerValue.Blob([0, 255]))]),
                 Scenario.Delete => new LedgerEvent(3, Table, row),
                 _ => new LedgerEvent(1, Table, row)

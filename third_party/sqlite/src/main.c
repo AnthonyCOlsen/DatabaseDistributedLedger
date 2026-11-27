@@ -5367,7 +5367,8 @@ static int publicationLoad(sqlite3 *db, const char *path){
       const unsigned char *sql=sqlite3_column_text(s,0);
       if( sql && (strcmp((const char*)sql,
           "CREATE TABLE items(row_guid BLOB PRIMARY KEY) WITHOUT ROWID")==0 ||
-          strcmp((const char*)sql,"CREATE TABLE items(row_guid BLOB PRIMARY KEY, value BLOB) WITHOUT ROWID")==0) &&
+          strcmp((const char*)sql,"CREATE TABLE items(row_guid BLOB PRIMARY KEY, value BLOB) WITHOUT ROWID")==0 ||
+          strcmp((const char*)sql,"CREATE TABLE notes(v BLOB)")==0) &&
           sqlite3_step(s)==SQLITE_DONE ) rc=SQLITE_OK;
     }
   }
@@ -5383,7 +5384,8 @@ done:
 int sqlite3PublicationStatement(const char *z, int n){
   static const char *const sql[]={"BEGIN","INSERT INTO items(row_guid) VALUES(?1)","COMMIT","ROLLBACK",
     "SAVEPOINT staged","ROLLBACK TO staged","RELEASE staged",
-    "UPDATE items SET value=?2 WHERE row_guid=?1 AND value IS NOT ?2","DELETE FROM items WHERE row_guid=?1"};
+    "UPDATE items SET value=?2 WHERE row_guid=?1 AND value IS NOT ?2","DELETE FROM items WHERE row_guid=?1",
+    "CREATE TABLE notes(v BLOB)","ALTER TABLE notes ADD COLUMN tag TEXT","DROP TABLE notes"};
   int i, len=0;
   if( !z ) return 0;
   while( len<128 && (n<0 || len<n) && z[len] ) len++;
@@ -5393,9 +5395,38 @@ int sqlite3PublicationStatement(const char *z, int n){
   while( len && sqlite3Isspace(z[len-1]) ) len--;
   while( len && sqlite3Isspace(*z) ){ z++; len--; }
   for(i=0; i<ArraySize(sql); i++){
-    if( (int)strlen(sql[i])==len && sqlite3_strnicmp(z,sql[i],len)==0 ) return i+1;
+    if( (int)strlen(sql[i])==len && (i+1>=PUBLICATION_CREATE_NOTES ?
+        memcmp(z,sql[i],len)==0 : sqlite3_strnicmp(z,sql[i],len)==0) ) return i+1;
   }
   return 0;
+}
+
+/* The pinned engine reparses sqlite_master with these internal SELECTs
+** while stepping CREATE (OP_ParseSchema) or ADD (sqlite3InitOne). */
+int sqlite3PublicationSchemaRead(sqlite3 *db, const char *z, int n){
+  if( !db->init.busy || !z || n>=0 ) return 0;
+  if( db->publicationSchemaOp==PUBLICATION_CREATE_NOTES ){
+    return strcmp(z,"SELECT*FROM\"main\".sqlite_master WHERE tbl_name='notes' AND type!='trigger' ORDER BY rowid")==0;
+  }
+  return db->publicationSchemaOp==PUBLICATION_ADD_TAG &&
+         strcmp(z,"SELECT*FROM\"main\".sqlite_master ORDER BY rowid")==0;
+}
+
+/* Exact names and fixed identities belong only to the validated disposable
+** notes schema. Text lengths are one-byte protocol varints in this subset. */
+void sqlite3PublicationSchemaFrame(sqlite3 *db, int op){
+  u8 *p=db->publicationFrame+32;
+  *p++=op==PUBLICATION_CREATE_NOTES ? 0x10 : op==PUBLICATION_ADD_TAG ? 0x13 : 0x11;
+  memset(p,0x33,16); p+=16;  /* table notes */
+  if( op==PUBLICATION_CREATE_NOTES ){
+    memcpy(p,"\005notes\001",7); p+=7;
+    memset(p,0x44,16); p+=16; /* column v */
+    memcpy(p,"\001v\004BLOB\001\000",9); p+=9;
+  }else if( op==PUBLICATION_ADD_TAG ){
+    memset(p,0x55,16); p+=16; /* column tag */
+    memcpy(p,"\003tag\004TEXT\001\000",11); p+=11;
+  }
+  db->publicationSchemaBytes=(u8)(p-db->publicationFrame);
 }
 
 /* The supervised server bounds its child lifetime. A missing reply after the
@@ -5405,7 +5436,8 @@ int sqlite3PublicationSubmit(sqlite3 *db){
   HANDLE h;
   ULONG server=0;
   unsigned char reply[1+sizeof(db->publicationFrame)];
-  DWORD frameBytes=db->publicationFrame[32]==2 ? 86 : db->publicationFrame[32]==3 ? 65 : 66;
+  DWORD frameBytes=db->publicationSchemaBytes ? db->publicationSchemaBytes :
+    db->publicationFrame[32]==2 ? 86 : db->publicationFrame[32]==3 ? 65 : 66;
   DWORD n, offset=0;
   int rc=SQLITE_CANTOPEN;
   sqlite3_snprintf(sizeof(name),name,"\\\\.\\pipe\\%s",db->publicationPipe);
