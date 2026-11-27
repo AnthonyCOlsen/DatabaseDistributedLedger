@@ -15,7 +15,7 @@ internal static class Step2aCommand
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool GetNamedPipeClientProcessId(SafePipeHandle pipe, out uint pid);
     private const int WaitMs = 10000;
-    private const byte Published = 1, Unenrolled = 2, Uncertain = 3;
+    private const byte Published = 1, Rejected = 2, Uncertain = 3;
     private static readonly Guid Table = new("11111111-1111-1111-1111-111111111111");
 
     internal static int Run(string[] args)
@@ -167,7 +167,7 @@ internal static class Step2aCommand
             SecurityIdentifier? peer = null;
             pipe.RunAsClient(() => { using var id = WindowsIdentity.GetCurrent(true); peer = id?.User; });
             bool sameLaunch = pid == child.Id && !child.HasExited && peer != null && host.User is {} hostSid && peer.Equals(hostSid);
-            byte result = Unenrolled;
+            byte result = Rejected;
             byte[] body = request[32..];
             if (enroll && sameLaunch && new Guid(request.AsSpan(0,16), true) == instance &&
                 new Guid(request.AsSpan(16,16), true) == block && body[0] == 1 && body[33] == 0 &&
@@ -176,12 +176,27 @@ internal static class Step2aCommand
                 result = Uncertain;
                 try
                 {
-                    var publication = ledger.Publish(body, block);
-                    if (publication.Block.Id == block && publication.Block.EventBytes.AsSpan().SequenceEqual(body)
-                        && publication.Authorization == "authorized" && publication.Status == "retained")
+                    // Only a verified, genesis-only history proves the initial replica case here.
+                    // Absence of a local key from incomplete history is not a definitive refusal.
+                    ledger.EnsureConfig();
+                    var history = ledger.Snapshot();
+                    var binding = ledger.Manifest.Binding!;
+                    if (history.Blocks.Count == 1 && history.Blocks[0] is { Status: "retained", Authorization: "authorized" } initial &&
+                        initial.Block.IsGenesis && initial.Block.LedgerId == binding.LedgerId &&
+                        initial.Block.Hash == binding.GenesisHash && !history.AuthorizedKeys.Contains(ledger.PublicKey))
                     {
-                        Console.WriteLine($"PUBLISH_RETURNED pid={pid} instance={instance} block={block} event={Convert.ToHexString(body)} hash={publication.Block.Hash}");
-                        result = Published;
+                        Console.WriteLine($"INITIAL_REPLICA_REFUSED instance={instance} block={block} genesis={binding.GenesisHash}");
+                        result = Rejected;
+                    }
+                    else if (history.AuthorizedKeys.Contains(ledger.PublicKey))
+                    {
+                        var publication = ledger.Publish(body, block);
+                        if (publication.Block.Id == block && publication.Block.EventBytes.AsSpan().SequenceEqual(body)
+                            && publication.Authorization == "authorized" && publication.Status == "retained")
+                        {
+                            Console.WriteLine($"PUBLISH_RETURNED pid={pid} instance={instance} block={block} event={Convert.ToHexString(body)} hash={publication.Block.Hash}");
+                            result = Published;
+                        }
                     }
                 }
                 catch (LedgerException error) { Console.Error.WriteLine(error.Code); }
@@ -199,7 +214,7 @@ internal static class Step2aCommand
                 request.CopyTo(response, 1);
                 pipe.WriteAsync(response, token).AsTask().GetAwaiter().GetResult();
             }
-            int expected = lost ? 7 : enroll ? 0 : 4;
+            int expected = lost ? 7 : result == Rejected ? 4 : 0;
             if (!child.WaitForExit(WaitMs) || !sameLaunch || child.ExitCode != expected)
                 throw new IOException("Unexpected producer result");
             Console.Write(child.StandardOutput.ReadToEnd());

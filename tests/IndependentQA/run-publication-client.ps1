@@ -45,12 +45,50 @@ Run $exe @('--instance-root',$l,'instance','init') 'instance' 0
 Run $exe @('--instance-root',$l,'ledger','init') 'genesis' 0
 [IO.File]::WriteAllBytes($db,$image)
 $before=(Get-FileHash -LiteralPath $db).Hash
+$r=Join-Path $d 'replica'
+$rdb=Join-Path $d 'replica.DLDB'
+$gen=(Get-Content "$b\genesis.out" -Raw | ConvertFrom-Json).data
+Run $exe @('--instance-root',$l,'block','get','--id',$gen.genesis_block_guid,'--output',"$b\genesis.raw") 'genesis-read' 0
+if((Get-FileHash "$b\genesis.raw" -Algorithm SHA512).Hash -ne $gen.genesis_sha512){throw 'Genesis pin mismatch'}
+Run $exe @('--instance-root',$r,'instance','init') 'replica-init' 0
+Run $exe @('--instance-root',$r,'ledger','join','--ledger-id',$gen.ledger_id_hex,'--genesis-sha512',$gen.genesis_sha512,'--genesis-file',"$b\genesis.raw") 'replica-join' 0
+Run $exe @('--instance-root',$r,'status') 'replica-status' 0
+Run $exe @('--instance-root',$l,'status') 'master-status' 0
+$rs=(Get-Content "$b\replica-status.out" -Raw | ConvertFrom-Json).data
+$ms=(Get-Content "$b\master-status.out" -Raw | ConvertFrom-Json).data
+foreach($s in $rs,$ms){
+  if($s.instance.state -ne 'bound' -or $s.instance.recovery_codes.Count -ne 0 -or
+     $s.signing.available -ne $true -or $s.binding.ledger_id_hex -ne $gen.ledger_id_hex -or
+     $s.binding.genesis_sha512 -ne $gen.genesis_sha512 -or $s.blocks.retained_count -ne 1){throw 'Initial binding or inventory'}
+}
+if($rs.instance.instance_guid -eq $ms.instance.instance_guid -or $rs.instance.public_key_hex -eq $ms.instance.public_key_hex -or
+   $rs.signing.authorized -ne $false -or $ms.signing.authorized -ne $true){throw 'Local roles or identities differ from fixture expectations'}
+[IO.File]::WriteAllBytes($rdb,$image)
+$replicaHash=(Get-FileHash $rdb).Hash
 $watch=[IO.FileSystemWatcher]::new($d)
 $watch.NotifyFilter=[IO.NotifyFilters]'FileName,LastWrite,Size'
 foreach($e in 'Created','Changed','Deleted','Renamed','Error'){Register-ObjectEvent $watch $e -SourceIdentifier "projection-$e" | Out-Null}
 $watch.EnableRaisingEvents=$true
 try{
   [IO.File]::WriteAllText("$d\control-before",'before')
+  Run $exe @('--instance-root',$r,'block','export','--output',"$b\replica-before.ddlb") 'replica-before' 0
+  Run $exe @('serve-projection-write',$rdb,'--commit-control') 'replica-write' 0
+  $trace=Get-Content "$b\replica-write.out" -Raw
+  $attempt=[regex]::Match($trace,'LAUNCH_EXPECTED scenario=Enrolled instance=(\S+) enrolled=True block=(\S+)')
+  $id=$attempt.Groups[2].Value
+  if(!$attempt.Success -or $attempt.Groups[1].Value -ne $rs.instance.instance_guid -or
+     !$trace.Contains("INITIAL_REPLICA_REFUSED instance=$($rs.instance.instance_guid) block=$id genesis=$($gen.genesis_sha512)") -or
+     !$trace.Contains("enrolled=True sameLaunch=True block=$id") -or !$trace.Contains('status=2') -or
+     [regex]::Matches($trace,'SUBMISSION_RECEIVED').Count -ne 1 -or $trace.Contains('PUBLISH_RETURNED') -or
+     !$trace.Contains('SQL [BEGIN] rc=101') -or !$trace.Contains('SQL [INSERT INTO items(row_guid) VALUES(?1)] rc=101') -or
+     !$trace.Contains('SQL [COMMIT] rc=23') -or !$trace.Contains('publication rejected')){throw 'Replica rejection evidence incomplete'}
+  Run $exe @('--instance-root',$r,'block','export','--output',"$b\replica-after.ddlb") 'replica-after' 0
+  if((Get-FileHash "$b\replica-before.ddlb").Hash -ne (Get-FileHash "$b\replica-after.ddlb").Hash -or
+     (Get-Content "$b\replica-after.out" -Raw | ConvertFrom-Json).data.block_count -ne 1){throw 'Replica inventory changed'}
+  Run $exe @('--instance-root',$r,'block','get','--id',$id,'--output',"$b\unexpected-replica.raw") 'replica-absent' 4
+  if((Get-Content "$b\replica-absent.out" -Raw | ConvertFrom-Json).error.code -ne 'BLOCK_NOT_FOUND'){throw 'Unexpected replica lookup'}
+  if((Get-FileHash $rdb).Hash -ne $replicaHash){throw 'Replica projection changed'}
+  foreach($s in '-journal','-wal','-shm'){if(Test-Path -LiteralPath "$rdb$s"){throw "Unexpected replica $s"}}
   Run $exe @('--instance-root',$l,'block','export','--output',"$b\before.ddlb") 'inventory-before' 0
   Run $exe @('serve-projection-write',$db,'--rollback') 'rollback' 0
   $rollbackLog=Get-Content "$b\rollback.out" -Raw
