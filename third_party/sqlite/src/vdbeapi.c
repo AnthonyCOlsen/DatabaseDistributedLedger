@@ -990,16 +990,20 @@ int sqlite3_step(sqlite3_stmt *pStmt){
   sqlite3_mutex_enter(db->mutex);
 #ifdef SQLITE_ENABLE_UDDL_STEP2A
   int publicationOp=0;
+  int outerRelease=0;
   if( db->publicationManaged==1 ){
     publicationOp=sqlite3PublicationStatement(v->zSql,-1);
+    /* Capture before stepping: SQLite removes the transaction savepoint on
+    ** successful release. An inner release does not complete a transaction. */
+    outerRelease = publicationOp==7 && db->isTransactionSavepoint &&
+                   db->pSavepoint && db->pSavepoint->pNext==0;
     if( !publicationOp || (db->publicationConsumed && publicationOp!=4)
      || (publicationOp==2 && (db->autoCommit || db->publicationRow || v->nVar!=1 ||
              !(v->aVar[0].flags & MEM_Blob) || (v->aVar[0].flags & MEM_Zero) ||
              v->aVar[0].n!=16 || !v->aVar[0].z))
-     /* One inner savepoint starts from an empty publication frame. SQLite
-     ** owns its stack and provisional table. Never let RELEASE open or end
-     ** the outer transaction; only explicit COMMIT can submit this frame. */
-     || (publicationOp==5 && (db->autoCommit || db->pSavepoint || db->publicationRow))
+     /* Permit only one named savepoint, starting from an empty frame. */
+     || (publicationOp==5 && (db->pSavepoint || db->publicationRow))
+     || (outerRelease && !db->publicationRow)
      || ((publicationOp==6 || publicationOp==7) && (db->autoCommit || !db->pSavepoint))
      || (publicationOp==3 && (db->autoCommit || db->pSavepoint || !db->publicationRow)) ){
       db->publicationConsumed=1;
@@ -1053,7 +1057,7 @@ int sqlite3_step(sqlite3_stmt *pStmt){
       /* Native ROLLBACK TO succeeded and retained the named savepoint. */
       memset(db->publicationFrame+49,0,16);
       db->publicationRow=0;
-    }else if( publicationOp==3 ){
+    }else if( publicationOp==3 || outerRelease ){
       /* Only the private transaction has committed. SQL success still depends
       ** on the service acknowledgment for this exact immutable request. */
       db->publicationConsumed=1;

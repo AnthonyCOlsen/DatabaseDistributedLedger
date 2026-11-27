@@ -115,6 +115,30 @@ try{
       if($offset -ne $inventory.Length){throw 'Incomplete inventory inspection'}
     }
   }
+  foreach($case in 'Outer','OuterDenied','OuterLost'){
+    $option=@{Outer='--outer-release';OuterDenied='--outer-denied';OuterLost='--outer-lost'}[$case]
+    Run $exe @('serve-projection-write',$db,$option) $case 0
+    $trace=Get-Content "$b\$case.out" -Raw
+    $launch=[regex]::Match($trace,"LAUNCH_EXPECTED scenario=$case instance=\S+ enrolled=\w+ block=(\S+) table=(\S+) row=(\S+)")
+    $expected=@{Outer='rc=101';OuterDenied='rc=23 message=publication rejected';OuterLost='rc=10 message=publication outcome unknown after submission'}[$case]
+    if(!$launch.Success -or !$trace.Contains('SQL [SAVEPOINT staged] rc=101') -or
+       !$trace.Contains('SQL [INSERT INTO items(row_guid) VALUES(?1)] rc=101') -or
+       !$trace.Contains('BEFORE_OUTER_RELEASE connections=0 requests=0 block=absent') -or
+       [regex]::Matches($trace,'SUBMISSION_RECEIVED').Count -ne 1 -or !$trace.Contains("SQL [RELEASE staged] $expected") -or
+       ($case -ne 'Outer' -and !$trace.Contains('rc=23 message=unsupported managed transaction'))){throw "$case SQL or service evidence incomplete"}
+    $id=$launch.Groups[1].Value
+    $published=$case -ne 'OuterDenied'
+    Run $exe @('--instance-root',$l,'block','get','--id',$id,'--output',"$b\$case.raw") "$case-read" $(if($published){0}else{4})
+    if($published){
+      $expectedCount++
+      $raw=[IO.File]::ReadAllBytes("$b\$case.raw")
+      $body='01'+$launch.Groups[2].Value.Replace('-','')+$launch.Groups[3].Value.Replace('-','')+'00'
+      if($raw.Length -ne 261 -or [Convert]::ToHexString($raw,34,16) -ne $id.Replace('-','') -or
+         [Convert]::ToHexString($raw,163,34) -ne $body){throw "$case signed content mismatch"}
+    }elseif((Get-Content "$b\$case-read.out" -Raw | ConvertFrom-Json).error.code -ne 'BLOCK_NOT_FOUND'){throw 'Denial lookup mismatch'}
+    Run $exe @('--instance-root',$l,'block','export','--output',"$b\$case.ddlb") "$case-export" 0
+    if((Get-Content "$b\$case-export.out" -Raw | ConvertFrom-Json).data.block_count -ne $expectedCount){throw "$case inventory count"}
+  }
   Run $exe @('serve-projection-write',$db) 'host' 0
   [IO.File]::WriteAllText("$d\control-after",'after')
   $clock=[Diagnostics.Stopwatch]::StartNew()
@@ -160,4 +184,4 @@ foreach($m in $launch){
 }
 if(!$log.Contains('publication rejected') -or !$log.Contains('publication outcome unknown after submission') -or
    [regex]::Matches($log,'PUBLISH_RETURNED').Count -ne 2 -or [regex]::Matches($log,'PRODUCER_EXIT').Count -ne 4){throw 'Missing native outcome'}
-"Projection before=$before after=$after; both inner savepoint scenarios, full rollback, positive COMMIT and four Step 2a scenarios checked."
+"Projection before=$before after=$after; outer RELEASE success, denial and lost reply, both inner savepoint scenarios, full rollback, positive COMMIT and four Step 2a scenarios checked."
