@@ -21,7 +21,8 @@ int main(int argc, char **argv){
   int rollback = argc==4 && strcmp(argv[3],"--rollback")==0;
   int replace = argc==4 && strcmp(argv[3],"--discard-at-savepoint")==0;
   int retain = argc==4 && strcmp(argv[3],"--retain-at-savepoint")==0;
-  if( argc!=3 && !rollback && !replace && !retain ) return 2;
+  int outer = argc==4 && strcmp(argv[3],"--outer-release")==0;
+  if( argc!=3 && !rollback && !replace && !retain && !outer ) return 2;
   if( strcmp(argv[1],"--create-seed")==0 ){
     rc=sqlite3_open_v2(argv[2],&db,SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE,0);
     if( rc==SQLITE_OK ) rc=sqlite3_exec(db,
@@ -38,7 +39,7 @@ int main(int argc, char **argv){
   }
   rc=sqlite3_open_v2(argv[1],&db,SQLITE_OPEN_READWRITE,0);
   if( rc!=SQLITE_OK ){ printf("OPEN rc=%d %s\n",rc,sqlite3_errmsg(db)); goto done; }
-  if( execute(db,"BEGIN",0)!=SQLITE_DONE ) goto done;
+  if( execute(db,outer ? "SAVEPOINT staged" : "BEGIN",0)!=SQLITE_DONE ) goto done;
   if( replace || retain ){
     unsigned char first[16];
     memcpy(first,row,sizeof(first));
@@ -55,12 +56,16 @@ int main(int argc, char **argv){
     result=rc==SQLITE_DONE && sqlite3_get_autocommit(db) ? 0 : 6;
     goto done;
   }
-  if( replace || retain ){
-    puts("READY_FOR_OUTER_COMMIT");
+  if( replace || retain || outer ){
+    puts(outer ? "READY_FOR_OUTER_RELEASE" : "READY_FOR_OUTER_COMMIT");
     fflush(stdout);
     if( getchar()!='G' ) goto done;
   }
-  rc=execute(db,"COMMIT",0);
+  rc=execute(db,outer ? "RELEASE staged" : "COMMIT",0);
+  if( outer && (rc==SQLITE_AUTH || rc==SQLITE_IOERR) ){
+    /* A fresh RELEASE on this consumed handle must fail without submitting. */
+    if( execute(db,"RELEASE staged",0)!=SQLITE_AUTH ) goto done;
+  }
   result=rc==SQLITE_DONE ? 0 : rc==SQLITE_AUTH ? 4 : rc==SQLITE_IOERR ? 7 : 6;
 done:
   rc=sqlite3_close(db);

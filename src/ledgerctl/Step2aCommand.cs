@@ -27,7 +27,9 @@ internal static class Step2aCommand
             Scenario[] scenarios = args.Length == 2
                 ? [Scenario.Enrolled, Scenario.Unenrolled, Scenario.DuplicateSeed, Scenario.LostReply]
                 : args[2] switch { "--rollback" => [Scenario.Rollback], "--commit-control" => [Scenario.Enrolled],
-                    "--discard-at-savepoint" => [Scenario.Discard], "--retain-at-savepoint" => [Scenario.Retain], _ => [] };
+                    "--discard-at-savepoint" => [Scenario.Discard], "--retain-at-savepoint" => [Scenario.Retain],
+                    "--outer-release" => [Scenario.Outer], "--outer-denied" => [Scenario.OuterDenied],
+                    "--outer-lost" => [Scenario.OuterLost], _ => [] };
             if (scenarios.Length == 0) return 2;
             var path = Path.GetFullPath(file);
             if (!Path.GetExtension(path).Equals(".DLDB", StringComparison.OrdinalIgnoreCase)) return 2;
@@ -77,21 +79,23 @@ internal static class Step2aCommand
         catch { file.Dispose(); throw; }
     }
 
-    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback, Discard, Retain }
+    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback, Discard, Retain, Outer, OuterDenied, OuterLost }
 
     private static void ServeChild(NamedPipeServerStream pipe, string name, LedgerInstance ledger, Scenario scenario, string path)
     {
         var instance = ledger.Manifest.InstanceId;
         var block = Guid.NewGuid();
-        var enroll = scenario != Scenario.Unenrolled;
+        bool outer = scenario is Scenario.Outer or Scenario.OuterDenied or Scenario.OuterLost;
+        bool lost = scenario is Scenario.LostReply or Scenario.OuterLost;
+        var enroll = scenario is not (Scenario.Unenrolled or Scenario.OuterDenied);
         var row = scenario == Scenario.DuplicateSeed ? new Guid("01000000-0000-0000-0000-000000000000") : Guid.NewGuid();
-        bool savepoint = scenario is Scenario.Discard or Scenario.Retain;
+        bool savepoint = outer || scenario is Scenario.Discard or Scenario.Retain;
         var start = new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "publication-client.exe"))
         { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardInput = savepoint };
         start.ArgumentList.Add(path);
         start.ArgumentList.Add(row.ToString("N"));
         if (scenario == Scenario.Rollback) start.ArgumentList.Add("--rollback");
-        if (savepoint) start.ArgumentList.Add(scenario == Scenario.Discard ? "--discard-at-savepoint" : "--retain-at-savepoint");
+        if (savepoint) start.ArgumentList.Add(outer ? "--outer-release" : scenario == Scenario.Discard ? "--discard-at-savepoint" : "--retain-at-savepoint");
         start.Environment["UDDL_PROJECTION"] = path;
         start.Environment["UDDL_SERVER_PID"] = Environment.ProcessId.ToString();
         start.Environment["UDDL_LOCAL_PIPE"] = name;
@@ -138,7 +142,7 @@ internal static class Step2aCommand
                     line = child.StandardOutput.ReadLineAsync(token).AsTask().GetAwaiter().GetResult();
                     if (line is null) throw new IOException("Client exited before COMMIT barrier");
                     Console.WriteLine(line);
-                } while (line != "READY_FOR_OUTER_COMMIT");
+                } while (line != (outer ? "READY_FOR_OUTER_RELEASE" : "READY_FOR_OUTER_COMMIT"));
                 observation.Cancel();
                 try
                 {
@@ -146,7 +150,10 @@ internal static class Step2aCommand
                     throw new IOException("Unexpected submission before outer COMMIT");
                 }
                 catch (OperationCanceledException) when (connection!.IsCanceled) { }
-                Console.WriteLine("BEFORE_OUTER_COMMIT connections=0 requests=0");
+                if (outer && ledger.SelectExport().Blocks.Any(record => record.Id == block))
+                    throw new IOException("Block already retained before outer RELEASE");
+                Console.WriteLine(outer ? "BEFORE_OUTER_RELEASE connections=0 requests=0 block=absent" :
+                    "BEFORE_OUTER_COMMIT connections=0 requests=0");
             }
             var accept = pipe.WaitForConnectionAsync(token);
             if (savepoint) { child.StandardInput.WriteLine("G"); child.StandardInput.Flush(); }
@@ -180,7 +187,7 @@ internal static class Step2aCommand
                 catch (LedgerException error) { Console.Error.WriteLine(error.Code); }
             }
             Console.WriteLine($"REPLY pid={pid} enrolled={enroll} sameLaunch={sameLaunch} block={block} event={Convert.ToHexString(body)} status={result}");
-            if (scenario == Scenario.LostReply)
+            if (lost)
             {
                 if (result != Published) throw new IOException("Expected publication before lost reply");
                 pipe.Disconnect();
@@ -192,7 +199,7 @@ internal static class Step2aCommand
                 request.CopyTo(response, 1);
                 pipe.WriteAsync(response, token).AsTask().GetAwaiter().GetResult();
             }
-            int expected = scenario == Scenario.LostReply ? 7 : enroll ? 0 : 4;
+            int expected = lost ? 7 : enroll ? 0 : 4;
             if (!child.WaitForExit(WaitMs) || !sameLaunch || child.ExitCode != expected)
                 throw new IOException("Unexpected producer result");
             Console.Write(child.StandardOutput.ReadToEnd());
