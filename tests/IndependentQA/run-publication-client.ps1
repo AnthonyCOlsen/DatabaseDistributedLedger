@@ -65,6 +65,28 @@ if($rs.instance.instance_guid -eq $ms.instance.instance_guid -or $rs.instance.pu
    $rs.signing.authorized -ne $false -or $ms.signing.authorized -ne $true){throw 'Local roles or identities differ from fixture expectations'}
 [IO.File]::WriteAllBytes($rdb,$image)
 $replicaHash=(Get-FileHash $rdb).Hash
+# Three independent ledger roots and frozen input images. The ADD/DROP fixtures
+# have a signed notes definition before the native transaction starts.
+$notes='33'*16
+$createBody='10'+$notes+'056E6F74657301'+('44'*16)+'017604424C4F420100'
+$addBody='13'+$notes+('55'*16)+'0374616704544558540100'
+$dropBody='11'+$notes
+[IO.File]::WriteAllBytes("$b\notes-definition.event",[Convert]::FromHexString($createBody))
+Run $client @('--notes-seed',"$b\ordinary-notes.db") 'ordinary-notes' 0
+$notesImage=[IO.File]::ReadAllBytes("$b\ordinary-notes.db")
+$signature.CopyTo($notesImage,0)
+$schemaHashes=@{}
+foreach($case in 'SchemaCreate','SchemaAdd','SchemaDrop'){
+  $root=Join-Path $d $case
+  Run $exe @('--instance-root',$root,'instance','init') "$case-init" 0
+  Run $exe @('--instance-root',$root,'ledger','init') "$case-genesis" 0
+  if($case -eq 'SchemaCreate'){[IO.File]::WriteAllBytes("$root.DLDB",$image)}
+  else{
+    Run $exe @('--instance-root',$root,'block','publish','--event-file',"$b\notes-definition.event") "$case-definition" 0
+    [IO.File]::WriteAllBytes("$root.DLDB",$notesImage)
+  }
+  $schemaHashes[$case]=(Get-FileHash "$root.DLDB").Hash
+}
 $watch=[IO.FileSystemWatcher]::new($d)
 $watch.NotifyFilter=[IO.NotifyFilters]'FileName,LastWrite,Size'
 foreach($e in 'Created','Changed','Deleted','Renamed','Error'){Register-ObjectEvent $watch $e -SourceIdentifier "projection-$e" | Out-Null}
@@ -215,6 +237,48 @@ try{
   Run $exe @('--instance-root',$l,'block','export','--output',"$b\dml-after.ddlb") 'dml-after' 0
   $old=(Get-Content "$b\dml-before.out" -Raw | ConvertFrom-Json).data.block_count
   if((Get-Content "$b\dml-after.out" -Raw | ConvertFrom-Json).data.block_count -ne $old+2){throw 'Unexpected effective-DML inventory'}
+  foreach($case in 'SchemaCreate','SchemaAdd','SchemaDrop'){
+    $root=Join-Path $d $case
+    $option,$body,$sql=switch($case){
+      'SchemaCreate' {'--create-notes';$createBody;'CREATE TABLE notes(v BLOB)'}
+      'SchemaAdd' {'--add-tag';$addBody;'ALTER TABLE notes ADD COLUMN tag TEXT'}
+      'SchemaDrop' {'--drop-notes';$dropBody;'DROP TABLE notes'}
+    }
+    Run $exe @('serve-projection-write',"$root.DLDB",$option) "$case-host" 0
+    $trace=Get-Content "$b\$case-host.out" -Raw
+    $launch=[regex]::Match($trace,"LAUNCH_EXPECTED scenario=$case instance=\S+ enrolled=True block=(\S+) table=(\S+)")
+    $id=$launch.Groups[1].Value
+    if(!$launch.Success -or $launch.Groups[2].Value.Replace('-','') -ne $notes -or
+       !$trace.Contains("SQL [$sql] rc=101") -or !$trace.Contains('BEFORE_OUTER_COMMIT connections=0 requests=0') -or
+       [regex]::Matches($trace,'SUBMISSION_RECEIVED').Count -ne 1 -or [regex]::Matches($trace,'PUBLISH_RETURNED').Count -ne 1 -or
+       !$trace.Contains("sameLaunch=True block=$id event=$body status=1") -or !$trace.Contains('SQL [COMMIT] rc=101')){
+      throw "$case transaction/ack"
+    }
+    foreach($silent in $(if($case -eq 'SchemaCreate'){'SchemaRollback';'SchemaUnsupported';'SchemaMixed'}elseif($case -eq 'SchemaAdd'){'SchemaDuplicate'})){
+      $attempt=[regex]::Match($trace,"LAUNCH_EXPECTED scenario=$silent instance=\S+ enrolled=True block=(\S+)")
+      if(!$attempt.Success -or !$trace.Contains("NO_SUBMISSION scenario=$silent")){throw "$silent observation"}
+      Run $exe @('--instance-root',$root,'block','get','--id',$attempt.Groups[1].Value,'--output',"$b\$silent-unexpected.raw") "$silent-absent" 4
+      if((Get-Content "$b\$silent-absent.out" -Raw | ConvertFrom-Json).error.code -ne 'BLOCK_NOT_FOUND'){throw "$silent absence"}
+    }
+    Run $exe @('--instance-root',$root,'block','export','--output',"$b\$case.ddlb") "$case-export" 0
+    $expectedCount=if($case -eq 'SchemaCreate'){2}else{3}
+    if((Get-Content "$b\$case-export.out" -Raw | ConvertFrom-Json).data.block_count -ne $expectedCount){throw "$case inventory"}
+    Run $exe @('--instance-root',$root,'block','get','--id',$id,'--output',"$b\$case.raw") "$case-read" 0
+    $raw=[IO.File]::ReadAllBytes("$b\$case.raw")
+    $n=[int]($body.Length/2)
+    if($raw.Length -ne 163+$n+64 -or [Convert]::ToHexString($raw,34,16) -ne $id.Replace('-','') -or
+       [Convert]::ToHexString($raw,163,$n) -ne $body){throw "$case signed schema content"}
+    $publicKey=(Get-Content "$b\$case-init.out" -Raw | ConvertFrom-Json).data.public_key_hex
+    if([Convert]::ToHexString($raw,58,32) -ne $publicKey){throw "$case signer"}
+    $key=[byte[]]([Convert]::FromHexString('302a300506032b6570032100')+$raw[58..89])
+    [IO.File]::WriteAllBytes("$b\$case.pub.der",$key)
+    [IO.File]::WriteAllBytes("$b\$case.message",[byte[]]$raw[0..($raw.Length-65)])
+    [IO.File]::WriteAllBytes("$b\$case.sig",[byte[]]$raw[($raw.Length-64)..($raw.Length-1)])
+    $openssl=Join-Path $env:ProgramFiles 'Git\usr\bin\openssl.exe'
+    Run $openssl @('pkeyutl','-verify','-pubin','-keyform','DER','-inkey',"$b\$case.pub.der",'-rawin','-in',"$b\$case.message",'-sigfile',"$b\$case.sig") "$case-ed25519" 0
+    if((Get-FileHash "$root.DLDB").Hash -ne $schemaHashes[$case]){throw "$case projection changed"}
+    foreach($s in '-journal','-wal','-shm'){if(Test-Path "$root.DLDB$s"){throw "$case unexpected sidecar"}}
+  }
   [IO.File]::WriteAllText("$d\control-after",'after')
   $clock=[Diagnostics.Stopwatch]::StartNew()
   do{
@@ -259,4 +323,4 @@ foreach($m in $launch){
 }
 if(!$log.Contains('LOST_REPLY original=IOERR further_dml=AUTH further_commit=AUTH') -or !$log.Contains('publication rejected') -or !$log.Contains('publication outcome unknown after submission') -or
    [regex]::Matches($log,'PUBLISH_RETURNED').Count -ne 2 -or [regex]::Matches($log,'PRODUCER_EXIT').Count -ne 4){throw 'Missing native outcome'}
-"Projection before=$before after=$after; outer RELEASE success, denial and lost reply, both inner savepoint scenarios, full rollback, positive COMMIT, effective UPDATE/DELETE, unchanged, missing, DML rollback and four Step 2a scenarios checked."
+"Projection before=$before after=$after; outer RELEASE success, denial and lost reply, both inner savepoint scenarios, full rollback, positive COMMIT, representable CREATE/ADD/DROP, DDL rejection and rollback, effective UPDATE/DELETE, unchanged, missing, DML rollback and four Step 2a scenarios checked."

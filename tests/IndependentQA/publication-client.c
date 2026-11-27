@@ -27,13 +27,30 @@ int main(int argc, char **argv){
   int replace = argc==4 && strcmp(argv[3],"--discard-at-savepoint")==0;
   int retain = argc==4 && strcmp(argv[3],"--retain-at-savepoint")==0;
   int outer = argc==4 && strcmp(argv[3],"--outer-release")==0;
+  const char *ddl=0;
+  int ddlFailure=0, ddlRollback=0, ddlMixed=0;
+  if( argc==4 ){
+    if( !strcmp(argv[3],"--schemacreate") ) ddl="CREATE TABLE notes(v BLOB)";
+    if( !strcmp(argv[3],"--schemaadd") ) ddl="ALTER TABLE notes ADD COLUMN tag TEXT";
+    if( !strcmp(argv[3],"--schemadrop") ) ddl="DROP TABLE notes";
+    if( !strcmp(argv[3],"--schemamixed") ){ ddl="CREATE TABLE notes(v BLOB)"; ddlMixed=1; }
+    if( !strcmp(argv[3],"--schemarollback") ){ ddl="CREATE TABLE notes(v BLOB)"; ddlRollback=1; }
+    if( !strcmp(argv[3],"--schemaduplicate") ){ ddl="CREATE TABLE notes(v BLOB)"; ddlFailure=SQLITE_ERROR; }
+    if( !strcmp(argv[3],"--schemaunsupported") ){ ddl="CREATE TABLE notes(v BLOB UNIQUE)"; ddlFailure=SQLITE_AUTH; }
+  }
   int lost=argc==4 && !strcmp(argv[3],"--lost-reply");
   int update=argc==4 && (!strcmp(argv[3],"--update") || !strcmp(argv[3],"--unchanged") || !strcmp(argv[3],"--update-rollback"));
   int remove=argc==4 && (!strcmp(argv[3],"--delete") || !strcmp(argv[3],"--missing"));
   unsigned char value[2]={0,255};
   if( update && !strcmp(argv[3],"--unchanged") ) value[1]=1;
   if( update && !strcmp(argv[3],"--update-rollback") ) rollback=1;
-  if( argc!=3 && !lost && !update && !remove && !rollback && !replace && !retain && !outer ) return 2;
+  if( argc!=3 && !ddl && !lost && !update && !remove && !rollback && !replace && !retain && !outer ) return 2;
+  if( !strcmp(argv[1],"--notes-seed") ){
+    rc=sqlite3_open_v2(argv[2],&db,SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE,0);
+    if( rc==SQLITE_OK ) rc=sqlite3_exec(db,"CREATE TABLE notes(v BLOB)",0,0,0);
+    sqlite3_close(db);
+    return rc;
+  }
   if( strcmp(argv[1],"--create-seed")==0 ){
     rc=sqlite3_open_v2(argv[2],&db,SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE,0);
     if( rc==SQLITE_OK ) rc=sqlite3_exec(db,
@@ -60,7 +77,19 @@ int main(int argc, char **argv){
     if( replace && execute(db,"ROLLBACK TO staged",0)!=SQLITE_DONE ) goto done;
     if( execute(db,"RELEASE staged",0)!=SQLITE_DONE || sqlite3_get_autocommit(db) ) goto done;
   }
-  if( update ) rc=executeBound(db,"UPDATE items SET value=?2 WHERE row_guid=?1 AND value IS NOT ?2",row,value);
+  if( ddl ){
+    rc=execute(db,ddl,0);
+    if( ddlFailure ){
+      if( rc==ddlFailure && execute(db,"ROLLBACK",0)==SQLITE_DONE ) result=0;
+      goto done;
+    }
+    if( ddlMixed ){
+      if( rc==SQLITE_DONE && execute(db,"INSERT INTO items(row_guid) VALUES(?1)",row)==SQLITE_AUTH &&
+          execute(db,"COMMIT",0)==SQLITE_AUTH && execute(db,"ROLLBACK",0)==SQLITE_DONE ) result=0;
+      goto done;
+    }
+    if( ddlRollback ) rollback=1;
+  }else if( update ) rc=executeBound(db,"UPDATE items SET value=?2 WHERE row_guid=?1 AND value IS NOT ?2",row,value);
   else if( remove ) rc=execute(db,"DELETE FROM items WHERE row_guid=?1",row);
   else rc=retain ? SQLITE_DONE : execute(db,"INSERT INTO items(row_guid) VALUES(?1)",row);
   if( rc!=SQLITE_DONE ){ if( rc==SQLITE_CONSTRAINT ) result=5; goto done; }
@@ -69,7 +98,7 @@ int main(int argc, char **argv){
     result=rc==SQLITE_DONE && sqlite3_get_autocommit(db) ? 0 : 6;
     goto done;
   }
-  if( replace || retain || outer ){
+  if( ddl || replace || retain || outer ){
     puts(outer ? "READY_FOR_OUTER_RELEASE" : "READY_FOR_OUTER_COMMIT");
     fflush(stdout);
     if( getchar()!='G' ) goto done;

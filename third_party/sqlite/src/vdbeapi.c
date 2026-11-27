@@ -991,17 +991,18 @@ int sqlite3_step(sqlite3_stmt *pStmt){
 #ifdef SQLITE_ENABLE_UDDL_STEP2A
   int publicationOp=0;
   int outerRelease=0;
-  if( db->publicationManaged==1 ){
+  if( db->publicationManaged==1 && !(v->readOnly && sqlite3PublicationSchemaRead(db,v->zSql,-1)) ){
     publicationOp=sqlite3PublicationStatement(v->zSql,-1);
     /* Capture before stepping: SQLite removes the transaction savepoint on
     ** successful release. An inner release does not complete a transaction. */
     outerRelease = publicationOp==7 && db->isTransactionSavepoint &&
                    db->pSavepoint && db->pSavepoint->pNext==0;
-    if( !publicationOp || (db->publicationConsumed && publicationOp!=4)
-     || ((publicationOp==2 || publicationOp>=8) && (db->autoCommit || db->publicationRow ||
+    if( db->publicationSchemaOp || !publicationOp || (db->publicationConsumed && publicationOp!=4)
+     || ((publicationOp==2 || publicationOp==8 || publicationOp==9) && (db->autoCommit || db->publicationRow ||
              db->publicationEmptyDml || v->nVar!=(publicationOp==8 ? 2 : 1) ||
              !(v->aVar[0].flags & MEM_Blob) || (v->aVar[0].flags & MEM_Zero) ||
              v->aVar[0].n!=16 || !v->aVar[0].z))
+     || (publicationOp>=PUBLICATION_CREATE_NOTES && (db->autoCommit || db->publicationRow || v->nVar))
      || (publicationOp>=8 && db->pSavepoint)
      || (publicationOp==8 && (!(v->aVar[1].flags & MEM_Blob) || (v->aVar[1].flags & MEM_Zero) ||
                              v->aVar[1].n!=2 || !v->aVar[1].z))
@@ -1016,6 +1017,7 @@ int sqlite3_step(sqlite3_stmt *pStmt){
       sqlite3_mutex_leave(db->mutex);
       return SQLITE_AUTH;
     }
+    if( publicationOp>=PUBLICATION_CREATE_NOTES ) db->publicationSchemaOp=(u8)publicationOp;
   }
 #endif
   while( (rc = sqlite3Step(v))==SQLITE_SCHEMA
@@ -1054,8 +1056,12 @@ int sqlite3_step(sqlite3_stmt *pStmt){
   }
 #ifdef SQLITE_ENABLE_UDDL_STEP2A
   if( publicationOp ){
+    if( publicationOp>=PUBLICATION_CREATE_NOTES ) db->publicationSchemaOp=0;
     if( rc!=SQLITE_DONE || publicationOp==4 ) db->publicationConsumed=1;
-    else if( publicationOp>=8 && sqlite3_changes64(db)==0 ){
+    else if( publicationOp>=PUBLICATION_CREATE_NOTES ){
+      sqlite3PublicationSchemaFrame(db,publicationOp);
+      db->publicationRow=1;
+    }else if( publicationOp>=8 && sqlite3_changes64(db)==0 ){
       db->publicationEmptyDml=1;
     }else if( publicationOp==2 || publicationOp>=8 ){
       db->publicationFrame[32]=publicationOp==8 ? 2 : publicationOp==9 ? 3 : 1;

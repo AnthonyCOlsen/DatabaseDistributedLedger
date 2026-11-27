@@ -1697,6 +1697,11 @@ typedef int (*sqlite3_xauth)(void*,int,const char*,const char*,const char*,
 ** Each database connection is an instance of the following structure.
 */
 #ifdef SQLITE_ENABLE_UDDL_STEP2A
+#define PUBLICATION_CREATE_NOTES 10
+#define PUBLICATION_ADD_TAG      11
+#define PUBLICATION_DROP_NOTES   12
+int sqlite3PublicationSchemaRead(sqlite3*, const char*, int);
+void sqlite3PublicationSchemaFrame(sqlite3*, int);
 int sqlite3PublicationStatement(const char*, int);
 int sqlite3PublicationSubmit(sqlite3*);
 #endif
@@ -1706,6 +1711,8 @@ struct sqlite3 {
   u32 publicationServer;
   char publicationPipe[64];
   unsigned char publicationFrame[86];
+  u8 publicationSchemaOp; /* Owning DDL step during native schema reparse. */
+  u8 publicationSchemaBytes; /* Complete instance/id/event frame size, or zero for DML. */
   u8 publicationEmptyDml; /* A completed fixture DML matched no effective row. */
 #endif
   sqlite3_vfs *pVfs;            /* OS Interface */
