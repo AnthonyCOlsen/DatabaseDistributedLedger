@@ -1,5 +1,6 @@
 using UserDimensions.Ledger;
 if(args.Length>0 && args[0]=="--worker") return Tests.Worker(args[1..]);
+if(args.Length==1 && args[0]=="--intent-progress-journal") { Tests.RunProgressJournal(); return Tests.Finish(); }
 if(args.Length==1 && args[0]=="--frozen-intent-store") { Tests.RunFrozenIntentStore(); return Tests.Finish(); }
 if(args.Length==1 && args[0]=="--qa015-d01") { Tests.RunMissingGenesis(); return Tests.Finish(); }
 if(args.Length==1 && args[0]=="--pre-signing") { Tests.RunPreSigningRecovery(); return Tests.Finish(); }
