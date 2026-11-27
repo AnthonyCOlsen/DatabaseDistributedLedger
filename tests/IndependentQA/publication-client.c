@@ -19,7 +19,9 @@ int main(int argc, char **argv){
   unsigned char row[16];
   int i, rc, result=6;
   int rollback = argc==4 && strcmp(argv[3],"--rollback")==0;
-  if( argc!=3 && !rollback ) return 2;
+  int replace = argc==4 && strcmp(argv[3],"--discard-at-savepoint")==0;
+  int retain = argc==4 && strcmp(argv[3],"--retain-at-savepoint")==0;
+  if( argc!=3 && !rollback && !replace && !retain ) return 2;
   if( strcmp(argv[1],"--create-seed")==0 ){
     rc=sqlite3_open_v2(argv[2],&db,SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE,0);
     if( rc==SQLITE_OK ) rc=sqlite3_exec(db,
@@ -37,12 +39,26 @@ int main(int argc, char **argv){
   rc=sqlite3_open_v2(argv[1],&db,SQLITE_OPEN_READWRITE,0);
   if( rc!=SQLITE_OK ){ printf("OPEN rc=%d %s\n",rc,sqlite3_errmsg(db)); goto done; }
   if( execute(db,"BEGIN",0)!=SQLITE_DONE ) goto done;
-  rc=execute(db,"INSERT INTO items(row_guid) VALUES(?1)",row);
+  if( replace || retain ){
+    unsigned char first[16];
+    memcpy(first,row,sizeof(first));
+    if( replace ) first[0]^=0x80;
+    if( execute(db,"SAVEPOINT staged",0)!=SQLITE_DONE ||
+        execute(db,"INSERT INTO items(row_guid) VALUES(?1)",first)!=SQLITE_DONE ) goto done;
+    if( replace && execute(db,"ROLLBACK TO staged",0)!=SQLITE_DONE ) goto done;
+    if( execute(db,"RELEASE staged",0)!=SQLITE_DONE || sqlite3_get_autocommit(db) ) goto done;
+  }
+  rc=retain ? SQLITE_DONE : execute(db,"INSERT INTO items(row_guid) VALUES(?1)",row);
   if( rc!=SQLITE_DONE ){ if( rc==SQLITE_CONSTRAINT ) result=5; goto done; }
   if( rollback ){
     rc=execute(db,"ROLLBACK",0);
     result=rc==SQLITE_DONE && sqlite3_get_autocommit(db) ? 0 : 6;
     goto done;
+  }
+  if( replace || retain ){
+    puts("READY_FOR_OUTER_COMMIT");
+    fflush(stdout);
+    if( getchar()!='G' ) goto done;
   }
   rc=execute(db,"COMMIT",0);
   result=rc==SQLITE_DONE ? 0 : rc==SQLITE_AUTH ? 4 : rc==SQLITE_IOERR ? 7 : 6;

@@ -996,7 +996,12 @@ int sqlite3_step(sqlite3_stmt *pStmt){
      || (publicationOp==2 && (db->autoCommit || db->publicationRow || v->nVar!=1 ||
              !(v->aVar[0].flags & MEM_Blob) || (v->aVar[0].flags & MEM_Zero) ||
              v->aVar[0].n!=16 || !v->aVar[0].z))
-     || (publicationOp==3 && (db->autoCommit || !db->publicationRow)) ){
+     /* One inner savepoint starts from an empty publication frame. SQLite
+     ** owns its stack and provisional table. Never let RELEASE open or end
+     ** the outer transaction; only explicit COMMIT can submit this frame. */
+     || (publicationOp==5 && (db->autoCommit || db->pSavepoint || db->publicationRow))
+     || ((publicationOp==6 || publicationOp==7) && (db->autoCommit || !db->pSavepoint))
+     || (publicationOp==3 && (db->autoCommit || db->pSavepoint || !db->publicationRow)) ){
       db->publicationConsumed=1;
       sqlite3ErrorWithMsg(db,SQLITE_AUTH,"unsupported managed transaction");
       sqlite3_mutex_leave(db->mutex);
@@ -1044,6 +1049,10 @@ int sqlite3_step(sqlite3_stmt *pStmt){
     else if( publicationOp==2 ){
       memcpy(db->publicationFrame+49,v->aVar[0].z,16);
       db->publicationRow=1;
+    }else if( publicationOp==6 ){
+      /* Native ROLLBACK TO succeeded and retained the named savepoint. */
+      memset(db->publicationFrame+49,0,16);
+      db->publicationRow=0;
     }else if( publicationOp==3 ){
       /* Only the private transaction has committed. SQL success still depends
       ** on the service acknowledgment for this exact immutable request. */

@@ -5380,7 +5380,8 @@ done:
 /* Bounded grammar for this first client slice. All accepted statements still
 ** go through SQLite's own compiler, binder and VM. */
 int sqlite3PublicationStatement(const char *z, int n){
-  static const char *const sql[]={"BEGIN","INSERT INTO items(row_guid) VALUES(?1)","COMMIT","ROLLBACK"};
+  static const char *const sql[]={"BEGIN","INSERT INTO items(row_guid) VALUES(?1)","COMMIT","ROLLBACK",
+    "SAVEPOINT staged","ROLLBACK TO staged","RELEASE staged"};
   int i, len=0;
   if( !z ) return 0;
   while( len<128 && (n<0 || len<n) && z[len] ) len++;
@@ -5389,7 +5390,7 @@ int sqlite3PublicationStatement(const char *z, int n){
   if( len && z[len-1]==';' ) len--;
   while( len && sqlite3Isspace(z[len-1]) ) len--;
   while( len && sqlite3Isspace(*z) ){ z++; len--; }
-  for(i=0; i<4; i++){
+  for(i=0; i<ArraySize(sql); i++){
     if( (int)strlen(sql[i])==len && sqlite3_strnicmp(z,sql[i],len)==0 ) return i+1;
   }
   return 0;

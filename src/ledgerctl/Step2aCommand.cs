@@ -26,7 +26,8 @@ internal static class Step2aCommand
             var file = args[1];
             Scenario[] scenarios = args.Length == 2
                 ? [Scenario.Enrolled, Scenario.Unenrolled, Scenario.DuplicateSeed, Scenario.LostReply]
-                : args[2] switch { "--rollback" => [Scenario.Rollback], "--commit-control" => [Scenario.Enrolled], _ => [] };
+                : args[2] switch { "--rollback" => [Scenario.Rollback], "--commit-control" => [Scenario.Enrolled],
+                    "--discard-at-savepoint" => [Scenario.Discard], "--retain-at-savepoint" => [Scenario.Retain], _ => [] };
             if (scenarios.Length == 0) return 2;
             var path = Path.GetFullPath(file);
             if (!Path.GetExtension(path).Equals(".DLDB", StringComparison.OrdinalIgnoreCase)) return 2;
@@ -76,7 +77,7 @@ internal static class Step2aCommand
         catch { file.Dispose(); throw; }
     }
 
-    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback }
+    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback, Discard, Retain }
 
     private static void ServeChild(NamedPipeServerStream pipe, string name, LedgerInstance ledger, Scenario scenario, string path)
     {
@@ -84,11 +85,13 @@ internal static class Step2aCommand
         var block = Guid.NewGuid();
         var enroll = scenario != Scenario.Unenrolled;
         var row = scenario == Scenario.DuplicateSeed ? new Guid("01000000-0000-0000-0000-000000000000") : Guid.NewGuid();
+        bool savepoint = scenario is Scenario.Discard or Scenario.Retain;
         var start = new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "publication-client.exe"))
-        { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true };
+        { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardInput = savepoint };
         start.ArgumentList.Add(path);
         start.ArgumentList.Add(row.ToString("N"));
         if (scenario == Scenario.Rollback) start.ArgumentList.Add("--rollback");
+        if (savepoint) start.ArgumentList.Add(scenario == Scenario.Discard ? "--discard-at-savepoint" : "--retain-at-savepoint");
         start.Environment["UDDL_PROJECTION"] = path;
         start.Environment["UDDL_SERVER_PID"] = Environment.ProcessId.ToString();
         start.Environment["UDDL_LOCAL_PIPE"] = name;
@@ -98,12 +101,12 @@ internal static class Step2aCommand
         // Arm the single local pipe before launch. Any connection during rollback,
         // even without a complete or admissible request, fails the observation.
         using var observation = new CancellationTokenSource();
-        var connection = scenario == Scenario.Rollback ? pipe.WaitForConnectionAsync(observation.Token) : null;
+        var connection = scenario == Scenario.Rollback || savepoint ? pipe.WaitForConnectionAsync(observation.Token) : null;
         using var child = Process.Start(start) ?? throw new IOException("Producer launch failed");
         try
         {
             _ = child.SafeHandle;
-            if (connection is not null)
+            if (scenario == Scenario.Rollback && connection is not null)
             {
                 if (!child.WaitForExit(WaitMs)) throw new IOException("Rollback client timed out");
                 Console.Write(child.StandardOutput.ReadToEnd());
@@ -126,7 +129,28 @@ internal static class Step2aCommand
             }
             using var deadline = new CancellationTokenSource(WaitMs);
             var token = deadline.Token;
-            pipe.WaitForConnectionAsync(token).GetAwaiter().GetResult();
+            if (savepoint)
+            {
+                // The child cannot enter COMMIT until the host releases stdin.
+                string? line;
+                do
+                {
+                    line = child.StandardOutput.ReadLineAsync(token).AsTask().GetAwaiter().GetResult();
+                    if (line is null) throw new IOException("Client exited before COMMIT barrier");
+                    Console.WriteLine(line);
+                } while (line != "READY_FOR_OUTER_COMMIT");
+                observation.Cancel();
+                try
+                {
+                    connection!.GetAwaiter().GetResult();
+                    throw new IOException("Unexpected submission before outer COMMIT");
+                }
+                catch (OperationCanceledException) when (connection!.IsCanceled) { }
+                Console.WriteLine("BEFORE_OUTER_COMMIT connections=0 requests=0");
+            }
+            var accept = pipe.WaitForConnectionAsync(token);
+            if (savepoint) { child.StandardInput.WriteLine("G"); child.StandardInput.Flush(); }
+            accept.GetAwaiter().GetResult();
             var request = new byte[66]; // instance, stable block id, fixed-size INSERT
             pipe.ReadExactlyAsync(request, token).AsTask().GetAwaiter().GetResult();
             Console.WriteLine($"SUBMISSION_RECEIVED scenario={scenario} block={new Guid(request.AsSpan(16,16),true)}");
