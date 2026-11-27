@@ -77,6 +77,44 @@ try{
   $event='01'+$commit.Groups[2].Value.Replace('-','')+$commit.Groups[3].Value.Replace('-','')+'00'
   if($control.Length -ne 261 -or [Convert]::ToHexString($control,34,16) -ne $commit.Groups[1].Value.Replace('-','') -or
      [Convert]::ToHexString($control,163,34) -ne $event){throw 'Positive control signed content differs'}
+  $expectedCount=2
+  foreach($case in 'Discard','Retain'){
+    $option=if($case -eq 'Discard'){'--discard-at-savepoint'}else{'--retain-at-savepoint'}
+    Run $exe @('serve-projection-write',$db,$option) $case 0
+    $trace=Get-Content "$b\$case.out" -Raw
+    $launch=[regex]::Match($trace,"LAUNCH_EXPECTED scenario=$case instance=\S+ enrolled=True block=(\S+) table=(\S+) row=(\S+)")
+    $expectedInserts=if($case -eq 'Discard'){2}else{1}
+    if(!$launch.Success -or !$trace.Contains('SQL [SAVEPOINT staged] rc=101') -or
+       [regex]::Matches($trace,'SQL \[INSERT INTO items\(row_guid\) VALUES\(\?1\)\] rc=101').Count -ne $expectedInserts -or
+       ($case -eq 'Discard' -and !$trace.Contains('SQL [ROLLBACK TO staged] rc=101')) -or
+       !$trace.Contains('SQL [RELEASE staged] rc=101') -or !$trace.Contains('BEFORE_OUTER_COMMIT connections=0 requests=0') -or
+       [regex]::Matches($trace,'SUBMISSION_RECEIVED').Count -ne 1 -or !$trace.Contains('SQL [COMMIT] rc=101') -or
+       !$trace.Contains('status=1')){throw "$case transaction or IPC evidence incomplete"}
+    $id=$launch.Groups[1].Value
+    $row=$launch.Groups[3].Value.Replace('-','')
+    $event='01'+$launch.Groups[2].Value.Replace('-','')+$row+'00'
+    Run $exe @('--instance-root',$l,'block','get','--id',$id,'--output',"$b\$case.raw") "$case-read" 0
+    $raw=[IO.File]::ReadAllBytes("$b\$case.raw")
+    if($raw.Length -ne 261 -or [Convert]::ToHexString($raw,34,16) -ne $id.Replace('-','') -or
+       [Convert]::ToHexString($raw,163,34) -ne $event){throw "$case signed event mismatch"}
+    Run $exe @('--instance-root',$l,'block','export','--output',"$b\$case.ddlb") "$case-export" 0
+    $expectedCount++
+    if((Get-Content "$b\$case-export.out" -Raw | ConvertFrom-Json).data.block_count -ne $expectedCount){throw "$case inventory count"}
+    if($case -eq 'Discard'){
+      $discarded=[Convert]::FromHexString($row)
+      $discarded[0]=$discarded[0] -bxor 128
+      $inventory=[IO.File]::ReadAllBytes("$b\$case.ddlb")
+      $offset=14
+      for($i=0;$i -lt $expectedCount;$i++){
+        $length=[System.Buffers.Binary.BinaryPrimitives]::ReadUInt64BigEndian([byte[]]$inventory[$offset..($offset+7)])
+        $offset+=8
+        if($length -eq 261 -and $inventory[$offset+163] -eq 1 -and
+           [Convert]::ToHexString($inventory,$offset+180,16) -eq [Convert]::ToHexString($discarded)){throw 'Discarded row retained'}
+        $offset+=[int]$length
+      }
+      if($offset -ne $inventory.Length){throw 'Incomplete inventory inspection'}
+    }
+  }
   Run $exe @('serve-projection-write',$db) 'host' 0
   [IO.File]::WriteAllText("$d\control-after",'after')
   $clock=[Diagnostics.Stopwatch]::StartNew()
@@ -122,4 +160,4 @@ foreach($m in $launch){
 }
 if(!$log.Contains('publication rejected') -or !$log.Contains('publication outcome unknown after submission') -or
    [regex]::Matches($log,'PUBLISH_RETURNED').Count -ne 2 -or [regex]::Matches($log,'PRODUCER_EXIT').Count -ne 4){throw 'Missing native outcome'}
-"Projection before=$before after=$after; rollback, positive COMMIT and four Step 2a scenarios checked."
+"Projection before=$before after=$after; both inner savepoint scenarios, full rollback, positive COMMIT and four Step 2a scenarios checked."
