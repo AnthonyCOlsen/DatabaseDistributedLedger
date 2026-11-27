@@ -998,14 +998,19 @@ int sqlite3_step(sqlite3_stmt *pStmt){
     outerRelease = publicationOp==7 && db->isTransactionSavepoint &&
                    db->pSavepoint && db->pSavepoint->pNext==0;
     if( !publicationOp || (db->publicationConsumed && publicationOp!=4)
-     || (publicationOp==2 && (db->autoCommit || db->publicationRow || v->nVar!=1 ||
+     || ((publicationOp==2 || publicationOp>=8) && (db->autoCommit || db->publicationRow ||
+             db->publicationEmptyDml || v->nVar!=(publicationOp==8 ? 2 : 1) ||
              !(v->aVar[0].flags & MEM_Blob) || (v->aVar[0].flags & MEM_Zero) ||
              v->aVar[0].n!=16 || !v->aVar[0].z))
+     || (publicationOp>=8 && db->pSavepoint)
+     || (publicationOp==8 && (!(v->aVar[1].flags & MEM_Blob) || (v->aVar[1].flags & MEM_Zero) ||
+                             v->aVar[1].n!=2 || !v->aVar[1].z))
+     || (db->publicationEmptyDml && publicationOp!=3 && publicationOp!=4)
      /* Permit only one named savepoint, starting from an empty frame. */
      || (publicationOp==5 && (db->pSavepoint || db->publicationRow))
      || (outerRelease && !db->publicationRow)
      || ((publicationOp==6 || publicationOp==7) && (db->autoCommit || !db->pSavepoint))
-     || (publicationOp==3 && (db->autoCommit || db->pSavepoint || !db->publicationRow)) ){
+     || (publicationOp==3 && (db->autoCommit || db->pSavepoint || (!db->publicationRow && !db->publicationEmptyDml))) ){
       db->publicationConsumed=1;
       sqlite3ErrorWithMsg(db,SQLITE_AUTH,"unsupported managed transaction");
       sqlite3_mutex_leave(db->mutex);
@@ -1050,7 +1055,17 @@ int sqlite3_step(sqlite3_stmt *pStmt){
 #ifdef SQLITE_ENABLE_UDDL_STEP2A
   if( publicationOp ){
     if( rc!=SQLITE_DONE || publicationOp==4 ) db->publicationConsumed=1;
-    else if( publicationOp==2 ){
+    else if( publicationOp>=8 && sqlite3_changes64(db)==0 ){
+      db->publicationEmptyDml=1;
+    }else if( publicationOp==2 || publicationOp>=8 ){
+      db->publicationFrame[32]=publicationOp==8 ? 2 : publicationOp==9 ? 3 : 1;
+      if( publicationOp==8 ){
+        db->publicationFrame[65]=1;             /* one changed field */
+        memset(db->publicationFrame+66,0x22,16); /* fixture value column */
+        db->publicationFrame[82]=4;             /* BLOB, two exact bytes */
+        db->publicationFrame[83]=2;
+        memcpy(db->publicationFrame+84,v->aVar[1].z,2);
+      }
       memcpy(db->publicationFrame+49,v->aVar[0].z,16);
       db->publicationRow=1;
     }else if( publicationOp==6 ){
@@ -1061,7 +1076,7 @@ int sqlite3_step(sqlite3_stmt *pStmt){
       /* Only the private transaction has committed. SQL success still depends
       ** on the service acknowledgment for this exact immutable request. */
       db->publicationConsumed=1;
-      rc=sqlite3PublicationSubmit(db);
+      rc=db->publicationEmptyDml ? SQLITE_OK : sqlite3PublicationSubmit(db);
       if( rc==SQLITE_OK ) rc=SQLITE_DONE;
       else{
         v->rc=rc;
