@@ -51,6 +51,32 @@ foreach($e in 'Created','Changed','Deleted','Renamed','Error'){Register-ObjectEv
 $watch.EnableRaisingEvents=$true
 try{
   [IO.File]::WriteAllText("$d\control-before",'before')
+  Run $exe @('--instance-root',$l,'block','export','--output',"$b\before.ddlb") 'inventory-before' 0
+  Run $exe @('serve-projection-write',$db,'--rollback') 'rollback' 0
+  $rollbackLog=Get-Content "$b\rollback.out" -Raw
+  $match=[regex]::Match($rollbackLog,'LAUNCH_EXPECTED scenario=Rollback instance=\S+ enrolled=True block=(\S+) table=(\S+) row=(\S+)')
+  if(!$match.Success -or !$rollbackLog.Contains('SQL [BEGIN] rc=101') -or
+     !$rollbackLog.Contains('SQL [INSERT INTO items(row_guid) VALUES(?1)] rc=101') -or
+     !$rollbackLog.Contains('SQL [ROLLBACK] rc=101') -or !$rollbackLog.Contains('CLOSE rc=0') -or
+     !$rollbackLog.Contains('connections=0 requests=0') -or $rollbackLog.Contains('SUBMISSION_RECEIVED')){throw 'Rollback evidence incomplete'}
+  Run $exe @('--instance-root',$l,'block','export','--output',"$b\after.ddlb") 'inventory-after' 0
+  if((Get-FileHash "$b\before.ddlb").Hash -ne (Get-FileHash "$b\after.ddlb").Hash -or
+    (Get-Content "$b\inventory-after.out" -Raw | ConvertFrom-Json).data.block_count -ne 1){throw 'Rollback changed inventory'}
+  Run $exe @('--instance-root',$l,'block','get','--id',$match.Groups[1].Value,'--output',"$b\unexpected.raw") 'rollback-read' 4
+  if((Get-Content "$b\rollback-read.out" -Raw | ConvertFrom-Json).error.code -ne 'BLOCK_NOT_FOUND'){throw 'Unexpected rollback lookup'}
+  Run $exe @('serve-projection-write',$db,'--commit-control') 'positive' 0
+  $positive=Get-Content "$b\positive.out" -Raw
+  $commit=[regex]::Match($positive,'LAUNCH_EXPECTED scenario=Enrolled instance=\S+ enrolled=True block=(\S+) table=(\S+) row=(\S+)')
+  if(!$commit.Success -or $commit.Groups[1].Value -eq $match.Groups[1].Value -or
+     $commit.Groups[3].Value -eq $match.Groups[3].Value -or [regex]::Matches($positive,'SUBMISSION_RECEIVED').Count -ne 1 -or
+     !$positive.Contains('SQL [COMMIT] rc=101') -or !$positive.Contains('status=1')){throw 'Commit control evidence incomplete'}
+  Run $exe @('--instance-root',$l,'block','export','--output',"$b\control.ddlb") 'inventory-control' 0
+  if((Get-Content "$b\inventory-control.out" -Raw | ConvertFrom-Json).data.block_count -ne 2){throw 'Expected exactly one new block'}
+  Run $exe @('--instance-root',$l,'block','get','--id',$commit.Groups[1].Value,'--output',"$b\control.raw") 'control-read' 0
+  $control=[IO.File]::ReadAllBytes("$b\control.raw")
+  $event='01'+$commit.Groups[2].Value.Replace('-','')+$commit.Groups[3].Value.Replace('-','')+'00'
+  if($control.Length -ne 261 -or [Convert]::ToHexString($control,34,16) -ne $commit.Groups[1].Value.Replace('-','') -or
+     [Convert]::ToHexString($control,163,34) -ne $event){throw 'Positive control signed content differs'}
   Run $exe @('serve-projection-write',$db) 'host' 0
   [IO.File]::WriteAllText("$d\control-after",'after')
   $clock=[Diagnostics.Stopwatch]::StartNew()
@@ -96,4 +122,4 @@ foreach($m in $launch){
 }
 if(!$log.Contains('publication rejected') -or !$log.Contains('publication outcome unknown after submission') -or
    [regex]::Matches($log,'PUBLISH_RETURNED').Count -ne 2 -or [regex]::Matches($log,'PRODUCER_EXIT').Count -ne 4){throw 'Missing native outcome'}
-"Projection before=$before after=$after; four connected launches; controls and endpoint inventory checked."
+"Projection before=$before after=$after; rollback, positive COMMIT and four Step 2a scenarios checked."

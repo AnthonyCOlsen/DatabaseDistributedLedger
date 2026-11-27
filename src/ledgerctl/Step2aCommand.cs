@@ -22,7 +22,12 @@ internal static class Step2aCommand
     {
         try
         {
-            if (args is not ["serve-projection-write", var file]) return 2;
+            if (args.Length is < 2 or > 3 || args[0] != "serve-projection-write") return 2;
+            var file = args[1];
+            Scenario[] scenarios = args.Length == 2
+                ? [Scenario.Enrolled, Scenario.Unenrolled, Scenario.DuplicateSeed, Scenario.LostReply]
+                : args[2] switch { "--rollback" => [Scenario.Rollback], "--commit-control" => [Scenario.Enrolled], _ => [] };
+            if (scenarios.Length == 0) return 2;
             var path = Path.GetFullPath(file);
             if (!Path.GetExtension(path).Equals(".DLDB", StringComparison.OrdinalIgnoreCase)) return 2;
             var root = Path.ChangeExtension(path, null);
@@ -34,7 +39,7 @@ internal static class Step2aCommand
             using var handle = CreateNamedPipeW(@"\\.\pipe\" + name, 0x40080003, 8, 1, 256, 256, 0, IntPtr.Zero);
             if (handle.IsInvalid) throw new System.ComponentModel.Win32Exception();
             using var server = new NamedPipeServerStream(PipeDirection.InOut, true, false, handle);
-            foreach (var scenario in new[] { Scenario.Enrolled, Scenario.Unenrolled, Scenario.DuplicateSeed, Scenario.LostReply })
+            foreach (var scenario in scenarios)
             {
                 ServeChild(server, name, ledger, scenario, path);
                 if (server.IsConnected) server.Disconnect();
@@ -71,7 +76,7 @@ internal static class Step2aCommand
         catch { file.Dispose(); throw; }
     }
 
-    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply }
+    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback }
 
     private static void ServeChild(NamedPipeServerStream pipe, string name, LedgerInstance ledger, Scenario scenario, string path)
     {
@@ -83,16 +88,36 @@ internal static class Step2aCommand
         { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true };
         start.ArgumentList.Add(path);
         start.ArgumentList.Add(row.ToString("N"));
+        if (scenario == Scenario.Rollback) start.ArgumentList.Add("--rollback");
         start.Environment["UDDL_PROJECTION"] = path;
         start.Environment["UDDL_SERVER_PID"] = Environment.ProcessId.ToString();
         start.Environment["UDDL_LOCAL_PIPE"] = name;
         start.Environment["UDDL_INSTANCE"] = instance.ToString("N");
         start.Environment["UDDL_EVENT_ID"] = block.ToString("N");
         Console.WriteLine($"LAUNCH_EXPECTED scenario={scenario} instance={instance} enrolled={enroll} block={block} table={Table} row={row}");
+        // Arm the single local pipe before launch. Any connection during rollback,
+        // even without a complete or admissible request, fails the observation.
+        using var observation = new CancellationTokenSource();
+        var connection = scenario == Scenario.Rollback ? pipe.WaitForConnectionAsync(observation.Token) : null;
         using var child = Process.Start(start) ?? throw new IOException("Producer launch failed");
         try
         {
             _ = child.SafeHandle;
+            if (connection is not null)
+            {
+                if (!child.WaitForExit(WaitMs)) throw new IOException("Rollback client timed out");
+                Console.Write(child.StandardOutput.ReadToEnd());
+                observation.Cancel();
+                try
+                {
+                    connection.GetAwaiter().GetResult();
+                    throw new IOException("Unexpected rollback endpoint connection");
+                }
+                catch (OperationCanceledException) when (connection.IsCanceled) { }
+                if (child.ExitCode != 0) throw new IOException("Rollback client failed");
+                Console.WriteLine($"ROLLBACK_OBSERVED pid={child.Id} connections=0 requests=0");
+                return;
+            }
             if (scenario == Scenario.DuplicateSeed)
             {
                 if (!child.WaitForExit(WaitMs) || child.ExitCode != 5) throw new IOException("Expected seed constraint");
@@ -104,6 +129,7 @@ internal static class Step2aCommand
             pipe.WaitForConnectionAsync(token).GetAwaiter().GetResult();
             var request = new byte[66]; // instance, stable block id, fixed-size INSERT
             pipe.ReadExactlyAsync(request, token).AsTask().GetAwaiter().GetResult();
+            Console.WriteLine($"SUBMISSION_RECEIVED scenario={scenario} block={new Guid(request.AsSpan(16,16),true)}");
             if (!GetNamedPipeClientProcessId(pipe.SafePipeHandle, out uint pid))
                 throw new System.ComponentModel.Win32Exception();
             using var host = WindowsIdentity.GetCurrent();

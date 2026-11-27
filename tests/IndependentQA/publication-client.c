@@ -18,7 +18,8 @@ int main(int argc, char **argv){
   sqlite3 *db=0;
   unsigned char row[16];
   int i, rc, result=6;
-  if( argc!=3 ) return 2;
+  int rollback = argc==4 && strcmp(argv[3],"--rollback")==0;
+  if( argc!=3 && !rollback ) return 2;
   if( strcmp(argv[1],"--create-seed")==0 ){
     rc=sqlite3_open_v2(argv[2],&db,SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE,0);
     if( rc==SQLITE_OK ) rc=sqlite3_exec(db,
@@ -38,9 +39,16 @@ int main(int argc, char **argv){
   if( execute(db,"BEGIN",0)!=SQLITE_DONE ) goto done;
   rc=execute(db,"INSERT INTO items(row_guid) VALUES(?1)",row);
   if( rc!=SQLITE_DONE ){ if( rc==SQLITE_CONSTRAINT ) result=5; goto done; }
+  if( rollback ){
+    rc=execute(db,"ROLLBACK",0);
+    result=rc==SQLITE_DONE && sqlite3_get_autocommit(db) ? 0 : 6;
+    goto done;
+  }
   rc=execute(db,"COMMIT",0);
   result=rc==SQLITE_DONE ? 0 : rc==SQLITE_AUTH ? 4 : rc==SQLITE_IOERR ? 7 : 6;
 done:
-  sqlite3_close(db);
+  rc=sqlite3_close(db);
+  if( rollback ) printf("CLOSE rc=%d\n",rc);
+  if( rc!=SQLITE_OK ) return 6;
   return result;
 }
