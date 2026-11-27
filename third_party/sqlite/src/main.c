@@ -5365,8 +5365,9 @@ static int publicationLoad(sqlite3 *db, const char *path){
     rc=SQLITE_SCHEMA;
     if( sqlite3_step(s)==SQLITE_ROW ){
       const unsigned char *sql=sqlite3_column_text(s,0);
-      if( sql && strcmp((const char*)sql,
-          "CREATE TABLE items(row_guid BLOB PRIMARY KEY) WITHOUT ROWID")==0 &&
+      if( sql && (strcmp((const char*)sql,
+          "CREATE TABLE items(row_guid BLOB PRIMARY KEY) WITHOUT ROWID")==0 ||
+          strcmp((const char*)sql,"CREATE TABLE items(row_guid BLOB PRIMARY KEY, value BLOB) WITHOUT ROWID")==0) &&
           sqlite3_step(s)==SQLITE_DONE ) rc=SQLITE_OK;
     }
   }
@@ -5381,7 +5382,8 @@ done:
 ** go through SQLite's own compiler, binder and VM. */
 int sqlite3PublicationStatement(const char *z, int n){
   static const char *const sql[]={"BEGIN","INSERT INTO items(row_guid) VALUES(?1)","COMMIT","ROLLBACK",
-    "SAVEPOINT staged","ROLLBACK TO staged","RELEASE staged"};
+    "SAVEPOINT staged","ROLLBACK TO staged","RELEASE staged",
+    "UPDATE items SET value=?2 WHERE row_guid=?1 AND value IS NOT ?2","DELETE FROM items WHERE row_guid=?1"};
   int i, len=0;
   if( !z ) return 0;
   while( len<128 && (n<0 || len<n) && z[len] ) len++;
@@ -5402,7 +5404,8 @@ int sqlite3PublicationSubmit(sqlite3 *db){
   char name[100];
   HANDLE h;
   ULONG server=0;
-  unsigned char reply[67];
+  unsigned char reply[1+sizeof(db->publicationFrame)];
+  DWORD frameBytes=db->publicationFrame[32]==2 ? 86 : db->publicationFrame[32]==3 ? 65 : 66;
   DWORD n, offset=0;
   int rc=SQLITE_CANTOPEN;
   sqlite3_snprintf(sizeof(name),name,"\\\\.\\pipe\\%s",db->publicationPipe);
@@ -5411,11 +5414,11 @@ int sqlite3PublicationSubmit(sqlite3 *db){
   if( h==INVALID_HANDLE_VALUE ) return rc;
   if( GetNamedPipeServerProcessId(h,&server) && server==db->publicationServer ){
     rc=SQLITE_IOERR;
-    if( WriteFile(h,db->publicationFrame,66,&n,0) && n==66 ){
-      while( offset<sizeof(reply) && ReadFile(h,reply+offset,sizeof(reply)-offset,&n,0) && n ){
+    if( WriteFile(h,db->publicationFrame,frameBytes,&n,0) && n==frameBytes ){
+      while( offset<1+frameBytes && ReadFile(h,reply+offset,1+frameBytes-offset,&n,0) && n ){
         offset+=n;
       }
-      if( offset==sizeof(reply) && memcmp(reply+1,db->publicationFrame,66)==0 ){
+      if( offset==1+frameBytes && memcmp(reply+1,db->publicationFrame,frameBytes)==0 ){
         if( reply[0]==1 ) rc=SQLITE_OK;
         if( reply[0]==2 ) rc=SQLITE_AUTH;
       }

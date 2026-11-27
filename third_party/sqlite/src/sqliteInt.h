@@ -1705,7 +1705,8 @@ struct sqlite3 {
   u8 publicationManaged, publicationRow, publicationConsumed;
   u32 publicationServer;
   char publicationPipe[64];
-  unsigned char publicationFrame[66];
+  unsigned char publicationFrame[86];
+  u8 publicationEmptyDml; /* A completed fixture DML matched no effective row. */
 #endif
   sqlite3_vfs *pVfs;            /* OS Interface */
   struct Vdbe *pVdbe;           /* List of active virtual machines */

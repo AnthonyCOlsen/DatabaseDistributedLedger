@@ -29,6 +29,7 @@ internal static class Step2aCommand
                 : args[2] switch { "--rollback" => [Scenario.Rollback], "--commit-control" => [Scenario.Enrolled],
                     "--discard-at-savepoint" => [Scenario.Discard], "--retain-at-savepoint" => [Scenario.Retain],
                     "--outer-release" => [Scenario.Outer], "--outer-denied" => [Scenario.OuterDenied],
+                    "--effective-dml" => [Scenario.Unchanged, Scenario.Missing, Scenario.UpdateRollback, Scenario.Update, Scenario.Delete],
                     "--outer-lost" => [Scenario.OuterLost], _ => [] };
             if (scenarios.Length == 0) return 2;
             var path = Path.GetFullPath(file);
@@ -79,7 +80,7 @@ internal static class Step2aCommand
         catch { file.Dispose(); throw; }
     }
 
-    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback, Discard, Retain, Outer, OuterDenied, OuterLost }
+    private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback, Discard, Retain, Outer, OuterDenied, OuterLost, Update, Delete, Unchanged, Missing, UpdateRollback }
 
     private static void ServeChild(NamedPipeServerStream pipe, string name, LedgerInstance ledger, Scenario scenario, string path)
     {
@@ -88,12 +89,18 @@ internal static class Step2aCommand
         bool outer = scenario is Scenario.Outer or Scenario.OuterDenied or Scenario.OuterLost;
         bool lost = scenario is Scenario.LostReply or Scenario.OuterLost;
         var enroll = scenario is not (Scenario.Unenrolled or Scenario.OuterDenied);
-        var row = scenario == Scenario.DuplicateSeed ? new Guid("01000000-0000-0000-0000-000000000000") : Guid.NewGuid();
+        bool update = scenario is Scenario.Update or Scenario.UpdateRollback or Scenario.Unchanged;
+        bool silent = scenario is Scenario.Rollback or Scenario.Unchanged or Scenario.Missing or Scenario.UpdateRollback;
+        var row = update || scenario == Scenario.DuplicateSeed ? new Guid("01000000-0000-0000-0000-000000000000") :
+            scenario == Scenario.Delete ? new Guid("02000000-0000-0000-0000-000000000000") : Guid.NewGuid();
         bool savepoint = outer || scenario is Scenario.Discard or Scenario.Retain;
         var start = new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "publication-client.exe"))
         { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardInput = savepoint };
         start.ArgumentList.Add(path);
         start.ArgumentList.Add(row.ToString("N"));
+        if (update || scenario is Scenario.Delete or Scenario.Missing)
+            start.ArgumentList.Add(scenario == Scenario.UpdateRollback ? "--update-rollback" : "--" + scenario.ToString().ToLowerInvariant());
+        if (scenario == Scenario.LostReply) start.ArgumentList.Add("--lost-reply");
         if (scenario == Scenario.Rollback) start.ArgumentList.Add("--rollback");
         if (savepoint) start.ArgumentList.Add(outer ? "--outer-release" : scenario == Scenario.Discard ? "--discard-at-savepoint" : "--retain-at-savepoint");
         start.Environment["UDDL_PROJECTION"] = path;
@@ -105,24 +112,24 @@ internal static class Step2aCommand
         // Arm the single local pipe before launch. Any connection during rollback,
         // even without a complete or admissible request, fails the observation.
         using var observation = new CancellationTokenSource();
-        var connection = scenario == Scenario.Rollback || savepoint ? pipe.WaitForConnectionAsync(observation.Token) : null;
+        var connection = silent || savepoint ? pipe.WaitForConnectionAsync(observation.Token) : null;
         using var child = Process.Start(start) ?? throw new IOException("Producer launch failed");
         try
         {
             _ = child.SafeHandle;
-            if (scenario == Scenario.Rollback && connection is not null)
+            if (silent && connection is not null)
             {
-                if (!child.WaitForExit(WaitMs)) throw new IOException("Rollback client timed out");
+                if (!child.WaitForExit(WaitMs)) throw new IOException($"{scenario} client timed out");
                 Console.Write(child.StandardOutput.ReadToEnd());
                 observation.Cancel();
                 try
                 {
                     connection.GetAwaiter().GetResult();
-                    throw new IOException("Unexpected rollback endpoint connection");
+                    throw new IOException($"Unexpected {scenario} endpoint connection");
                 }
                 catch (OperationCanceledException) when (connection.IsCanceled) { }
-                if (child.ExitCode != 0) throw new IOException("Rollback client failed");
-                Console.WriteLine($"ROLLBACK_OBSERVED pid={child.Id} connections=0 requests=0");
+                if (child.ExitCode != 0) throw new IOException($"{scenario} client failed");
+                Console.WriteLine($"{(scenario == Scenario.Rollback ? "ROLLBACK_OBSERVED" : "NO_SUBMISSION")} scenario={scenario} pid={child.Id} connections=0 requests=0");
                 return;
             }
             if (scenario == Scenario.DuplicateSeed)
@@ -158,7 +165,13 @@ internal static class Step2aCommand
             var accept = pipe.WaitForConnectionAsync(token);
             if (savepoint) { child.StandardInput.WriteLine("G"); child.StandardInput.Flush(); }
             accept.GetAwaiter().GetResult();
-            var request = new byte[66]; // instance, stable block id, fixed-size INSERT
+            var expectedBody = EventCodec.Encode(scenario switch
+            {
+                Scenario.Update => new LedgerEvent(2, Table, row, Fields: [new RowField(new Guid("22222222-2222-2222-2222-222222222222"), LedgerValue.Blob([0, 255]))]),
+                Scenario.Delete => new LedgerEvent(3, Table, row),
+                _ => new LedgerEvent(1, Table, row)
+            });
+            var request = new byte[32 + expectedBody.Length];
             pipe.ReadExactlyAsync(request, token).AsTask().GetAwaiter().GetResult();
             Console.WriteLine($"SUBMISSION_RECEIVED scenario={scenario} block={new Guid(request.AsSpan(16,16),true)}");
             if (!GetNamedPipeClientProcessId(pipe.SafePipeHandle, out uint pid))
@@ -170,8 +183,7 @@ internal static class Step2aCommand
             byte result = Rejected;
             byte[] body = request[32..];
             if (enroll && sameLaunch && new Guid(request.AsSpan(0,16), true) == instance &&
-                new Guid(request.AsSpan(16,16), true) == block && body[0] == 1 && body[33] == 0 &&
-                new Guid(body.AsSpan(1,16),true) == Table && new Guid(body.AsSpan(17,16),true) == row)
+                new Guid(request.AsSpan(16,16), true) == block && body.AsSpan().SequenceEqual(expectedBody))
             {
                 result = Uncertain;
                 try
@@ -209,7 +221,7 @@ internal static class Step2aCommand
             }
             else
             {
-                var response = new byte[67];
+                var response = new byte[1 + request.Length];
                 response[0] = result;
                 request.CopyTo(response, 1);
                 pipe.WriteAsync(response, token).AsTask().GetAwaiter().GetResult();

@@ -178,6 +178,43 @@ try{
     if((Get-Content "$b\$case-export.out" -Raw | ConvertFrom-Json).data.block_count -ne $expectedCount){throw "$case inventory count"}
   }
   Run $exe @('serve-projection-write',$db) 'host' 0
+  Run $exe @('--instance-root',$l,'block','export','--output',"$b\dml-before.ddlb") 'dml-before' 0
+  Run $exe @('serve-projection-write',$db,'--effective-dml') 'effective-dml' 0
+  $trace=Get-Content "$b\effective-dml.out" -Raw
+  $runs=@($trace -split '(?=LAUNCH_EXPECTED )' | Where-Object {$_ -match '^LAUNCH_EXPECTED '})
+  if($runs.Count -ne 5){throw 'Missing effective-DML launch'}
+  foreach($case in 'Unchanged','Missing','UpdateRollback','Update','Delete'){
+    $part=@($runs | Where-Object {$_.StartsWith("LAUNCH_EXPECTED scenario=$case ")})
+    if($part.Count -ne 1){throw "$case launch count"}
+    $part=$part[0]
+    $launch=[regex]::Match($part,'enrolled=True block=(\S+) table=(\S+) row=(\S+)')
+    if(!$launch.Success -or !$part.Contains('SQL [BEGIN] rc=101')){throw "$case transaction"}
+    $id=$launch.Groups[1].Value
+    $update=$case -in 'Update','Unchanged','UpdateRollback'
+    $statement=if($update){'UPDATE items SET value=?2 WHERE row_guid=?1 AND value IS NOT ?2'}else{'DELETE FROM items WHERE row_guid=?1'}
+    if(!$part.Contains("SQL [$statement] rc=101")){throw "$case native statement"}
+    $boundary=if($case -eq 'UpdateRollback'){'ROLLBACK'}else{'COMMIT'}
+    if(!$part.Contains("SQL [$boundary] rc=101")){throw "$case native boundary"}
+    if($case -notin 'Update','Delete'){
+      if(!$part.Contains('connections=0 requests=0') -or $part.Contains('SUBMISSION_RECEIVED')){throw "$case IPC"}
+      Run $exe @('--instance-root',$l,'block','get','--id',$id,'--output',"$b\$case.raw") "$case-read" 4
+      if((Get-Content "$b\$case-read.out" -Raw | ConvertFrom-Json).error.code -ne 'BLOCK_NOT_FOUND'){throw "$case absence"}
+      continue
+    }
+    $table='11111111111111111111111111111111'
+    $expected=if($update){'02'+$table+'01000000000000000000000000000000'+'01'+'22222222222222222222222222222222'+'040200FF'}else{'03'+$table+'02000000000000000000000000000000'}
+    if([regex]::Matches($part,'SUBMISSION_RECEIVED').Count -ne 1 -or
+       !$part.Contains("enrolled=True sameLaunch=True block=$id event=$expected status=1") -or
+       !$part.Contains("block=$id event=$expected hash=")){throw "$case service correspondence"}
+    Run $exe @('--instance-root',$l,'block','get','--id',$id,'--output',"$b\$case.raw") "$case-read" 0
+    $raw=[IO.File]::ReadAllBytes("$b\$case.raw")
+    $length=[int]($expected.Length/2)
+    if($raw.Length -ne 163+$length+64 -or [Convert]::ToHexString($raw,34,16) -ne $id.Replace('-','') -or
+       [Convert]::ToHexString($raw,163,$length) -ne $expected){throw "$case reopened signed content"}
+  }
+  Run $exe @('--instance-root',$l,'block','export','--output',"$b\dml-after.ddlb") 'dml-after' 0
+  $old=(Get-Content "$b\dml-before.out" -Raw | ConvertFrom-Json).data.block_count
+  if((Get-Content "$b\dml-after.out" -Raw | ConvertFrom-Json).data.block_count -ne $old+2){throw 'Unexpected effective-DML inventory'}
   [IO.File]::WriteAllText("$d\control-after",'after')
   $clock=[Diagnostics.Stopwatch]::StartNew()
   do{
@@ -220,6 +257,6 @@ foreach($m in $launch){
     }else{Write-Output 'Independent OpenSSL signature check NOT RUN'}
   }
 }
-if(!$log.Contains('publication rejected') -or !$log.Contains('publication outcome unknown after submission') -or
+if(!$log.Contains('LOST_REPLY original=IOERR further_dml=AUTH further_commit=AUTH') -or !$log.Contains('publication rejected') -or !$log.Contains('publication outcome unknown after submission') -or
    [regex]::Matches($log,'PUBLISH_RETURNED').Count -ne 2 -or [regex]::Matches($log,'PRODUCER_EXIT').Count -ne 4){throw 'Missing native outcome'}
-"Projection before=$before after=$after; outer RELEASE success, denial and lost reply, both inner savepoint scenarios, full rollback, positive COMMIT and four Step 2a scenarios checked."
+"Projection before=$before after=$after; outer RELEASE success, denial and lost reply, both inner savepoint scenarios, full rollback, positive COMMIT, effective UPDATE/DELETE, unchanged, missing, DML rollback and four Step 2a scenarios checked."
