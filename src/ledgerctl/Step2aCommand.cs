@@ -19,7 +19,11 @@ internal static class Step2aCommand
     private static readonly Guid NotesId = new("33333333-3333-3333-3333-333333333333");
     private static readonly Guid Table = new("11111111-1111-1111-1111-111111111111");
 
+#if UDDL_STORED_COMMIT_FIXTURE
+    internal static int Run(string[] args, string fixtureRoot, byte[]? journalKey = null)
+#else
     internal static int Run(string[] args)
+#endif
     {
         try
         {
@@ -34,6 +38,11 @@ internal static class Step2aCommand
                     "--add-tag" => [Scenario.SchemaDuplicate, Scenario.SchemaAdd],
                     "--drop-notes" => [Scenario.SchemaDrop],
                     "--effective-dml" => [Scenario.Unchanged, Scenario.Missing, Scenario.UpdateRollback, Scenario.Update, Scenario.Delete],
+#if UDDL_STORED_COMMIT_FIXTURE
+                    "--stored-commit" => [Scenario.StoredCommit],
+                    "--stored-refused" => [Scenario.StoredRefused],
+                    "--stored-lost" => [Scenario.StoredLost],
+#endif
                     "--outer-lost" => [Scenario.OuterLost], _ => [] };
             if (scenarios.Length == 0) return 2;
             var path = Path.GetFullPath(file);
@@ -49,7 +58,11 @@ internal static class Step2aCommand
             using var server = new NamedPipeServerStream(PipeDirection.InOut, true, false, handle);
             foreach (var scenario in scenarios)
             {
+#if UDDL_STORED_COMMIT_FIXTURE
+                ServeChild(server, name, ledger, scenario, path, fixtureRoot, journalKey);
+#else
                 ServeChild(server, name, ledger, scenario, path);
+#endif
                 if (server.IsConnected) server.Disconnect();
             }
             return 0;
@@ -85,14 +98,27 @@ internal static class Step2aCommand
     }
 
     private enum Scenario { Enrolled, Unenrolled, DuplicateSeed, LostReply, Rollback, Discard, Retain, Outer, OuterDenied, OuterLost, Update, Delete, Unchanged, Missing, UpdateRollback,
-        SchemaCreate, SchemaAdd, SchemaDrop, SchemaDuplicate, SchemaUnsupported, SchemaRollback, SchemaMixed }
+        SchemaCreate, SchemaAdd, SchemaDrop, SchemaDuplicate, SchemaUnsupported, SchemaRollback, SchemaMixed,
+#if UDDL_STORED_COMMIT_FIXTURE
+        StoredCommit, StoredRefused, StoredLost,
+#endif
+    }
 
+#if UDDL_STORED_COMMIT_FIXTURE
+    private static void ServeChild(NamedPipeServerStream pipe, string name, LedgerInstance ledger, Scenario scenario,
+        string path, string fixtureRoot, byte[]? journalKey)
+#else
     private static void ServeChild(NamedPipeServerStream pipe, string name, LedgerInstance ledger, Scenario scenario, string path)
+#endif
     {
         var instance = ledger.Manifest.InstanceId;
         var block = Guid.NewGuid();
         bool outer = scenario is Scenario.Outer or Scenario.OuterDenied or Scenario.OuterLost;
         bool lost = scenario is Scenario.LostReply or Scenario.OuterLost;
+#if UDDL_STORED_COMMIT_FIXTURE
+        bool stored = scenario is Scenario.StoredCommit or Scenario.StoredRefused or Scenario.StoredLost;
+        lost |= scenario == Scenario.StoredLost;
+#endif
         var enroll = scenario is not (Scenario.Unenrolled or Scenario.OuterDenied);
         bool update = scenario is Scenario.Update or Scenario.UpdateRollback or Scenario.Unchanged;
         bool schema = scenario is Scenario.SchemaCreate or Scenario.SchemaAdd or Scenario.SchemaDrop;
@@ -110,6 +136,9 @@ internal static class Step2aCommand
         if (schema || scenario is Scenario.SchemaMixed or Scenario.SchemaRollback or Scenario.SchemaDuplicate or Scenario.SchemaUnsupported)
             start.ArgumentList.Add("--" + scenario.ToString().ToLowerInvariant());
         if (scenario == Scenario.LostReply) start.ArgumentList.Add("--lost-reply");
+#if UDDL_STORED_COMMIT_FIXTURE
+        if (scenario == Scenario.StoredLost) start.ArgumentList.Add("--lost-reply");
+#endif
         if (scenario == Scenario.Rollback) start.ArgumentList.Add("--rollback");
         if (savepoint) start.ArgumentList.Add(outer ? "--outer-release" : scenario == Scenario.Discard ? "--discard-at-savepoint" : "--retain-at-savepoint");
         start.Environment["UDDL_PROJECTION"] = path;
@@ -216,22 +245,57 @@ internal static class Step2aCommand
                     }
                     else if (history.AuthorizedKeys.Contains(ledger.PublicKey))
                     {
-                        var publication = ledger.Publish(body, block);
-                        if (publication.Block.Id == block && publication.Block.EventBytes.AsSpan().SequenceEqual(body)
-                            && publication.Authorization == "authorized" && publication.Status == "retained")
+#if UDDL_STORED_COMMIT_FIXTURE
+                        if (stored)
                         {
-                            Console.WriteLine($"PUBLISH_RETURNED pid={pid} instance={instance} block={block} event={Convert.ToHexString(body)} hash={publication.Block.Hash}");
-                            result = Published;
+                            result = FixtureStoredPublication.Run(fixtureRoot, ledger, row, block, body, pid,
+                                scenario == Scenario.StoredRefused, journalKey) switch
+                            {
+                                FixtureStoredPublication.Result.Published => Published,
+                                FixtureStoredPublication.Result.Refused => Rejected,
+                                _ => Uncertain
+                            };
+                        }
+                        else
+#endif
+                        {
+                            var publication = ledger.Publish(body, block);
+                            if (publication.Block.Id == block && publication.Block.EventBytes.AsSpan().SequenceEqual(body)
+                                && publication.Authorization == "authorized" && publication.Status == "retained")
+                            {
+                                Console.WriteLine($"PUBLISH_RETURNED pid={pid} instance={instance} block={block} event={Convert.ToHexString(body)} hash={publication.Block.Hash}");
+                                result = Published;
+                            }
                         }
                     }
                 }
                 catch (LedgerException error) { Console.Error.WriteLine(error.Code); }
             }
-            Console.WriteLine($"REPLY pid={pid} enrolled={enroll} sameLaunch={sameLaunch} block={block} event={Convert.ToHexString(body)} status={result}");
+#if UDDL_STORED_COMMIT_FIXTURE
+            if (scenario != Scenario.StoredLost)
+#endif
+                Console.WriteLine($"REPLY pid={pid} enrolled={enroll} sameLaunch={sameLaunch} block={block} event={Convert.ToHexString(body)} status={result}");
             if (lost)
             {
                 if (result != Published) throw new IOException("Expected publication before lost reply");
                 pipe.Disconnect();
+#if UDDL_STORED_COMMIT_FIXTURE
+                if (scenario == Scenario.StoredLost)
+                {
+                    using var retryObservation = new CancellationTokenSource();
+                    var retry = pipe.WaitForConnectionAsync(retryObservation.Token);
+                    Console.WriteLine($"STORED_REPLY_DROPPED block={block}");
+                    if (!child.WaitForExit(WaitMs)) throw new IOException("Stored lost-reply client timed out");
+                    retryObservation.Cancel();
+                    try
+                    {
+                        retry.GetAwaiter().GetResult();
+                        throw new IOException("Unexpected reconnection after dropped reply");
+                    }
+                    catch (OperationCanceledException) when (retry.IsCanceled) { }
+                    Console.WriteLine("STORED_NO_RESUBMISSION connections=1 requests=1");
+                }
+#endif
             }
             else
             {
@@ -244,6 +308,10 @@ internal static class Step2aCommand
             if (!child.WaitForExit(WaitMs) || !sameLaunch || child.ExitCode != expected)
                 throw new IOException("Unexpected producer result");
             Console.Write(child.StandardOutput.ReadToEnd());
+#if UDDL_STORED_COMMIT_FIXTURE
+            if (stored && result != (scenario == Scenario.StoredRefused ? Rejected : Published))
+                throw new IOException("Unexpected stored-COMMIT publication outcome");
+#endif
         }
         finally
         {

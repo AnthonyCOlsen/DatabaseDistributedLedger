@@ -1,4 +1,42 @@
+using System.Security.Cryptography;
 using UserDimensions.Ledger;
+
+if (args.Length > 0 && args[0] is "--start-restart-fixture" or "--recover-stored-fixture")
+{
+    if (!OperatingSystem.IsWindows()) return 2;
+    byte[] key = new byte[32];
+    try
+    {
+        using var input = Console.OpenStandardInput();
+        input.ReadExactly(key);
+        if (input.ReadByte() != -1) return 2;
+        if (args is ["--start-restart-fixture", var projection, var storage])
+        {
+            Console.WriteLine($"SERVICE_START pid={Environment.ProcessId}");
+            return Step2aCommand.Run(["serve-projection-write", projection, "--stored-commit"], storage, key);
+        }
+        if (args is not ["--recover-stored-fixture", var root, var scratch, var rowText, var blockText, var eventHex] ||
+            !Guid.TryParse(rowText, out var row) || !Guid.TryParse(blockText, out var block)) return 2;
+        int publicationCalls = 0;
+        var files = new DurableFiles(point =>
+        {
+            if (point == "publication-entered") publicationCalls++;
+            throw new IOException("Unexpected mutation during recognition");
+        });
+        using var ledger = LedgerInstance.Open(root, files);
+        bool recognized = StoredPublicationRecovery.Recognize(scratch, ledger, row, block,
+            Convert.FromHexString(eventHex), key, files);
+        Console.WriteLine($"RECOVERY pid={Environment.ProcessId} block={block} recognized={recognized} publicationCalls={publicationCalls}");
+        return publicationCalls != 0 ? 6 : recognized ? 0 : 4;
+    }
+    finally { CryptographicOperations.ZeroMemory(key); }
+}
+if (args.Length > 0 && args[0] == "--stored-commit-fixture")
+{
+    if (!OperatingSystem.IsWindows() || args.Length != 4 ||
+        args[2] is not ("--stored-commit" or "--stored-refused" or "--stored-lost")) return 2;
+    return Step2aCommand.Run(["serve-projection-write", args[1], args[2]], args[3]);
+}
 if(args.Length>0 && args[0]=="--worker") return Tests.Worker(args[1..]);
 if(args.Length==1 && args[0]=="--intent-progress-journal") { Tests.RunProgressJournal(); return Tests.Finish(); }
 if(args.Length==1 && args[0]=="--frozen-intent-store") { Tests.RunFrozenIntentStore(); return Tests.Finish(); }

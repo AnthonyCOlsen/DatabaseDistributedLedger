@@ -1,4 +1,4 @@
-param([Parameter(Mandatory)][string]$Batch,[Parameter(Mandatory)][string]$App)
+param([Parameter(Mandatory)][string]$Batch,[Parameter(Mandatory)][string]$App,[string]$StoredCommitHost,[string]$NodeVerifier)
 $ErrorActionPreference='Stop'
 $b=[IO.Path]::GetFullPath($Batch)
 if([IO.Directory]::Exists($b)){throw 'Expected fresh batch'}
@@ -10,27 +10,194 @@ $db=Join-Path $d 'items.DLDB'
 $l=Join-Path $d 'items'
 $exe=Join-Path $App 'ledgerctl.exe'
 $client=Join-Path $App 'publication-client.exe'
-function Run([string]$program,[string[]]$arguments,[string]$name,[int]$expected){
+if($NodeVerifier){$NodeVerifier=(Resolve-Path -LiteralPath $NodeVerifier).Path}
+function Run([string]$program,[string[]]$arguments,[string]$name,[int]$expected,[byte[]]$serviceKey){
   $pi=[Diagnostics.ProcessStartInfo]::new($program)
   $pi.UseShellExecute=$false
   $pi.CreateNoWindow=$true
   $pi.WorkingDirectory=$b
   $pi.RedirectStandardOutput=$true
   $pi.RedirectStandardError=$true
+  $pi.RedirectStandardInput=($null -ne $serviceKey)
   foreach($a in $arguments){$pi.ArgumentList.Add($a)}
   $p=[Diagnostics.Process]::Start($pi)
   try{
+    if($serviceKey){
+      $p.StandardInput.BaseStream.Write($serviceKey,0,$serviceKey.Length)
+      $p.StandardInput.Close()
+    }
     $out=$p.StandardOutput.ReadToEndAsync()
     $err=$p.StandardError.ReadToEndAsync()
     if(!$p.WaitForExit(55000)){$p.Kill($true);$null=$p.WaitForExit(5000);throw "$name timeout"}
     $rc=$p.ExitCode
     [IO.File]::WriteAllText("$b\$name.out",$out.GetAwaiter().GetResult())
     [IO.File]::WriteAllText("$b\$name.err",$err.GetAwaiter().GetResult())
-    $receipt="$name exit=$rc command=$program $($arguments -join ' ')"
+    $receipt="$name exit=$rc pid=$($p.Id) command=$program $($arguments -join ' ')"
     Add-Content "$b\commands.txt" $receipt
     $receipt
     if($rc -ne $expected){Get-Content "$b\$name.out","$b\$name.err";throw "$name failed"}
   }finally{$p.Dispose()}
+}
+function Confirm-BlockSignature([string]$case,[byte[]]$raw,[switch]$AllowMissing){
+  $openssl=Join-Path $env:ProgramFiles 'Git\usr\bin\openssl.exe'
+  if(!$NodeVerifier -and $AllowMissing -and !(Test-Path -LiteralPath $openssl)){
+    Write-Output 'Independent OpenSSL signature check NOT RUN'
+    return
+  }
+  $keyPath="$b\$case.pub.der"
+  $messagePath="$b\$case.message"
+  $signaturePath="$b\$case.sig"
+  [IO.File]::WriteAllBytes($keyPath,[byte[]]([Convert]::FromHexString('302a300506032b6570032100') + $raw[58..89]))
+  [IO.File]::WriteAllBytes($messagePath,[byte[]]($raw[0..($raw.Length-65)]))
+  [IO.File]::WriteAllBytes($signaturePath,[byte[]]($raw[($raw.Length-64)..($raw.Length-1)]))
+  if($NodeVerifier){
+    $verify='
+      const { readFileSync } = require("node:fs");
+      const { verify } = require("node:crypto");
+      const [key, message, signature] = process.argv.slice(1).map(path => readFileSync(path));
+      if (!verify(null, message, { key, format: "der", type: "spki" }, signature)) process.exit(1);
+      console.log("Signature Verified Successfully");
+    '
+    Run $NodeVerifier @('-e',$verify,$keyPath,$messagePath,$signaturePath) "$case-ed25519" 0
+  }else{
+    Run $openssl @('pkeyutl','-verify','-pubin','-keyform','DER','-inkey',$keyPath,'-rawin','-in',$messagePath,'-sigfile',$signaturePath) "$case-ed25519" 0
+  }
+}
+function Test-StoredPublication([string]$case,[string]$option,[string]$projectionHash){
+  $root=Join-Path $d $case
+  $projection="$root.DLDB"
+  # Keep test receipts out of the directory monitored for projection writes.
+  $scratch=[IO.Directory]::CreateDirectory((Join-Path $b "$case-storage")).FullName
+  Run $exe @('--instance-root',$root,'block','export','--output',"$b\$case-before.ddlb") "$case-before" 0
+  if($case -eq 'StoredCommit'){
+    $serviceKey=[Security.Cryptography.RandomNumberGenerator]::GetBytes(32)
+    Run $StoredCommitHost @('--start-restart-fixture',$projection,$scratch) "$case-host" 0 $serviceKey
+  }else{
+    Run $StoredCommitHost @('--stored-commit-fixture',$projection,$option,$scratch) "$case-host" 0
+  }
+  Run $exe @('--instance-root',$root,'block','export','--output',"$b\$case-after.ddlb") "$case-after" 0
+
+  $trace=Get-Content "$b\$case-host.out" -Raw
+  $launch=[regex]::Match($trace,"LAUNCH_EXPECTED scenario=$case instance=(\S+) enrolled=True block=(\S+) table=(\S+) row=(\S+)")
+  if(!$launch.Success -or [regex]::Matches($trace,'SUBMISSION_RECEIVED').Count -ne 1 -or
+     !$trace.Contains('SQL [BEGIN] rc=101') -or
+     !$trace.Contains('SQL [INSERT INTO items(row_guid) VALUES(?1)] rc=101')){throw "$case native transaction evidence incomplete"}
+  if((Get-FileHash -LiteralPath $projection).Hash -ne $projectionHash){throw "$case projection changed"}
+  foreach($suffix in '-journal','-wal','-shm'){
+    if(Test-Path -LiteralPath "$projection$suffix"){throw "$case unexpected sidecar"}
+  }
+
+  $id=$launch.Groups[2].Value
+  $idHex=$id.Replace('-','')
+  $intent=Join-Path $scratch "intents\$idHex"
+  $journal=Join-Path $scratch "journal\$idHex"
+  $body='01'+$launch.Groups[3].Value.Replace('-','')+$launch.Groups[4].Value.Replace('-','')+'00'
+  $payload=[IO.File]::ReadAllBytes("$intent\payload")
+  if([Convert]::ToHexString($payload) -ne $body){throw "$case stored native event differs"}
+  $digest=(Get-FileHash -LiteralPath "$intent\payload" -Algorithm SHA256).Hash
+  $instance=(Get-Content "$b\$case-init.out" -Raw | ConvertFrom-Json).data
+  $genesis=(Get-Content "$b\$case-genesis.out" -Raw | ConvertFrom-Json).data
+  $intentBytes=[IO.File]::ReadAllBytes("$intent\manifest")
+  if($intentBytes.Length -ne 248 -or [Text.Encoding]::ASCII.GetString($intentBytes,0,8) -ne 'UDDLFIM1' -or
+     [Convert]::ToHexString($intentBytes,8,16) -ne $idHex -or
+     [Convert]::ToHexString($intentBytes,24,16) -ne $launch.Groups[4].Value.Replace('-','') -or
+     $launch.Groups[1].Value -ne $instance.instance_guid -or
+     [Convert]::ToHexString($intentBytes,40,16) -ne $instance.instance_guid.Replace('-','') -or
+     [Convert]::ToHexString($intentBytes,56,32) -ne $instance.public_key_hex -or
+     [Convert]::ToHexString($intentBytes,88,32) -ne $genesis.ledger_id_hex -or
+     [Convert]::ToHexString($intentBytes,120,64) -ne $genesis.genesis_sha512 -or
+     [BitConverter]::ToInt32($intentBytes,192) -ne 1 -or
+     [Convert]::ToHexString($intentBytes,196,16) -ne $idHex -or
+     [BitConverter]::ToInt32($intentBytes,212) -ne $payload.Length -or
+     [Convert]::ToHexString($intentBytes,216,32) -ne $digest){throw "$case stored intent binding differs"}
+  $countBefore=(Get-Content "$b\$case-before.out" -Raw | ConvertFrom-Json).data.block_count
+  $countAfter=(Get-Content "$b\$case-after.out" -Raw | ConvertFrom-Json).data.block_count
+  if($countBefore -ne 1){throw "$case fixture is not genesis-only"}
+  $rawPath="$b\$case.raw"
+  if($case -eq 'StoredRefused'){
+    Run $exe @('--instance-root',$root,'block','get','--id',$id,'--output',$rawPath) "$case-absent" 4
+    if($countAfter -ne 1 -or (Get-FileHash "$b\$case-before.ddlb").Hash -ne (Get-FileHash "$b\$case-after.ddlb").Hash -or
+       (Get-Content "$b\$case-absent.out" -Raw | ConvertFrom-Json).error.code -ne 'BLOCK_NOT_FOUND' -or
+       (Test-Path -LiteralPath "$intent\ready") -or (Test-Path -LiteralPath $journal) -or
+       !$trace.Contains("STORED_READY_FAULT block=$id") -or !$trace.Contains("STORED_INTENT_REFUSED request=$id readiness=Restricted") -or
+       !$trace.Contains("enrolled=True sameLaunch=True block=$id") -or !$trace.Contains('status=2') -or
+       !$trace.Contains('SQL [COMMIT] rc=23') -or $trace.Contains('STORED_GATE') -or $trace.Contains('PUBLISH_RETURNED')){
+      throw "$case pre-publication refusal evidence incomplete"
+    }
+    Write-Output "$case PASS: native refusal, no publication and identical retained inventory"
+    return
+  }
+
+  $gate=[regex]::Match($trace,"STORED_GATE block=$id sequence=0 headSha256=[0-9A-F]{64}")
+  $publication=[regex]::Match($trace,"PUBLISH_RETURNED pid=\d+ instance=$($launch.Groups[1].Value) block=$id event=$body hash=(\S+)",[Text.RegularExpressions.RegexOptions]::IgnoreCase)
+  $progress=[regex]::Match($trace,"STORED_PROGRESS block=$id record=(\S+) sequence=1 headSha256=([0-9A-F]{64})")
+  $transport=if($case -eq 'StoredLost'){"STORED_REPLY_DROPPED block=$id"}else{"enrolled=True sameLaunch=True block=$id event=" + $body.ToUpperInvariant() + ' status=1'}
+  $nativeResult=if($case -eq 'StoredLost'){'SQL [COMMIT] rc=10'}else{'SQL [COMMIT] rc=101'}
+  if(!$gate.Success -or !$publication.Success -or !$progress.Success -or $countAfter -ne 2 -or
+     [regex]::Matches($trace,'PUBLISH_RETURNED').Count -ne 1){throw "$case expected one retained publication and verified journal progression"}
+  $last=-1
+  foreach($marker in "STORED_INTENT_READY request=$id bodySha256=$digest",$gate.Value,$publication.Value,$progress.Value,$transport,$nativeResult){
+    $at=$trace.IndexOf($marker,[StringComparison]::Ordinal)
+    if($at -le $last){throw "$case trace missing or out of order: $marker"}
+    $last=$at
+  }
+  if($case -eq 'StoredLost' -and (!$trace.Contains('STORED_NO_RESUBMISSION connections=1 requests=1') -or
+     !$trace.Contains('LOST_REPLY original=IOERR further_dml=AUTH further_commit=AUTH') -or
+     $trace.Contains('SQL [COMMIT] rc=101') -or $trace.Contains('REPLY pid='))){throw "$case uncertainty or no-resend evidence incomplete"}
+
+  Run $exe @('--instance-root',$root,'block','get','--id',$id,'--output',$rawPath) "$case-retained" 0
+  $raw=[IO.File]::ReadAllBytes($rawPath)
+  if($raw.Length -ne 261 -or [Convert]::ToHexString($raw,34,16) -ne $idHex -or
+     [Convert]::ToHexString($raw,58,32) -ne $instance.public_key_hex -or
+     [Convert]::ToHexString($raw,163,34) -ne $body -or
+     (Get-FileHash -LiteralPath $rawPath -Algorithm SHA512).Hash -ne $publication.Groups[1].Value){throw "$case signed block differs from stored payload"}
+  Confirm-BlockSignature $case $raw
+
+  $manifest=(Get-FileHash -LiteralPath "$intent\manifest" -Algorithm SHA256).Hash
+  $ready=[IO.File]::ReadAllBytes("$intent\ready")
+  $head=[IO.File]::ReadAllBytes("$journal\head")
+  $record=[IO.File]::ReadAllBytes("$journal\0001.rec")
+  if($ready.Length -ne 40 -or [Text.Encoding]::ASCII.GetString($ready,0,8) -ne 'UDDLFIR1' -or
+     [Convert]::ToHexString($ready,8,32) -ne $manifest -or $head.Length -ne 108 -or $record.Length -ne 177 -or
+     [Text.Encoding]::ASCII.GetString($head,0,8) -ne 'UDDLJHD1' -or [Text.Encoding]::ASCII.GetString($record,0,8) -ne 'UDDLJRC1' -or
+     [Convert]::ToHexString($head,8,32) -ne $manifest -or [Convert]::ToHexString($record,8,32) -ne $manifest -or
+     [BitConverter]::ToInt32($head,40) -ne 1 -or [BitConverter]::ToInt32($record,40) -ne 1 -or
+     [Convert]::ToHexString($head,44,32) -ne (Get-FileHash -LiteralPath "$journal\0001.rec" -Algorithm SHA256).Hash -or
+     [Convert]::ToHexString($record,77,16) -ne $progress.Groups[1].Value.Replace('-','') -or
+     [BitConverter]::ToInt32($record,93) -ne 0 -or [Convert]::ToHexString($record,97,16) -ne $idHex -or
+     [Convert]::ToHexString($record,113,32) -ne $digest -or
+     (Get-FileHash -LiteralPath "$journal\head" -Algorithm SHA256).Hash -ne $progress.Groups[2].Value){
+    throw "$case journal or readiness files disagree with the fixture receipts"
+  }
+  if($case -eq 'StoredCommit'){
+    $original=[regex]::Match($trace,'SERVICE_START pid=(\d+)')
+    if(!$original.Success){throw 'Missing original service PID'}
+    $recover=@('--recover-stored-fixture',$root,$scratch,$launch.Groups[4].Value,$id,$body)
+    foreach($mode in 'valid','wrong-key','unreadable'){
+      $key=if($mode -eq 'wrong-key'){[Security.Cryptography.RandomNumberGenerator]::GetBytes(32)}else{$serviceKey}
+      $locked=$null
+      try{
+        if($mode -eq 'unreadable'){
+          $locked=[IO.File]::Open("$journal\head",'Open','Read','None')
+        }
+        $expected=if($mode -eq 'valid'){0}else{4}
+        Run $StoredCommitHost $recover "$case-restart-$mode" $expected $key
+      }finally{if($locked){$locked.Dispose()}}
+      $recognized=($mode -eq 'valid').ToString()
+      $receipt=Get-Content "$b\$case-restart-$mode.out" -Raw
+      $result=[regex]::Match($receipt,"(?m)^RECOVERY pid=(\d+) block=$id recognized=$recognized publicationCalls=0\r?$")
+      if(!$result.Success -or $result.Groups[1].Value -eq $original.Groups[1].Value){throw "$mode recovery outcome or PID"}
+      Run $exe @('--instance-root',$root,'block','export','--output',"$b\$case-$mode.ddlb") "$case-$mode-inventory" 0
+      if((Get-FileHash "$b\$case-$mode.ddlb").Hash -ne (Get-FileHash "$b\$case-after.ddlb").Hash){
+        throw "$mode restart changed the signed inventory"
+      }
+    }
+    if((Get-FileHash -LiteralPath $projection).Hash -ne $projectionHash){throw 'Restart changed projection'}
+    foreach($suffix in '-journal','-wal','-shm'){
+      if(Test-Path -LiteralPath "$projection$suffix"){throw "Restart left $suffix"}
+    }
+  }
+  Write-Output "$case PASS: exact stored event, independently verified signature, one durable block, $nativeResult"
 }
 $ordinary=Join-Path $b 'ordinary.db'
 Run $client @('--create-seed',$ordinary) 'create' 0
@@ -86,6 +253,18 @@ foreach($case in 'SchemaCreate','SchemaAdd','SchemaDrop'){
     [IO.File]::WriteAllBytes("$root.DLDB",$notesImage)
   }
   $schemaHashes[$case]=(Get-FileHash "$root.DLDB").Hash
+}
+$storedCases=[ordered]@{StoredCommit='--stored-commit';StoredRefused='--stored-refused';StoredLost='--stored-lost'}
+$storedHashes=@{}
+if($StoredCommitHost){
+  $StoredCommitHost=(Resolve-Path -LiteralPath $StoredCommitHost).Path
+  foreach($case in $storedCases.Keys){
+    $root=Join-Path $d $case
+    Run $exe @('--instance-root',$root,'instance','init') "$case-init" 0
+    Run $exe @('--instance-root',$root,'ledger','init') "$case-genesis" 0
+    [IO.File]::WriteAllBytes("$root.DLDB",$image)
+    $storedHashes[$case]=(Get-FileHash -LiteralPath "$root.DLDB").Hash
+  }
 }
 $watch=[IO.FileSystemWatcher]::new($d)
 $watch.NotifyFilter=[IO.NotifyFilters]'FileName,LastWrite,Size'
@@ -270,14 +449,12 @@ try{
        [Convert]::ToHexString($raw,163,$n) -ne $body){throw "$case signed schema content"}
     $publicKey=(Get-Content "$b\$case-init.out" -Raw | ConvertFrom-Json).data.public_key_hex
     if([Convert]::ToHexString($raw,58,32) -ne $publicKey){throw "$case signer"}
-    $key=[byte[]]([Convert]::FromHexString('302a300506032b6570032100')+$raw[58..89])
-    [IO.File]::WriteAllBytes("$b\$case.pub.der",$key)
-    [IO.File]::WriteAllBytes("$b\$case.message",[byte[]]$raw[0..($raw.Length-65)])
-    [IO.File]::WriteAllBytes("$b\$case.sig",[byte[]]$raw[($raw.Length-64)..($raw.Length-1)])
-    $openssl=Join-Path $env:ProgramFiles 'Git\usr\bin\openssl.exe'
-    Run $openssl @('pkeyutl','-verify','-pubin','-keyform','DER','-inkey',"$b\$case.pub.der",'-rawin','-in',"$b\$case.message",'-sigfile',"$b\$case.sig") "$case-ed25519" 0
+    Confirm-BlockSignature $case $raw
     if((Get-FileHash "$root.DLDB").Hash -ne $schemaHashes[$case]){throw "$case projection changed"}
     foreach($s in '-journal','-wal','-shm'){if(Test-Path "$root.DLDB$s"){throw "$case unexpected sidecar"}}
+  }
+  if($StoredCommitHost){
+    foreach($case in $storedCases.Keys){Test-StoredPublication $case $storedCases[$case] $storedHashes[$case]}
   }
   [IO.File]::WriteAllText("$d\control-after",'after')
   $clock=[Diagnostics.Stopwatch]::StartNew()
@@ -311,14 +488,7 @@ foreach($m in $launch){
     $body='01'+$m.Groups[3].Value.Replace('-','')+$m.Groups[4].Value.Replace('-','')+'00'
     if($raw.Length -ne 261 -or [Convert]::ToHexString($raw,34,16) -ne $id.Replace('-','') -or
        [Convert]::ToHexString($raw,163,34) -ne $body){throw "$case retained event mismatch"}
-    $openssl=Join-Path $env:ProgramFiles 'Git\usr\bin\openssl.exe'
-    if(Test-Path -LiteralPath $openssl){
-      $key=[byte[]]([Convert]::FromHexString('302a300506032b6570032100') + $raw[58..89])
-      [IO.File]::WriteAllBytes("$b\$case.pub.der",$key)
-      [IO.File]::WriteAllBytes("$b\$case.message",[byte[]]$raw[0..196])
-      [IO.File]::WriteAllBytes("$b\$case.sig",[byte[]]$raw[197..260])
-      Run $openssl @('pkeyutl','-verify','-pubin','-keyform','DER','-inkey',"$b\$case.pub.der",'-rawin','-in',"$b\$case.message",'-sigfile',"$b\$case.sig") "$case-ed25519" 0
-    }else{Write-Output 'Independent OpenSSL signature check NOT RUN'}
+    Confirm-BlockSignature $case $raw -AllowMissing
   }
 }
 if(!$log.Contains('LOST_REPLY original=IOERR further_dml=AUTH further_commit=AUTH') -or !$log.Contains('publication rejected') -or !$log.Contains('publication outcome unknown after submission') -or
