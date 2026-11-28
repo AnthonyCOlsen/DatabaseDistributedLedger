@@ -1,7 +1,8 @@
 using System.Security.Cryptography;
 using UserDimensions.Ledger;
 
-if (args.Length > 0 && args[0] is "--start-restart-fixture" or "--recover-stored-fixture")
+if (args.Length > 0 && args[0] is "--start-restart-fixture" or "--recover-stored-fixture"
+        or "--cut-before-progress" or "--observe-before-progress")
 {
     if (!OperatingSystem.IsWindows()) return 2;
     byte[] key = new byte[32];
@@ -9,7 +10,12 @@ if (args.Length > 0 && args[0] is "--start-restart-fixture" or "--recover-stored
     {
         using var input = Console.OpenStandardInput();
         input.ReadExactly(key);
+        if (args is ["--cut-before-progress", var cutProjection, var cutStorage])
+            return FixtureStoredPublication.RunToCut(cutProjection, cutStorage, key, input);
         if (input.ReadByte() != -1) return 2;
+        if (args is ["--observe-before-progress", var ledgerRoot, var privateRoot, var rowId,
+                var blockId, var eventBytes, var blockHash])
+            return FixtureStoredPublication.ObserveCut(ledgerRoot, privateRoot, rowId, blockId, eventBytes, blockHash, key);
         if (args is ["--start-restart-fixture", var projection, var storage])
         {
             Console.WriteLine($"SERVICE_START pid={Environment.ProcessId}");
