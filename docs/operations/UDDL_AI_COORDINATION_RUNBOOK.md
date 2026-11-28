@@ -1,10 +1,24 @@
 # UDDL AI Coordination Runbook
 
-**Status:** Revised review draft. This manual describes operations. It grants no access, approval, or authority to execute work. Repository `AGENTS.md`, pinned specifications, and verified Project Owner decisions govern when they conflict with this draft.
+**Status:** Operations runbook, updated November 27, 2026 through PR #17. This manual describes operations. It grants no access, approval, or authority to execute work. Repository `AGENTS.md`, pinned specifications, and verified Project Owner decisions govern when they conflict with this guide.
 
-**Review update:** 2026-11-24 — proposed operational revisions from the November 23–24 L5 and Step 2 specialist coordination rounds. This is a candidate runbook revision, not a repository edit, a live grant, or acceptance of any design. Do not treat examples, past approvals, or historical incident states as current authorization.
+**Last verified:** November 27, 2026 (Chicago). See the operating history below for the route used to deliver the Step 2c clean-restart fixture.
 
-**Revision focus:** Immutable verified-file exchanges; recovery from missing delivery receipts and shared-browser contention; QA/Security independence; separate assignment and message counters; cross-specification closeout evidence; and explicit distinction between established Owner requirements and incomplete technical contracts.
+## How the setup evolved
+
+| Date (Chicago) | What changed |
+|---|---|
+| Nov 21-24 | The setup pilots established persistent specialist tasks and verified a second exchange with the same worker. Dot routed the design reviews, kept original replies, and used versioned files and hashes when a recipient could not open a shared link. |
+| Nov 26 | Dot dispatched implementation and independent QA for the connected Windows write and rollback work. Command-specific approvals allowed work in disposable folders under the ordinary Windows account. |
+| Nov 27 / approval | Dot became responsible for verifying the Owner's original decision. Each worker verifies its own active assignment from Dot, including its role and allowed actions. [Governance change (PR #16)](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/pull/16) |
+| Nov 27 / delivery | Dot directly reached the restart Developer, retrieved a reply to a second message in the same task, and used that worker for implementation. Independent Windows QA passed and Security cleared the same candidate. Dot opened the delivery PR and the Owner merged it at `458b0f9`. This used the eighth and final PR slot in that delivery package. [Clean-restart delivery (PR #17)](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/pull/17) |
+
+### Repeat the delivery workflow
+
+1. **Assign.** The Owner approves the bounded work in the designated Dot conversation. Dot records the base revision, allowed operations, worker and delivery limits, and Chicago cutoff. It dispatches to the verified Developer task and checks the acknowledgment in that task. Reuse a confirmed route while the assignment remains active.
+2. **Check messaging and file access separately.** A second message and matching reply establish two-way contact. The Developer reports its actual computer, working folder, sandbox mode and writable roots. During the restart, a local project chat had workspace-write access to its earlier checkout, while the worker Dot could reach started read-only. Selecting a working directory or moving a chat into a sidebar section did not demonstrate write access. The observed Edge exchange went from the project chat to Dot. The verified route from Dot to the restart worker used direct task messaging.
+3. **Execute.** Use the approved disposable checkout and non-admin account. The restart worker successfully cloned at the verified pin with approval for that command alone. For later operations needing a tool approval, identify the worker, command and destination. Report any pending click or denial to the Owner. Record what actually ran and its result in the private handoff.
+4. **Review and deliver.** The Developer hands Dot the pinned base, exact candidate patch, its SHA-256 and the test evidence. Dot sends that candidate independently to QA and Security. After both verdicts, verify the live base, head, applicable GitHub checks and remaining publication authority. For PR #17 the Windows tests ran on the assigned machine and Security performed a source review. The Owner made the merge decision. Record the merged revision and close the assignment.
 
 ## 1. Responsibilities and shared resources
 
@@ -97,7 +111,7 @@ flowchart TD
 
 The single active coordinator issues immutable, globally unique full IDs in `YYYY-MM-DD-EXISTING-REQUEST-ID` form, using the America/Chicago date when formally issued. Check the durable same-day issuance record before assigning an ID; the suffix can recur on a different date. Record creation in ISO 8601 with the applicable Chicago offset. Keep earlier IDs unchanged and history retrievable.
 
-A formal approval package shows **Approval datetime: Pending**. It identifies the exact operations, people or tasks, revision, destination, limits, expiration, and stop conditions. Verify the authenticated original Owner message against that package and check for revocation or supersession before each consequential action. A short reply naming the exact package can suffice. A typed signature, agent message, or forwarded copy cannot grant authority. The first recorder creates one canonical record with Chicago ISO 8601 offset and the original message reference/platform timestamp where available. Display the recorded date and time with CST or CDT; do not ask the Owner to supply it. Later agents reuse the record and verify the original. The timestamp is audit evidence, not proof of authorship or effective time. The register supports auditing; it is not by itself access control.
+A formal approval package shows **Approval datetime: Pending**. It identifies the exact operations, people or tasks, revision, destination, limits, expiration, and stop conditions. Verify the authenticated original Owner message against that package and check for revocation or supersession before each consequential action. A short reply naming the exact package can suffice. A typed signature, agent message, or forwarded copy cannot grant authority. The first recorder creates one canonical record with Chicago ISO 8601 offset and the original message reference/platform timestamp where available. Display the recorded date and time with CST or CDT; do not ask the Owner to supply it. Dot retains the original. Workers verify that their assignment came from the designated Dot, covers their intended actions and remains active. A manually relayed assignment requires verification of Dot's original handoff through a trusted channel. The timestamp is audit evidence, not proof of authorship or effective time. The register supports auditing; it is not by itself access control.
 
 ## 4. Dispatch, review, and receipts
 
@@ -219,7 +233,7 @@ Onboard only after approval. Keep each original conversation intact. Provide the
 
 ## 7. Project and publication checklist
 
-Step 1 remains accepted. Step 2 is design/research only. Use [Issue #1](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/issues/1) for GUID identity and collisions, [Issue #2](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/issues/2) for partial COMMIT and restart outcomes, and [Issue #3](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/issues/3) for the IPC contract. Steps 3 and 4 remain future planning. The decision queue and a specialist recommendation never grant implementation permission.
+Step 1 remains accepted. Step 2 progressed from design to separately authorized implementation increments. PR #17 demonstrated clean restart recognition for one disposable event. Review its recorded evidence and obtain the applicable scope and budget for the next increment. Use [Issue #1](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/issues/1) for GUID identity and collisions, [Issue #2](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/issues/2) for partial COMMIT and restart outcomes, and [Issue #3](https://github.com/AnthonyCOlsen/DatabaseDistributedLedger/issues/3) for the IPC contract. Steps 3 and 4 remain future planning. The decision queue and a specialist recommendation never grant implementation permission.
 
 ### Dated design-decision context (not a technical specification)
 
@@ -228,7 +242,7 @@ As of the November 24, 2026 Owner instructions, Step 2 design coordination must 
 These are a **historical coordination snapshot**, not a substitute for the exact authenticated Owner messages, implementation-qualified design, or protocol documents. Exact C3 irrevocability, SQLite caller interruption codes and lifecycle, authenticated journal compaction/recovery, and per-signature authority synchronization were subject to independent specialist qualification in the November 24 closure round. Cleanup A/B, release E/T, restore guarantees and retention choices must not be silently selected. Resolve competing technical statements from the canonical approved evidence/decision register, not from this runbook. Escalate any required wire-protocol change rather than assuming that partial projection is already representable.
 
 
-The eventual home is `docs/operations/UDDL_AI_COORDINATION_RUNBOOK.md`. Review this draft, scan for private data, and preview the fenced diagrams in a Mermaid-capable Markdown viewer. [GitHub Mermaid documentation](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams). Verify only the intended file and exact reviewed bytes are proposed for publication. Keep publication and merge separately authorized; no approval is inferred from receiving or reviewing this draft.
+The maintained copy is `docs/operations/UDDL_AI_COORDINATION_RUNBOOK.md`. Review proposed revisions, scan for private data, and preview the fenced diagrams in a Mermaid-capable Markdown viewer. [GitHub Mermaid documentation](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams). Verify only the intended file and exact reviewed bytes are proposed for publication. Keep publication and merge separately authorized; no approval is inferred from receiving or reviewing this draft.
 
 ## 8. Durable coordination registry and verification plan
 
