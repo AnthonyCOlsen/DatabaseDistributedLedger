@@ -63,6 +63,152 @@ function Confirm-BlockSignature([string]$case,[byte[]]$raw,[switch]$AllowMissing
     Run $openssl @('pkeyutl','-verify','-pubin','-keyform','DER','-inkey',$keyPath,'-rawin','-in',$messagePath,'-sigfile',$signaturePath) "$case-ed25519" 0
   }
 }
+function Stop-F02Process([Diagnostics.Process]$process,[string]$role,[bool]$stopTree){
+  # The witness retains these exact process handles through the bounded wait.
+  $wasAlive=!$process.HasExited
+  if($wasAlive){
+    try{$process.Kill($stopTree)}
+    catch [InvalidOperationException]{if(!$process.HasExited){throw}}
+  }
+  if(!$process.WaitForExit(5000) -or !$process.HasExited){
+    throw "F02 cleanup could not verify $role PID $($process.Id) exited"
+  }
+  "F02 cleanup role=$role pid=$($process.Id) aliveBeforeStop=$wasAlive exited=True exit=$($process.ExitCode)"
+}
+
+function Invoke-F02Cut([string]$projection,[string]$scratch,[byte[]]$key){
+  $start=[Diagnostics.ProcessStartInfo]::new($StoredCommitHost)
+  $start.UseShellExecute=$false
+  $start.CreateNoWindow=$true
+  $start.WorkingDirectory=$b
+  $start.RedirectStandardInput=$true
+  $start.RedirectStandardOutput=$true
+  $start.RedirectStandardError=$true
+  foreach($arg in '--cut-before-progress',$projection,$scratch){$start.ArgumentList.Add($arg)}
+  $hostProcess=[Diagnostics.Process]::Start($start)
+  $native=$null
+  $nativeVerified=$false
+  $failure=$null
+  $cleanupErrors=[Collections.Generic.List[Exception]]::new()
+  $cleanupReceipts=[Collections.Generic.List[string]]::new()
+  $trace=[Collections.Generic.List[string]]::new()
+  try{
+    $stderr=$hostProcess.StandardError.ReadToEndAsync()
+    $inputPipe=$hostProcess.StandardInput.BaseStream
+    $inputPipe.Write($key,0,$key.Length)
+    $inputPipe.Flush()
+    do{
+      $line=$hostProcess.StandardOutput.ReadLineAsync().WaitAsync([TimeSpan]::FromSeconds(15)).GetAwaiter().GetResult()
+      if($null -eq $line){throw 'Service exited before F02 cut'}
+      $trace.Add($line)
+      $cut=[regex]::Match($line,'^F02_CUT service=(\d+) client=(\d+) block=([0-9a-f-]{36}) hash=([0-9a-fA-F]{128})$')
+    }until($cut.Success)
+    if([int]$cut.Groups[1].Value -ne $hostProcess.Id){throw 'F02 service PID mismatch'}
+    $native=[Diagnostics.Process]::GetProcessById([int]$cut.Groups[2].Value)
+    $null=$native.SafeHandle
+    if($native.HasExited -or $native.MainModule.FileName -ne $client){throw 'F02 native process mismatch'}
+    $nativeVerified=$true
+    $inputPipe.WriteByte(1)
+    $hostProcess.StandardInput.Close()
+    if(!$hostProcess.WaitForExit(10000) -or $hostProcess.ExitCode -ne 82){throw 'F02 service exit not verified'}
+    if(!$native.WaitForExit(10000)){throw 'F02 native process did not exit'}
+    $trace.Add($hostProcess.StandardOutput.ReadToEnd())
+    [IO.File]::WriteAllText("$b\F02-host.err",$stderr.GetAwaiter().GetResult())
+    $receipt="F02 service=$($hostProcess.Id) exit=$($hostProcess.ExitCode) native=$($native.Id) exit=$($native.ExitCode)"
+    Add-Content "$b\commands.txt" "$receipt command=$StoredCommitHost --cut-before-progress $projection $scratch"
+    # publication-client returns 7 only for SQLITE_IOERR, after sqlite3_close succeeds.
+    if($native.ExitCode -ne 7){throw "F02 native COMMIT outcome: $receipt"}
+    Write-Output $receipt
+  }catch{
+    $failure=$_
+  }finally{
+    try{$cleanupReceipts.Add((Stop-F02Process $hostProcess 'service' $true))}
+    catch{$cleanupErrors.Add($_.Exception)}
+    if($nativeVerified){
+      try{$cleanupReceipts.Add((Stop-F02Process $native 'native' $false))}
+      catch{$cleanupErrors.Add($_.Exception)}
+    }
+    if($native){$native.Dispose()}
+    $hostProcess.Dispose()
+
+    # A failed trace or receipt must neither skip a process wait nor mask its outcome.
+    try{[IO.File]::WriteAllLines("$b\F02-host.out",$trace)}
+    catch{$cleanupErrors.Add($_.Exception)}
+    if($failure){$cleanupReceipts.Add("F02 failure=$($failure.Exception.Message)")}
+    foreach($errorDetail in $cleanupErrors){$cleanupReceipts.Add("F02 cleanup error=$($errorDetail.Message)")}
+    try{[IO.File]::AppendAllLines("$b\commands.txt",$cleanupReceipts)}
+    catch{$cleanupErrors.Add($_.Exception)}
+  }
+  if($cleanupErrors.Count){
+    if($failure){$cleanupErrors.Insert(0,$failure.Exception)}
+    throw [AggregateException]::new('F02 verification failed',$cleanupErrors)
+  }
+  if($failure){throw $failure}
+}
+
+function Get-F02HeadHash([string]$journal){
+  $entries=@(Get-ChildItem -LiteralPath $journal -Force)
+  if($entries.Count -ne 1 -or $entries[0].Name -cne 'head' -or $entries[0].Length -ne 108){
+    throw 'F02 journal contains unexpected files or head size'
+  }
+  return (Get-FileHash -LiteralPath $entries[0].FullName).Hash
+}
+
+function Test-F02Observation([string]$projectionHash){
+  $root=Join-Path $d 'F02'
+  $scratch=[IO.Directory]::CreateDirectory((Join-Path $b 'F02-storage')).FullName
+  $serviceKey=[Security.Cryptography.RandomNumberGenerator]::GetBytes(32)
+  Run $exe @('--instance-root',$root,'block','export','--output',"$b\F02-genesis.ddlb") 'F02-before-cut' 0
+  if((Get-Content "$b\F02-before-cut.out" -Raw | ConvertFrom-Json).data.block_count -ne 1){throw 'F02 initial count'}
+  Invoke-F02Cut "$root.DLDB" $scratch $serviceKey
+  $trace=Get-Content "$b\F02-host.out" -Raw
+  $launch=[regex]::Match($trace,'LAUNCH_EXPECTED scenario=StoredCommit instance=\S+ enrolled=True block=(\S+) table=(\S+) row=(\S+)')
+  if(!$launch.Success -or $launch.Groups[2].Value.Replace('-','') -ne '11111111111111111111111111111111'){throw 'F02 launch'}
+  $id=$launch.Groups[1].Value
+  $row=$launch.Groups[3].Value
+  $body='01'+$launch.Groups[2].Value.Replace('-','')+$row.Replace('-','')+'00'
+  $cut=[regex]::Match($trace,"F02_CUT service=(\d+) client=(\d+) block=$id hash=([0-9a-fA-F]{128})")
+  if(!$cut.Success){throw 'F02 cut marker missing'}
+  $hash=$cut.Groups[3].Value
+  $journal=Join-Path $scratch ('journal\'+$id.Replace('-',''))
+  $head=Get-F02HeadHash $journal
+  $gate=$trace.IndexOf("STORED_GATE block=$id sequence=0 headSha256=$head",[StringComparison]::OrdinalIgnoreCase)
+  $published=$trace.IndexOf("block=$id event=$body hash=$hash",[StringComparison]::OrdinalIgnoreCase)
+  if($gate -lt 0 -or $published -le $gate -or $cut.Index -le $published -or
+     [regex]::Matches($trace,"SUBMISSION_RECEIVED scenario=StoredCommit block=$id").Count -ne 1 -or
+     [regex]::Matches($trace,'PUBLISH_RETURNED').Count -ne 1 -or $trace -match 'STORED_PROGRESS|REPLY pid='){
+    throw 'F02 submission, retained readback or cut ordering mismatch'
+  }
+  Run $exe @('--instance-root',$root,'block','export','--output',"$b\F02-cut.ddlb") 'F02-cut-inventory' 0
+  if((Get-Content "$b\F02-cut-inventory.out" -Raw | ConvertFrom-Json).data.block_count -ne 2){throw 'F02 inventory count'}
+  $inventory=(Get-FileHash "$b\F02-cut.ddlb").Hash
+  Run $exe @('--instance-root',$root,'block','get','--id',$id,'--output',"$b\F02.raw") 'F02-retained' 0
+  $raw=[IO.File]::ReadAllBytes("$b\F02.raw")
+  $signer=(Get-Content "$b\F02-init.out" -Raw | ConvertFrom-Json).data.public_key_hex
+  if($raw.Length -ne 261 -or [Convert]::ToHexString($raw,34,16) -ne $id.Replace('-','') -or
+     [Convert]::ToHexString($raw,58,32) -ne $signer -or [Convert]::ToHexString($raw,163,34) -ne $body -or
+     (Get-FileHash "$b\F02.raw" -Algorithm SHA512).Hash -ne $hash){throw 'F02 exact signed bytes differ'}
+  Confirm-BlockSignature 'F02' $raw
+  foreach($mode in 'valid','wrong-key','wrong-hash'){
+    $key=if($mode -eq 'wrong-key'){[Security.Cryptography.RandomNumberGenerator]::GetBytes(32)}else{$serviceKey}
+    $expectedHash=if($mode -eq 'wrong-hash'){'0'*128}else{$hash}
+    $exit=if($mode -eq 'valid'){3}else{4}
+    Run $StoredCommitHost @('--observe-before-progress',$root,$scratch,$row,$id,$body,$expectedHash) "F02-$mode" $exit $key
+    $pattern=if($mode -eq 'valid'){
+      "^F02_OBSERVED pid=(\d+) block=$id hash=$hash sequence=0 records=0 tail=none checkpoint=unconfirmed publicationCalls=0$"
+    }else{'^F02_REFUSED pid=(\d+) publicationCalls=0$'}
+    $receipt=[regex]::Match((Get-Content "$b\F02-$mode.out" -Raw).Trim(),$pattern)
+    if(!$receipt.Success -or $receipt.Groups[1].Value -eq $cut.Groups[1].Value){throw "F02 $mode observation receipt"}
+    Run $exe @('--instance-root',$root,'block','export','--output',"$b\F02-$mode.ddlb") "F02-$mode-inventory" 0
+    if((Get-F02HeadHash $journal) -ne $head -or (Get-FileHash "$b\F02-$mode.ddlb").Hash -ne $inventory){
+      throw "F02 $mode observation changed journal or inventory"
+    }
+  }
+  if((Get-FileHash "$root.DLDB").Hash -ne $projectionHash){throw 'F02 projection changed'}
+  foreach($suffix in '-journal','-wal','-shm'){if(Test-Path -LiteralPath "$root.DLDB$suffix"){throw "F02 sidecar $suffix"}}
+  "F02 PASS block=$id hash=$hash journalSha256=$head inventorySha256=$inventory checkpoint=unconfirmed"
+}
+
 function Test-StoredPublication([string]$case,[string]$option,[string]$projectionHash){
   $root=Join-Path $d $case
   $projection="$root.DLDB"
@@ -258,7 +404,7 @@ $storedCases=[ordered]@{StoredCommit='--stored-commit';StoredRefused='--stored-r
 $storedHashes=@{}
 if($StoredCommitHost){
   $StoredCommitHost=(Resolve-Path -LiteralPath $StoredCommitHost).Path
-  foreach($case in $storedCases.Keys){
+  foreach($case in (@($storedCases.Keys) + 'F02')){
     $root=Join-Path $d $case
     Run $exe @('--instance-root',$root,'instance','init') "$case-init" 0
     Run $exe @('--instance-root',$root,'ledger','init') "$case-genesis" 0
@@ -455,6 +601,7 @@ try{
   }
   if($StoredCommitHost){
     foreach($case in $storedCases.Keys){Test-StoredPublication $case $storedCases[$case] $storedHashes[$case]}
+    Test-F02Observation $storedHashes['F02']
   }
   [IO.File]::WriteAllText("$d\control-after",'after')
   $clock=[Diagnostics.Stopwatch]::StartNew()
