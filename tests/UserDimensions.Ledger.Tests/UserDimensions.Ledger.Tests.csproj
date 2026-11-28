@@ -1,1 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType></PropertyGroup><ItemGroup><ProjectReference Include="../../src/UserDimensions.Ledger/UserDimensions.Ledger.csproj"/></ItemGroup></Project>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <DefineConstants>$(DefineConstants);UDDL_STORED_COMMIT_FIXTURE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/UserDimensions.Ledger/UserDimensions.Ledger.csproj"/>
+    <Compile Include="../../src/ledgerctl/Step2aCommand.cs" Link="Fixtures/Step2aCommand.cs"/>
+  </ItemGroup>
+</Project>

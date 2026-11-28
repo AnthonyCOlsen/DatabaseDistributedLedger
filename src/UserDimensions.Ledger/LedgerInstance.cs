@@ -287,6 +287,8 @@ public sealed class LedgerInstance : IDisposable
     }
     private void CheckPublicationSize(byte[] bytes) => Errors.Require(bytes.LongLength<=Limits.MaxDecompressedEventBytes && bytes.LongLength<=Limits.MaxInflightImportBytes/8,
         "RESOURCE_LIMIT",5,"Event exceeds configured buffered publication bounds.");
+    internal BlockDisposition? RecognizePublication(Guid id, byte[] body) => ExistingPublication(id, body);
+
     private BlockDisposition? ExistingPublication(Guid id,byte[] body,List<(SignedBlock Block,string Path)>? inventory=null)
     {
         var binding=Bound();
@@ -332,6 +334,7 @@ public sealed class LedgerInstance : IDisposable
     }
     private BlockDisposition PublishCore(byte[] body,Guid? id,Func<long> utc,bool compress=false)
     {
+        files.Checkpoint("publication-entered");
         var binding=Bound(); CheckPublicationSize(body);
         // Verify retained history before acquiring a fresh timestamp or signing.
         var inventory=Inventory();
